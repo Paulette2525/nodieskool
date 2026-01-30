@@ -116,12 +116,16 @@ export function usePostLikes(postId: string) {
     queryFn: async () => {
       if (!profile) return false;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("post_likes")
         .select("id")
         .eq("post_id", postId)
         .eq("user_id", profile.id)
-        .single();
+        // When there is no row, PostgREST returns 406 with `.single()`.
+        // We want "no like" to be a normal case, not an error.
+        .maybeSingle();
+
+      if (error) throw error;
 
       return !!data;
     },
