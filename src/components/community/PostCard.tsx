@@ -210,14 +210,16 @@ export function PostCard({
             </Button>
           </CollapsibleTrigger>
         </Collapsible>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleShare}
-          className="gap-1.5 text-muted-foreground hover:text-primary ml-auto"
-        >
-          {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-        </Button>
+        {isModerator && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleShare}
+            className="gap-1.5 text-muted-foreground hover:text-primary ml-auto"
+          >
+            {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+          </Button>
+        )}
       </div>
 
       {/* Comments Section */}
