@@ -44,7 +44,7 @@ export default function Community() {
               <CreatePostCard 
                 userName={profile.full_name || profile.username}
                 userAvatar={profile.avatar_url ?? undefined}
-                onPost={(content) => createPost.mutate(content)}
+                onPost={(content, imageUrl) => createPost.mutate({ content, imageUrl })}
               />
             )}
             

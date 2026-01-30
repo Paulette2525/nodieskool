@@ -110,8 +110,8 @@ export function PostCard({
     return colors[Math.min(level - 1, colors.length - 1)] || colors[0];
   };
 
-  const isOwner = profile?.id === author.id;
-  const canManage = isOwner || isModerator;
+  // Only moderators/admins can manage posts (delete, pin)
+  const canManage = isModerator;
 
   return (
     <Card className="p-5 shadow-card hover:shadow-md transition-shadow animate-fade-in">
