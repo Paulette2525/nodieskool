@@ -1,3 +1,4 @@
+// Auth context and provider for user authentication and role management
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
