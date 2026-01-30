@@ -175,22 +175,22 @@ export function Sidebar({ communityName = "Growth Academy", communityLogo }: Sid
               </div>
 
               {/* Actions */}
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 space-y-1">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="flex-1 justify-start text-sidebar-foreground"
+                  className="w-full justify-start text-sidebar-foreground"
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className="h-4 w-4 flex-shrink-0" />
                   <span className="ml-2">Paramètres</span>
                 </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={handleSignOut}
-                  className="flex-1 justify-start text-sidebar-foreground hover:text-destructive"
+                  className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4 flex-shrink-0" />
                   <span className="ml-2">Déconnexion</span>
                 </Button>
               </div>

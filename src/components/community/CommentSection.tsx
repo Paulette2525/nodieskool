@@ -81,7 +81,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
             <CommentItem
               key={comment.id}
               comment={comment}
-              canDelete={profile?.id === comment.user_id || isModerator}
+              canDelete={isModerator}
               onDelete={() => deleteComment.mutate(comment.id)}
             />
           ))}
