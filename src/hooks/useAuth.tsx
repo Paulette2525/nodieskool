@@ -20,6 +20,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isModerator: boolean;
   loading: boolean;
+  rolesLoaded: boolean;
   signUp: (email: string, password: string, username: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -35,27 +36,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
 
   const fetchProfile = async (userId: string) => {
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
+    try {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
 
-    if (profileData) {
-      setProfile(profileData);
-    }
+      if (profileData) {
+        setProfile(profileData);
+      }
 
-    // Check roles
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
+      // Check roles
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
 
-    if (roles) {
-      setIsAdmin(roles.some((r) => r.role === "admin"));
-      setIsModerator(roles.some((r) => r.role === "moderator" || r.role === "admin"));
+      console.log("Fetched roles for user:", userId, roles);
+
+      if (roles && roles.length > 0) {
+        const hasAdmin = roles.some((r) => r.role === "admin");
+        const hasMod = roles.some((r) => r.role === "moderator" || r.role === "admin");
+        console.log("User is admin:", hasAdmin, "is moderator:", hasMod);
+        setIsAdmin(hasAdmin);
+        setIsModerator(hasMod);
+      } else {
+        setIsAdmin(false);
+        setIsModerator(false);
+      }
+      setRolesLoaded(true);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setRolesLoaded(true);
     }
   };
 
@@ -63,27 +79,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Use setTimeout to avoid blocking the auth state change
-          setTimeout(() => fetchProfile(session.user.id), 0);
+          // Fetch profile immediately (not in setTimeout)
+          await fetchProfile(session.user.id);
         } else {
           setProfile(null);
           setIsAdmin(false);
           setIsModerator(false);
+          setRolesLoaded(true);
         }
         setLoading(false);
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log("Initial session check:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        await fetchProfile(session.user.id);
+      } else {
+        setRolesLoaded(true);
       }
       setLoading(false);
     });
@@ -155,6 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin,
         isModerator,
         loading,
+        rolesLoaded,
         signUp,
         signIn,
         signOut,

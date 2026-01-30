@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { usePosts } from "@/hooks/usePosts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users, BookOpen, Calendar, FileText, Settings, BarChart3 } from "lucide-react";
+import { Loader2, Users, BookOpen, Calendar, FileText, Settings } from "lucide-react";
 
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminMembersTab } from "@/components/admin/AdminMembersTab";
@@ -15,19 +14,30 @@ import { AdminPostsTab } from "@/components/admin/AdminPostsTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 
 export default function Admin() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, rolesLoaded, user } = useAuth();
   const { members, stats, awardPoints, updateUserRole, isLoading } = useAdmin();
   const { posts, deletePost } = usePosts();
 
-  if (loading) {
+  // Wait for both auth loading AND roles to be loaded
+  if (loading || !rolesLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Chargement des permissions...</p>
+        </div>
       </div>
     );
   }
 
+  // If not logged in, redirect to auth
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // If logged in but not admin, redirect to community
   if (!isAdmin) {
+    console.log("User is not admin, redirecting. isAdmin:", isAdmin);
     return <Navigate to="/community" replace />;
   }
 
