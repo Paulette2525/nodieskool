@@ -1,53 +1,50 @@
+import { Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { CourseCard } from "@/components/classroom/CourseCard";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Award, Clock } from "lucide-react";
-
-// Mock data
-const mockCourses = [
-  {
-    id: "1",
-    title: "Marketing Mastery",
-    description: "Learn advanced marketing strategies to grow your business and reach more customers effectively.",
-    thumbnailUrl: "",
-    totalLessons: 24,
-    completedLessons: 24,
-    progress: 100,
-  },
-  {
-    id: "2",
-    title: "Sales Fundamentals",
-    description: "Master the art of selling with proven techniques and frameworks used by top performers.",
-    thumbnailUrl: "",
-    totalLessons: 18,
-    completedLessons: 12,
-    progress: 67,
-  },
-  {
-    id: "3",
-    title: "Leadership Excellence",
-    description: "Develop essential leadership skills to inspire teams and drive organizational success.",
-    thumbnailUrl: "",
-    totalLessons: 15,
-    completedLessons: 3,
-    progress: 20,
-  },
-  {
-    id: "4",
-    title: "Advanced Strategies",
-    description: "Unlock advanced business strategies for scaling and sustainable growth.",
-    thumbnailUrl: "",
-    totalLessons: 20,
-    completedLessons: 0,
-    progress: 0,
-    isLocked: true,
-  },
-];
+import { BookOpen, Award, Clock, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCourses } from "@/hooks/useCourses";
 
 export default function Classroom() {
-  const totalLessons = mockCourses.reduce((acc, c) => acc + c.totalLessons, 0);
-  const completedLessons = mockCourses.reduce((acc, c) => acc + c.completedLessons, 0);
-  const overallProgress = Math.round((completedLessons / totalLessons) * 100);
+  const { user, loading } = useAuth();
+  const { courses, completedLessons, isLoading } = useCourses();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Calculate stats
+  const totalLessons = courses.reduce((acc, course) => 
+    acc + course.modules.reduce((modAcc, mod) => modAcc + mod.lessons.length, 0), 0);
+  const completedCount = completedLessons.length;
+  const overallProgress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+  // Calculate course progress
+  const coursesWithProgress = courses.map((course) => {
+    const courseLessons = course.modules.flatMap((m) => m.lessons);
+    const courseCompleted = courseLessons.filter((l) => completedLessons.includes(l.id)).length;
+    const courseProgress = courseLessons.length > 0 
+      ? Math.round((courseCompleted / courseLessons.length) * 100) 
+      : 0;
+    
+    return {
+      ...course,
+      totalLessons: courseLessons.length,
+      completedLessons: courseCompleted,
+      progress: courseProgress,
+    };
+  });
+
+  const completedCourses = coursesWithProgress.filter((c) => c.progress === 100).length;
 
   return (
     <MainLayout>
@@ -65,7 +62,7 @@ export default function Classroom() {
               <BookOpen className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{completedLessons}/{totalLessons}</p>
+              <p className="text-2xl font-bold text-foreground">{completedCount}/{totalLessons}</p>
               <p className="text-sm text-muted-foreground">Lessons Completed</p>
             </div>
           </div>
@@ -75,7 +72,7 @@ export default function Classroom() {
               <Award className="h-6 w-6 text-success" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{mockCourses.filter(c => c.progress === 100).length}</p>
+              <p className="text-2xl font-bold text-foreground">{completedCourses}</p>
               <p className="text-sm text-muted-foreground">Courses Completed</p>
             </div>
           </div>
@@ -85,8 +82,8 @@ export default function Classroom() {
               <Clock className="h-6 w-6 text-accent" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">12h 30m</p>
-              <p className="text-sm text-muted-foreground">Learning Time</p>
+              <p className="text-2xl font-bold text-foreground">{courses.length}</p>
+              <p className="text-sm text-muted-foreground">Available Courses</p>
             </div>
           </div>
         </div>
@@ -103,22 +100,35 @@ export default function Classroom() {
         {/* Courses Grid */}
         <div>
           <h2 className="text-lg font-semibold text-foreground mb-4">Your Courses</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockCourses.map((course) => (
-              <CourseCard
-                key={course.id}
-                id={course.id}
-                title={course.title}
-                description={course.description}
-                thumbnailUrl={course.thumbnailUrl}
-                totalLessons={course.totalLessons}
-                completedLessons={course.completedLessons}
-                progress={course.progress}
-                isLocked={course.isLocked}
-                onClick={() => console.log("Open course:", course.id)}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-xl border">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-medium text-foreground">No courses available</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Check back later for new courses
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {coursesWithProgress.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  description={course.description ?? ""}
+                  thumbnailUrl={course.thumbnail_url ?? undefined}
+                  totalLessons={course.totalLessons}
+                  completedLessons={course.completedLessons}
+                  progress={course.progress}
+                  onClick={() => console.log("Open course:", course.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </MainLayout>

@@ -1,73 +1,30 @@
+import { Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { EventCard } from "@/components/calendar/EventCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { useState } from "react";
-import { format, addDays, addHours, setHours, setMinutes } from "date-fns";
-import { Video, Plus } from "lucide-react";
-
-// Helper to create dates
-const today = new Date();
-const createDate = (daysFromNow: number, hour: number) => {
-  return setMinutes(setHours(addDays(today, daysFromNow), hour), 0);
-};
-
-// Mock data
-const mockEvents = [
-  {
-    id: "1",
-    title: "Weekly Q&A Session",
-    description: "Join us for our weekly community Q&A where you can ask anything about the courses.",
-    startTime: createDate(0, 15),
-    endTime: createDate(0, 16),
-    type: "qa" as const,
-    hostName: "David Kim",
-    attendeesCount: 42,
-    meetingUrl: "https://zoom.us/j/example",
-  },
-  {
-    id: "2",
-    title: "Marketing Masterclass: Social Media Strategies",
-    description: "Deep dive into advanced social media marketing techniques that drive real results.",
-    startTime: createDate(1, 10),
-    endTime: createDate(1, 12),
-    type: "masterclass" as const,
-    hostName: "Sarah Johnson",
-    attendeesCount: 89,
-    meetingUrl: "https://zoom.us/j/example",
-  },
-  {
-    id: "3",
-    title: "Sales Workshop: Closing Techniques",
-    description: "Interactive workshop on mastering the art of closing deals with confidence.",
-    startTime: createDate(3, 14),
-    endTime: createDate(3, 16),
-    type: "workshop" as const,
-    hostName: "Alex Martinez",
-    attendeesCount: 56,
-    meetingUrl: "https://zoom.us/j/example",
-  },
-  {
-    id: "4",
-    title: "Live: Building Your Personal Brand",
-    description: "Special live session on creating and growing your personal brand in 2024.",
-    startTime: createDate(5, 18),
-    endTime: createDate(5, 19),
-    type: "live" as const,
-    hostName: "Emily Rodriguez",
-    attendeesCount: 124,
-    meetingUrl: "https://zoom.us/j/example",
-  },
-];
+import { Video, Plus, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useEvents } from "@/hooks/useEvents";
 
 export default function Calendar() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(today);
+  const { user, loading, isModerator } = useAuth();
+  const { events, registeredEvents, isLoading, registerForEvent, unregisterFromEvent } = useEvents();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  // Get upcoming events (sorted by date)
-  const upcomingEvents = mockEvents
-    .filter(event => event.startTime >= today)
-    .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <MainLayout>
@@ -78,32 +35,49 @@ export default function Calendar() {
             <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
             <p className="text-muted-foreground mt-1">Upcoming events and sessions</p>
           </div>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Event
-          </Button>
+          {isModerator && (
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Event
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Events List */}
           <div className="lg:col-span-2 space-y-4">
             <h2 className="text-lg font-semibold text-foreground">Upcoming Events</h2>
-            {upcomingEvents.length > 0 ? (
-              upcomingEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  id={event.id}
-                  title={event.title}
-                  description={event.description}
-                  startTime={event.startTime}
-                  endTime={event.endTime}
-                  type={event.type}
-                  hostName={event.hostName}
-                  attendeesCount={event.attendeesCount}
-                  meetingUrl={event.meetingUrl}
-                  onJoin={() => console.log("Join event:", event.id)}
-                />
-              ))
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : events.length > 0 ? (
+              events.map((event) => {
+                const isRegistered = registeredEvents.includes(event.id);
+                return (
+                  <EventCard
+                    key={event.id}
+                    id={event.id}
+                    title={event.title}
+                    description={event.description ?? ""}
+                    startTime={new Date(event.start_time)}
+                    endTime={new Date(event.end_time)}
+                    type={event.event_type as 'live' | 'masterclass' | 'workshop' | 'qa'}
+                    hostName={event.profiles?.full_name || event.profiles?.username || "Host"}
+                    hostAvatar={event.profiles?.avatar_url ?? undefined}
+                    attendeesCount={event.attendees_count}
+                    meetingUrl={event.meeting_url ?? undefined}
+                    isRegistered={isRegistered}
+                    onJoin={() => {
+                      if (isRegistered) {
+                        unregisterFromEvent.mutate(event.id);
+                      } else {
+                        registerForEvent.mutate(event.id);
+                      }
+                    }}
+                  />
+                );
+              })
             ) : (
               <Card className="p-8 text-center">
                 <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -132,12 +106,12 @@ export default function Calendar() {
               <h3 className="font-semibold text-foreground mb-4">This Month</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-3 bg-muted rounded-lg">
-                  <p className="text-2xl font-bold text-foreground">{upcomingEvents.length}</p>
+                  <p className="text-2xl font-bold text-foreground">{events.length}</p>
                   <p className="text-xs text-muted-foreground">Events</p>
                 </div>
                 <div className="text-center p-3 bg-muted rounded-lg">
-                  <p className="text-2xl font-bold text-foreground">3</p>
-                  <p className="text-xs text-muted-foreground">Attended</p>
+                  <p className="text-2xl font-bold text-foreground">{registeredEvents.length}</p>
+                  <p className="text-xs text-muted-foreground">Registered</p>
                 </div>
               </div>
             </Card>
