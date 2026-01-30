@@ -45,8 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       timeoutId = window.setTimeout(() => reject(new Error(`${label} timed out`)), ms);
     });
 
+    // Wrap PromiseLike into a real Promise to ensure proper awaiting.
+    const p = new Promise<T>((resolve, reject) => {
+      (promise as any).then(resolve, reject);
+    });
+
     try {
-      return await Promise.race([Promise.resolve(promise as unknown as T), timeout]);
+      return await Promise.race([p, timeout]);
     } finally {
       if (timeoutId) window.clearTimeout(timeoutId);
     }
