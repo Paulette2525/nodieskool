@@ -77,7 +77,7 @@ export function Sidebar({ communityName = "Vibe Coding Academy", communityLogo }
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 w-64",
+          "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-300 w-64 overflow-hidden",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "md:relative md:translate-x-0"
         )}
@@ -97,7 +97,7 @@ export function Sidebar({ communityName = "Vibe Coding Academy", communityLogo }
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto min-h-0">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href || 
               (item.href !== "/" && location.pathname.startsWith(item.href));
@@ -137,7 +137,7 @@ export function Sidebar({ communityName = "Vibe Coding Academy", communityLogo }
         </nav>
 
         {/* User section */}
-        <div className="border-t border-sidebar-border p-3">
+        <div className="border-t border-sidebar-border p-3 overflow-y-auto flex-shrink-0 max-h-[40vh]">
           {/* Level & Points */}
           {profile && (
             <div className="mb-3 rounded-lg bg-sidebar-accent p-3">
