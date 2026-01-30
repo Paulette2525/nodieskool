@@ -8,8 +8,7 @@ import {
   LogOut,
   Menu,
   X,
-  ShieldCheck,
-  MessageCircle
+  ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,6 @@ import { useAuth } from "@/hooks/useAuth";
 const navigation = [
   { name: "Communauté", href: "/community", icon: Users },
   { name: "Formations", href: "/classroom", icon: BookOpen },
-  { name: "Messages", href: "/messages", icon: MessageCircle },
   { name: "Classement", href: "/leaderboard", icon: Trophy },
   { name: "Calendrier", href: "/calendar", icon: Calendar },
 ];
