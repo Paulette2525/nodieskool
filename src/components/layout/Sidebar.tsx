@@ -157,7 +157,7 @@ export function Sidebar({ communityName = "Growth Academy", communityLogo }: Sid
           {/* User info */}
           {user && profile && (
             <>
-              <div className="flex items-center gap-3">
+              <Link to="/profile" className="flex items-center gap-3 p-2 -mx-2 rounded-lg hover:bg-sidebar-accent transition-colors">
                 <Avatar className="h-9 w-9 flex-shrink-0">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
                   <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
@@ -172,7 +172,7 @@ export function Sidebar({ communityName = "Growth Academy", communityLogo }: Sid
                     @{profile.username}
                   </p>
                 </div>
-              </div>
+              </Link>
 
               {/* Actions */}
               <div className="mt-3 space-y-1">
@@ -180,9 +180,12 @@ export function Sidebar({ communityName = "Growth Academy", communityLogo }: Sid
                   variant="ghost" 
                   size="sm" 
                   className="w-full justify-start text-sidebar-foreground"
+                  asChild
                 >
-                  <Settings className="h-4 w-4 flex-shrink-0" />
-                  <span className="ml-2">Paramètres</span>
+                  <Link to="/settings">
+                    <Settings className="h-4 w-4 flex-shrink-0" />
+                    <span className="ml-2">Paramètres</span>
+                  </Link>
                 </Button>
                 <Button 
                   variant="ghost" 
