@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,34 +16,40 @@ import {
   Save,
   Loader2,
 } from "lucide-react";
-import { toast } from "sonner";
+import { useSettings, CommunitySettings } from "@/hooks/useSettings";
 
 export function AdminSettingsTab() {
-  const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState({
-    communityName: "Growth Academy",
-    communityDescription: "La communauté des entrepreneurs ambitieux",
-    welcomeMessage: "Bienvenue dans notre communauté !",
-    primaryColor: "#8B5CF6",
-    enableNotifications: true,
-    enableLeaderboard: true,
-    enableGamification: true,
-    requireEmailVerification: true,
-    allowPublicProfiles: true,
-  });
+  const { settings, isLoading, updateSettings, exportData } = useSettings();
+  const [localSettings, setLocalSettings] = useState<CommunitySettings>(settings);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  const handleSave = async () => {
-    setSaving(true);
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setSaving(false);
-    toast.success("Paramètres enregistrés");
+  useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+
+  useEffect(() => {
+    const changed = JSON.stringify(localSettings) !== JSON.stringify(settings);
+    setHasChanges(changed);
+  }, [localSettings, settings]);
+
+  const handleSave = () => {
+    updateSettings.mutate(localSettings);
   };
 
-  const handleExport = () => {
-    toast.info("Export des données en cours...");
-    // TODO: Implement data export
+  const handleChange = <K extends keyof CommunitySettings>(
+    key: K,
+    value: CommunitySettings[K]
+  ) => {
+    setLocalSettings((prev) => ({ ...prev, [key]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -62,24 +68,22 @@ export function AdminSettingsTab() {
           <div className="space-y-2">
             <Label>Nom de la communauté</Label>
             <Input
-              value={settings.communityName}
-              onChange={(e) => setSettings({ ...settings, communityName: e.target.value })}
+              value={localSettings.community_name}
+              onChange={(e) => handleChange("community_name", e.target.value)}
             />
           </div>
           <div className="space-y-2">
             <Label>Description</Label>
             <Textarea
-              value={settings.communityDescription}
-              onChange={(e) =>
-                setSettings({ ...settings, communityDescription: e.target.value })
-              }
+              value={localSettings.community_description}
+              onChange={(e) => handleChange("community_description", e.target.value)}
             />
           </div>
           <div className="space-y-2">
             <Label>Message de bienvenue</Label>
             <Textarea
-              value={settings.welcomeMessage}
-              onChange={(e) => setSettings({ ...settings, welcomeMessage: e.target.value })}
+              value={localSettings.welcome_message}
+              onChange={(e) => handleChange("welcome_message", e.target.value)}
               placeholder="Message affiché aux nouveaux membres"
             />
           </div>
@@ -101,13 +105,13 @@ export function AdminSettingsTab() {
             <div className="flex items-center gap-3">
               <Input
                 type="color"
-                value={settings.primaryColor}
-                onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                value={localSettings.primary_color}
+                onChange={(e) => handleChange("primary_color", e.target.value)}
                 className="w-16 h-10 p-1"
               />
               <Input
-                value={settings.primaryColor}
-                onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                value={localSettings.primary_color}
+                onChange={(e) => handleChange("primary_color", e.target.value)}
                 className="w-32"
               />
             </div>
@@ -116,7 +120,7 @@ export function AdminSettingsTab() {
             <Label>Logo de la communauté</Label>
             <div className="flex items-center gap-3">
               <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
-                {settings.communityName.charAt(0)}
+                {localSettings.community_name.charAt(0)}
               </div>
               <Button variant="outline" size="sm">
                 <Upload className="h-4 w-4 mr-2" />
@@ -145,10 +149,8 @@ export function AdminSettingsTab() {
               </p>
             </div>
             <Switch
-              checked={settings.enableNotifications}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, enableNotifications: checked })
-              }
+              checked={localSettings.enable_notifications}
+              onCheckedChange={(checked) => handleChange("enable_notifications", checked)}
             />
           </div>
           <Separator />
@@ -160,10 +162,8 @@ export function AdminSettingsTab() {
               </p>
             </div>
             <Switch
-              checked={settings.enableLeaderboard}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, enableLeaderboard: checked })
-              }
+              checked={localSettings.enable_leaderboard}
+              onCheckedChange={(checked) => handleChange("enable_leaderboard", checked)}
             />
           </div>
           <Separator />
@@ -175,10 +175,8 @@ export function AdminSettingsTab() {
               </p>
             </div>
             <Switch
-              checked={settings.enableGamification}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, enableGamification: checked })
-              }
+              checked={localSettings.enable_gamification}
+              onCheckedChange={(checked) => handleChange("enable_gamification", checked)}
             />
           </div>
         </CardContent>
@@ -202,10 +200,8 @@ export function AdminSettingsTab() {
               </p>
             </div>
             <Switch
-              checked={settings.requireEmailVerification}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, requireEmailVerification: checked })
-              }
+              checked={localSettings.require_email_verification}
+              onCheckedChange={(checked) => handleChange("require_email_verification", checked)}
             />
           </div>
           <Separator />
@@ -217,10 +213,8 @@ export function AdminSettingsTab() {
               </p>
             </div>
             <Switch
-              checked={settings.allowPublicProfiles}
-              onCheckedChange={(checked) =>
-                setSettings({ ...settings, allowPublicProfiles: checked })
-              }
+              checked={localSettings.allow_public_profiles}
+              onCheckedChange={(checked) => handleChange("allow_public_profiles", checked)}
             />
           </div>
         </CardContent>
@@ -237,9 +231,17 @@ export function AdminSettingsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-3">
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              Exporter les données (CSV)
+            <Button
+              variant="outline"
+              onClick={() => exportData.mutate()}
+              disabled={exportData.isPending}
+            >
+              {exportData.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              Exporter les données (JSON)
             </Button>
             <Button variant="outline">
               <Upload className="h-4 w-4 mr-2" />
@@ -254,8 +256,12 @@ export function AdminSettingsTab() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
-          {saving ? (
+        <Button
+          onClick={handleSave}
+          disabled={updateSettings.isPending || !hasChanges}
+          className="gap-2"
+        >
+          {updateSettings.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Save className="h-4 w-4" />

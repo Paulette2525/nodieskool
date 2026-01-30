@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Pin, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Pin, Trash2, Copy, Check } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,10 +9,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 import { usePostLikes } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
+import { CommentSection } from "./CommentSection";
+import { toast } from "sonner";
 
 interface PostCardProps {
   id: string;
@@ -49,6 +57,8 @@ export function PostCard({
   const { isLiked, toggleLike } = usePostLikes(id);
   const [optimisticLikes, setOptimisticLikes] = useState(likesCount);
   const [optimisticIsLiked, setOptimisticIsLiked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleLike = () => {
     if (!profile) return;
@@ -57,6 +67,36 @@ export function PostCard({
     setOptimisticIsLiked(newIsLiked);
     setOptimisticLikes(newIsLiked ? likesCount + 1 : likesCount);
     toggleLike.mutate();
+  };
+
+  const handleShare = async () => {
+    const postUrl = `${window.location.origin}/community?post=${id}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post de ${author.name}`,
+          text: content.slice(0, 100) + (content.length > 100 ? "..." : ""),
+          url: postUrl,
+        });
+      } catch (err) {
+        // User cancelled or error
+        copyToClipboard(postUrl);
+      }
+    } else {
+      copyToClipboard(postUrl);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("Lien copié !");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error("Erreur lors de la copie");
+    }
   };
 
   const getLevelBadge = (level: number) => {
@@ -79,7 +119,7 @@ export function PostCard({
       {isPinned && (
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
           <Pin className="h-3 w-3" />
-          <span>Pinned post</span>
+          <span>Publication épinglée</span>
         </div>
       )}
 
@@ -103,7 +143,7 @@ export function PostCard({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              @{author.username} · {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+              @{author.username} · {formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: fr })}
             </p>
           </div>
         </div>
@@ -119,12 +159,12 @@ export function PostCard({
               {isModerator && (
                 <DropdownMenuItem onClick={onTogglePin}>
                   <Pin className="h-4 w-4 mr-2" />
-                  {isPinned ? "Unpin" : "Pin"} post
+                  {isPinned ? "Désépingler" : "Épingler"}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete post
+                Supprimer
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -158,22 +198,34 @@ export function PostCard({
           <Heart className={cn("h-4 w-4", (isLiked || optimisticIsLiked) && "fill-current")} />
           <span className="text-sm">{isLiked ? likesCount : optimisticLikes}</span>
         </Button>
+        <Collapsible open={showComments} onOpenChange={setShowComments}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-muted-foreground hover:text-primary"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-sm">{commentsCount}</span>
+            </Button>
+          </CollapsibleTrigger>
+        </Collapsible>
         <Button
           variant="ghost"
           size="sm"
-          className="gap-1.5 text-muted-foreground hover:text-primary"
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-sm">{commentsCount}</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
+          onClick={handleShare}
           className="gap-1.5 text-muted-foreground hover:text-primary ml-auto"
         >
-          <Share2 className="h-4 w-4" />
+          {copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
         </Button>
       </div>
+
+      {/* Comments Section */}
+      <Collapsible open={showComments} onOpenChange={setShowComments}>
+        <CollapsibleContent>
+          <CommentSection postId={id} />
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
