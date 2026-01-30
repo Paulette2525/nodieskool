@@ -52,12 +52,13 @@ export function usePosts() {
   });
 
   const createPost = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, imageUrl }: { content: string; imageUrl?: string }) => {
       if (!profile) throw new Error("Not authenticated");
 
       const { error } = await supabase.from("posts").insert({
         user_id: profile.id,
         content,
+        image_url: imageUrl,
       });
 
       if (error) throw error;
