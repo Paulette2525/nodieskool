@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStorage } from "@/hooks/useStorage";
+import { useBadges } from "@/hooks/useBadges";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Camera, Loader2, MessageSquare, Heart, BookOpen, Trophy, Settings, ArrowLeft } from "lucide-react";
+import { BadgeCard } from "@/components/badges/BadgeCard";
+import { Camera, Loader2, MessageSquare, Heart, BookOpen, Trophy, Settings, ArrowLeft, Award } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,6 +22,7 @@ export default function Profile() {
   const { user, profile, loading } = useAuth();
   const { updateProfile } = useProfile();
   const { uploadAvatar, uploading } = useStorage();
+  const { allBadges, userBadges, earnedBadgeIds } = useBadges();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -27,10 +30,9 @@ export default function Profile() {
     username: "",
     bio: "",
   });
-  const [isEditing, setIsEditing] = useState(false);
 
   // Initialize form when profile loads
-  useState(() => {
+  useEffect(() => {
     if (profile) {
       setFormData({
         full_name: profile.full_name || "",
@@ -38,7 +40,7 @@ export default function Profile() {
         bio: profile.bio || "",
       });
     }
-  });
+  }, [profile]);
 
   // Fetch user stats
   const { data: stats } = useQuery({
@@ -88,7 +90,6 @@ export default function Profile() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await updateProfile.mutateAsync(formData);
-    setIsEditing(false);
   };
 
   const levelProgress = profile ? (profile.points % 100) : 0;
@@ -171,9 +172,10 @@ export default function Profile() {
         </Card>
 
         <Tabs defaultValue="stats" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
-            <TabsTrigger value="edit">Modifier le profil</TabsTrigger>
+            <TabsTrigger value="badges">Badges</TabsTrigger>
+            <TabsTrigger value="edit">Modifier</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats">
@@ -215,6 +217,38 @@ export default function Profile() {
                 </CardHeader>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="badges">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Mes Badges ({userBadges.length}/{allBadges.length})
+                </CardTitle>
+                <CardDescription>
+                  Collectionnez des badges en participant à la communauté
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {allBadges.map((badge) => {
+                    const userBadge = userBadges.find((ub) => ub.badge_id === badge.id);
+                    return (
+                      <BadgeCard
+                        key={badge.id}
+                        name={badge.name}
+                        description={badge.description}
+                        icon={badge.icon}
+                        isEarned={earnedBadgeIds.includes(badge.id)}
+                        awardedAt={userBadge?.awarded_at}
+                        size="md"
+                      />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="edit">
