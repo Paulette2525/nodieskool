@@ -16,6 +16,7 @@ import CourseDetail from "./pages/CourseDetail";
 import Leaderboard from "./pages/Leaderboard";
 import Calendar from "./pages/Calendar";
 import Admin from "./pages/Admin";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/messages" element={<Messages />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
