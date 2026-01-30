@@ -49,13 +49,14 @@ export function useComments(postId: string) {
   });
 
   const createComment = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, parentId }: { content: string; parentId?: string }) => {
       if (!profile) throw new Error("Not authenticated");
 
       const { error } = await supabase.from("post_comments").insert({
         post_id: postId,
         user_id: profile.id,
         content,
+        parent_id: parentId ?? null,
       });
 
       if (error) throw error;

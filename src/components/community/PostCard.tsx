@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Pin, Trash2, Copy, Check } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Pin, Trash2, Copy, Check, Bookmark } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { usePostLikes } from "@/hooks/usePosts";
+import { usePostBookmark } from "@/hooks/useBookmarks";
 import { useAuth } from "@/hooks/useAuth";
 import { CommentSection } from "./CommentSection";
 import { toast } from "sonner";
@@ -55,6 +56,7 @@ export function PostCard({
 }: PostCardProps) {
   const { profile, isAdmin } = useAuth();
   const { isLiked, toggleLike } = usePostLikes(id);
+  const { isBookmarked, toggleBookmark } = usePostBookmark(id);
   const [optimisticLikes, setOptimisticLikes] = useState(likesCount);
   const [optimisticIsLiked, setOptimisticIsLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -210,6 +212,24 @@ export function PostCard({
             </Button>
           </CollapsibleTrigger>
         </Collapsible>
+        
+        {/* Bookmark button - for all members */}
+        {profile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleBookmark.mutate()}
+            disabled={toggleBookmark.isPending}
+            className={cn(
+              "gap-1.5 text-muted-foreground hover:text-primary",
+              isBookmarked && "text-amber-500 hover:text-amber-600"
+            )}
+          >
+            <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current")} />
+          </Button>
+        )}
+        
+        {/* Share button - admin only */}
         {isAdmin && (
           <Button
             variant="ghost"
