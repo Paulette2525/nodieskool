@@ -13,7 +13,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <Sidebar communityName="Growth Academy" />
+      <Sidebar communityName="Vibe Coding Academy" />
       <main className="flex-1 overflow-auto w-full md:w-auto">
         {/* Top bar with search and notifications */}
         {user && (
