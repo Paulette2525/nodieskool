@@ -14,14 +14,31 @@ export function useLeaderboard() {
   return useQuery({
     queryKey: ["leaderboard"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get admin user_ids to exclude
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+
+      const adminUserIds = adminRoles?.map((r) => r.user_id) || [];
+
+      // Fetch profiles excluding admins
+      let query = supabase
         .from("profiles")
-        .select("id, username, full_name, avatar_url, points, level")
+        .select("id, user_id, username, full_name, avatar_url, points, level")
         .order("points", { ascending: false })
         .limit(50);
 
+      const { data, error } = await query;
+
       if (error) throw error;
-      return data as LeaderboardEntry[];
+
+      // Filter out admin profiles client-side
+      const filteredData = (data || []).filter(
+        (profile) => !adminUserIds.includes(profile.user_id)
+      );
+
+      return filteredData as LeaderboardEntry[];
     },
   });
 }
