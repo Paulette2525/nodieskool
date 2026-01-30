@@ -15,7 +15,7 @@ import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 
 export default function Admin() {
   const { isAdmin, loading, rolesLoaded, user } = useAuth();
-  const { members, stats, awardPoints, updateUserRole, isLoading } = useAdmin();
+  const { members, stats, awardPoints, updateUserRole, deleteUser, isLoading } = useAdmin();
   const { posts, deletePost } = usePosts();
 
   // Wait for both auth loading AND roles to be loaded
@@ -84,6 +84,7 @@ export default function Admin() {
               members={members}
               awardPoints={awardPoints}
               updateUserRole={updateUserRole}
+              deleteUser={deleteUser}
             />
           </TabsContent>
 

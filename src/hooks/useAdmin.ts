@@ -139,6 +139,22 @@ export function useAdmin() {
     },
   });
 
+  const deleteUser = useMutation({
+    mutationFn: async (userId: string) => {
+      // Delete user's profile (cascades to related data via foreign keys)
+      const { error } = await supabase.from("profiles").delete().eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-members"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      toast.success("Utilisateur supprimé !");
+    },
+    onError: (error) => {
+      toast.error("Échec de la suppression : " + error.message);
+    },
+  });
+
   return {
     members: membersQuery.data ?? [],
     stats: statsQuery.data,
@@ -146,5 +162,6 @@ export function useAdmin() {
     awardPoints,
     updateUserRole,
     deletePost,
+    deleteUser,
   };
 }
