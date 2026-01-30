@@ -1,5 +1,6 @@
-import { Lock, PlayCircle, CheckCircle } from "lucide-react";
+import { Lock, PlayCircle, CheckCircle, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
@@ -30,10 +31,9 @@ export function CourseCard({
   return (
     <Card 
       className={cn(
-        "overflow-hidden cursor-pointer transition-all hover:shadow-lg group",
+        "overflow-hidden transition-all hover:shadow-lg group",
         isLocked && "opacity-75"
       )}
-      onClick={onClick}
     >
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted overflow-hidden">
@@ -54,7 +54,7 @@ export function CourseCard({
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <Lock className="h-6 w-6" />
-              <span className="text-sm font-medium">Locked</span>
+              <span className="text-sm font-medium">Verrouillé</span>
             </div>
           </div>
         )}
@@ -63,7 +63,7 @@ export function CourseCard({
           <div className="absolute top-3 right-3">
             <div className="flex items-center gap-1.5 bg-success text-success-foreground px-2 py-1 rounded-full text-xs font-medium">
               <CheckCircle className="h-3 w-3" />
-              Completed
+              Terminé
             </div>
           </div>
         )}
@@ -78,7 +78,7 @@ export function CourseCard({
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="text-muted-foreground">
-              {completedLessons} / {totalLessons} lessons
+              {completedLessons} / {totalLessons} leçons
             </span>
             <span className={cn(
               "font-medium",
@@ -95,6 +95,36 @@ export function CourseCard({
             )}
           />
         </div>
+
+        {/* Action Button */}
+        <Button 
+          className="w-full mt-4 gap-2"
+          onClick={onClick}
+          disabled={isLocked}
+          variant={isCompleted ? "outline" : "default"}
+        >
+          {isLocked ? (
+            <>
+              <Lock className="h-4 w-4" />
+              Verrouillé
+            </>
+          ) : isCompleted ? (
+            <>
+              <CheckCircle className="h-4 w-4" />
+              Revoir le cours
+            </>
+          ) : progress > 0 ? (
+            <>
+              Continuer
+              <ArrowRight className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Commencer
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
       </div>
     </Card>
   );
