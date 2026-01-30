@@ -53,7 +53,7 @@ export function PostCard({
   onDelete,
   onTogglePin,
 }: PostCardProps) {
-  const { profile, isModerator } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const { isLiked, toggleLike } = usePostLikes(id);
   const [optimisticLikes, setOptimisticLikes] = useState(likesCount);
   const [optimisticIsLiked, setOptimisticIsLiked] = useState(false);
@@ -110,8 +110,8 @@ export function PostCard({
     return colors[Math.min(level - 1, colors.length - 1)] || colors[0];
   };
 
-  // Only moderators/admins can manage posts (delete, pin)
-  const canManage = isModerator;
+  // Only admins can manage posts (delete, pin)
+  const canManage = isAdmin;
 
   return (
     <Card className="p-5 shadow-card hover:shadow-md transition-shadow animate-fade-in">
@@ -156,7 +156,7 @@ export function PostCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {isModerator && (
+              {isAdmin && (
                 <DropdownMenuItem onClick={onTogglePin}>
                   <Pin className="h-4 w-4 mr-2" />
                   {isPinned ? "Désépingler" : "Épingler"}
@@ -210,7 +210,7 @@ export function PostCard({
             </Button>
           </CollapsibleTrigger>
         </Collapsible>
-        {isModerator && (
+        {isAdmin && (
           <Button
             variant="ghost"
             size="sm"

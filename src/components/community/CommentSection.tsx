@@ -14,7 +14,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ postId }: CommentSectionProps) {
-  const { profile, isModerator } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const { comments, isLoading, createComment, deleteComment } = useComments(postId);
   const [newComment, setNewComment] = useState("");
 
@@ -81,7 +81,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
             <CommentItem
               key={comment.id}
               comment={comment}
-              canDelete={isModerator}
+              canDelete={isAdmin}
               onDelete={() => deleteComment.mutate(comment.id)}
             />
           ))}
