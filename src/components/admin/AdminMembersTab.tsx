@@ -47,6 +47,16 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { UseMutationResult } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Member {
   id: string;
@@ -64,14 +74,27 @@ interface AdminMembersTabProps {
   members: Member[];
   awardPoints: UseMutationResult<void, Error, { userId: string; points: number; reason: string }>;
   updateUserRole: UseMutationResult<void, Error, { userId: string; role: "admin" | "moderator" | "member"; action: "add" | "remove" }>;
+  deleteUser: UseMutationResult<void, Error, string>;
 }
 
-export function AdminMembersTab({ members, awardPoints, updateUserRole }: AdminMembersTabProps) {
+export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUser }: AdminMembersTabProps) {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [pointsAmount, setPointsAmount] = useState("");
   const [pointsReason, setPointsReason] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
+
+  const handleDeleteUser = () => {
+    if (!memberToDelete) return;
+    deleteUser.mutate(memberToDelete.user_id, {
+      onSuccess: () => {
+        setDeleteDialogOpen(false);
+        setMemberToDelete(null);
+      },
+    });
+  };
 
   const handleAwardPoints = () => {
     if (!selectedMember || !pointsAmount || !pointsReason) return;
@@ -294,9 +317,15 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole }: AdminM
                         </>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => {
+                          setMemberToDelete(member);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
                         <UserX className="mr-2 h-4 w-4" />
-                        Bannir l'utilisateur
+                        Supprimer l'utilisateur
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -306,6 +335,32 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole }: AdminM
           </TableBody>
         </Table>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cet utilisateur ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sur le point de supprimer{" "}
+              <strong>{memberToDelete?.full_name || memberToDelete?.username}</strong>.
+              Cette action est irréversible et supprimera toutes les données associées à cet utilisateur.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteUser.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
