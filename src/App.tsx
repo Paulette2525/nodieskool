@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Community from "./pages/Community";
 import Classroom from "./pages/Classroom";
+import CourseDetail from "./pages/CourseDetail";
 import Leaderboard from "./pages/Leaderboard";
 import Calendar from "./pages/Calendar";
 import Admin from "./pages/Admin";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/community" element={<Community />} />
             <Route path="/classroom" element={<Classroom />} />
+            <Route path="/classroom/:id" element={<CourseDetail />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/admin" element={<Admin />} />

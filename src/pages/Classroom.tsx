@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { CourseCard } from "@/components/classroom/CourseCard";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCourses } from "@/hooks/useCourses";
 
 export default function Classroom() {
+  const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { courses, completedLessons, isLoading } = useCourses();
 
@@ -124,7 +125,7 @@ export default function Classroom() {
                   totalLessons={course.totalLessons}
                   completedLessons={course.completedLessons}
                   progress={course.progress}
-                  onClick={() => console.log("Open course:", course.id)}
+                  onClick={() => navigate(`/classroom/${course.id}`)}
                 />
               ))}
             </div>
