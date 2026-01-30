@@ -28,7 +28,7 @@ interface SidebarProps {
   communityLogo?: string;
 }
 
-export function Sidebar({ communityName = "Growth Academy", communityLogo }: SidebarProps) {
+export function Sidebar({ communityName = "Vibe Coding Academy", communityLogo }: SidebarProps) {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { user, profile, isAdmin, signOut } = useAuth();
