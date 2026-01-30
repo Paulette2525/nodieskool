@@ -1,30 +1,40 @@
 import { useState } from "react";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Pin } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Pin, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { usePostLikes } from "@/hooks/usePosts";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostCardProps {
   id: string;
   author: {
+    id: string;
     name: string;
-    avatar?: string;
+    username: string;
+    avatar?: string | null;
     level: number;
   };
   content: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   isPinned?: boolean;
   likesCount: number;
   commentsCount: number;
-  createdAt: Date;
-  isLiked?: boolean;
-  onLike?: () => void;
-  onComment?: () => void;
+  createdAt: string;
+  onDelete?: () => void;
+  onTogglePin?: () => void;
 }
 
 export function PostCard({
+  id,
   author,
   content,
   imageUrl,
@@ -32,17 +42,21 @@ export function PostCard({
   likesCount,
   commentsCount,
   createdAt,
-  isLiked = false,
-  onLike,
-  onComment,
+  onDelete,
+  onTogglePin,
 }: PostCardProps) {
-  const [liked, setLiked] = useState(isLiked);
-  const [likes, setLikes] = useState(likesCount);
+  const { profile, isModerator } = useAuth();
+  const { isLiked, toggleLike } = usePostLikes(id);
+  const [optimisticLikes, setOptimisticLikes] = useState(likesCount);
+  const [optimisticIsLiked, setOptimisticIsLiked] = useState(false);
 
   const handleLike = () => {
-    setLiked(!liked);
-    setLikes(liked ? likes - 1 : likes + 1);
-    onLike?.();
+    if (!profile) return;
+    
+    const newIsLiked = !isLiked;
+    setOptimisticIsLiked(newIsLiked);
+    setOptimisticLikes(newIsLiked ? likesCount + 1 : likesCount);
+    toggleLike.mutate();
   };
 
   const getLevelBadge = (level: number) => {
@@ -55,6 +69,9 @@ export function PostCard({
     ];
     return colors[Math.min(level - 1, colors.length - 1)] || colors[0];
   };
+
+  const isOwner = profile?.id === author.id;
+  const canManage = isOwner || isModerator;
 
   return (
     <Card className="p-5 shadow-card hover:shadow-md transition-shadow animate-fade-in">
@@ -70,7 +87,7 @@ export function PostCard({
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={author.avatar} />
+            <AvatarImage src={author.avatar ?? undefined} />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               {author.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
@@ -86,13 +103,32 @@ export function PostCard({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {formatDistanceToNow(createdAt, { addSuffix: true })}
+              @{author.username} · {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        
+        {canManage && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isModerator && (
+                <DropdownMenuItem onClick={onTogglePin}>
+                  <Pin className="h-4 w-4 mr-2" />
+                  {isPinned ? "Unpin" : "Pin"} post
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete post
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Content */}
@@ -113,18 +149,18 @@ export function PostCard({
           variant="ghost"
           size="sm"
           onClick={handleLike}
+          disabled={!profile}
           className={cn(
             "gap-1.5 text-muted-foreground hover:text-primary",
-            liked && "text-red-500 hover:text-red-600"
+            (isLiked || optimisticIsLiked) && "text-red-500 hover:text-red-600"
           )}
         >
-          <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-          <span className="text-sm">{likes}</span>
+          <Heart className={cn("h-4 w-4", (isLiked || optimisticIsLiked) && "fill-current")} />
+          <span className="text-sm">{isLiked ? likesCount : optimisticLikes}</span>
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={onComment}
           className="gap-1.5 text-muted-foreground hover:text-primary"
         >
           <MessageCircle className="h-4 w-4" />

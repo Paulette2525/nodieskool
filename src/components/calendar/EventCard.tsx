@@ -1,4 +1,4 @@
-import { Calendar as CalendarIcon, Clock, Users, Video, ExternalLink } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Users, Video, Check } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,7 @@ interface EventCardProps {
   hostAvatar?: string;
   attendeesCount: number;
   meetingUrl?: string;
+  isRegistered?: boolean;
   onJoin?: () => void;
 }
 
@@ -30,6 +31,7 @@ export function EventCard({
   hostAvatar,
   attendeesCount,
   meetingUrl,
+  isRegistered,
   onJoin,
 }: EventCardProps) {
   const getTypeConfig = () => {
@@ -66,8 +68,14 @@ export function EventCard({
               {typeConfig.label}
             </Badge>
             {isLive && (
-              <Badge className="bg-red-500 text-white text-xs animate-pulse-subtle">
+              <Badge className="bg-red-500 text-white text-xs animate-pulse">
                 LIVE NOW
+              </Badge>
+            )}
+            {isRegistered && !isLive && (
+              <Badge className="bg-success/10 text-success text-xs gap-1" variant="secondary">
+                <Check className="h-3 w-3" />
+                Registered
               </Badge>
             )}
           </div>
@@ -97,7 +105,9 @@ export function EventCard({
                   {hostName.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm text-muted-foreground">Hosted by <span className="font-medium text-foreground">{hostName}</span></span>
+              <span className="text-sm text-muted-foreground">
+                Hosted by <span className="font-medium text-foreground">{hostName}</span>
+              </span>
             </div>
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
@@ -107,17 +117,26 @@ export function EventCard({
         </div>
 
         {/* Action */}
-        {(isLive || isUpcoming) && meetingUrl && (
+        {(isLive || isUpcoming) && (
           <Button 
             size="sm" 
             onClick={onJoin}
+            variant={isRegistered ? "outline" : "default"}
             className={cn(
               "gap-1.5 ml-4",
-              isLive ? "bg-red-500 hover:bg-red-600" : ""
+              isLive && "bg-red-500 hover:bg-red-600"
             )}
           >
-            <Video className="h-4 w-4" />
-            {isLive ? "Join Now" : "Set Reminder"}
+            {isLive ? (
+              <>
+                <Video className="h-4 w-4" />
+                Join Now
+              </>
+            ) : isRegistered ? (
+              "Cancel"
+            ) : (
+              "Register"
+            )}
           </Button>
         )}
       </div>

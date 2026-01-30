@@ -7,12 +7,14 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
   { name: "Community", href: "/community", icon: Users },
@@ -26,17 +28,13 @@ interface SidebarProps {
   communityLogo?: string;
 }
 
-export function Sidebar({ communityName = "Community", communityLogo }: SidebarProps) {
+export function Sidebar({ communityName = "Growth Academy", communityLogo }: SidebarProps) {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user, profile, isAdmin, signOut } = useAuth();
 
-  // Mock user data
-  const user = {
-    name: "John Doe",
-    email: "john@example.com",
-    avatar: "",
-    level: 3,
-    points: 1250,
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -101,77 +99,106 @@ export function Sidebar({ communityName = "Community", communityLogo }: SidebarP
               </Link>
             );
           })}
+
+          {/* Admin link */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                location.pathname === "/admin"
+                  ? "bg-sidebar-accent text-primary"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                isCollapsed && "md:justify-center md:px-2"
+              )}
+            >
+              <ShieldCheck className={cn("h-5 w-5 flex-shrink-0", location.pathname === "/admin" && "text-primary")} />
+              {!isCollapsed && <span>Admin</span>}
+            </Link>
+          )}
         </nav>
 
         {/* User section */}
         <div className="border-t border-sidebar-border p-3">
           {/* Level & Points */}
-          {!isCollapsed && (
+          {!isCollapsed && profile && (
             <div className="mb-3 rounded-lg bg-sidebar-accent p-3">
               <div className="flex items-center justify-between text-xs text-sidebar-foreground">
-                <span className="font-medium">Level {user.level}</span>
-                <span className="text-accent font-semibold">{user.points} pts</span>
+                <span className="font-medium">Level {profile.level}</span>
+                <span className="text-accent font-semibold">{profile.points} pts</span>
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-sidebar-border">
                 <div 
                   className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: '65%' }}
+                  style={{ width: `${Math.min(100, (profile.points % 100))}%` }}
                 />
               </div>
             </div>
           )}
 
           {/* User info */}
-          <div className={cn(
-            "flex items-center gap-3",
-            isCollapsed && "md:justify-center"
-          )}>
-            <Avatar className="h-9 w-9">
-              <AvatarImage src={user.avatar} />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                {user.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
-                  {user.name}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user.email}
-                </p>
+          {user && profile && (
+            <>
+              <div className={cn(
+                "flex items-center gap-3",
+                isCollapsed && "md:justify-center"
+              )}>
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={profile.avatar_url ?? undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                    {(profile.full_name || profile.username).split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                {!isCollapsed && (
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">
+                      {profile.full_name || profile.username}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      @{profile.username}
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Actions */}
-          <div className={cn(
-            "mt-3 flex gap-2",
-            isCollapsed && "md:flex-col"
-          )}>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={cn(
-                "flex-1 justify-start text-sidebar-foreground",
-                isCollapsed && "md:justify-center md:px-2"
-              )}
-            >
-              <Settings className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Settings</span>}
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={cn(
-                "flex-1 justify-start text-sidebar-foreground hover:text-destructive",
-                isCollapsed && "md:justify-center md:px-2"
-              )}
-            >
-              <LogOut className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Log out</span>}
-            </Button>
-          </div>
+              {/* Actions */}
+              <div className={cn(
+                "mt-3 flex gap-2",
+                isCollapsed && "md:flex-col"
+              )}>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "flex-1 justify-start text-sidebar-foreground",
+                    isCollapsed && "md:justify-center md:px-2"
+                  )}
+                >
+                  <Settings className="h-4 w-4" />
+                  {!isCollapsed && <span className="ml-2">Settings</span>}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleSignOut}
+                  className={cn(
+                    "flex-1 justify-start text-sidebar-foreground hover:text-destructive",
+                    isCollapsed && "md:justify-center md:px-2"
+                  )}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {!isCollapsed && <span className="ml-2">Log out</span>}
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* Login button if not authenticated */}
+          {!user && !isCollapsed && (
+            <Link to="/auth">
+              <Button className="w-full">Sign In</Button>
+            </Link>
+          )}
         </div>
       </aside>
     </>
