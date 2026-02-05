@@ -1,10 +1,9 @@
- import { Navigate, useParams } from "react-router-dom";
  import { CommunityLayout } from "@/components/layout/CommunityLayout";
  import { CreatePostCard } from "@/components/community/CreatePostCard";
  import { PostCard } from "@/components/community/PostCard";
  import { Card } from "@/components/ui/card";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
- import { Trophy, Loader2, Users } from "lucide-react";
+ import { Trophy, Loader2 } from "lucide-react";
  import { useAuth } from "@/hooks/useAuth";
  import { usePostsWithCommunity } from "@/hooks/usePosts";
  import { useLeaderboard } from "@/hooks/useLeaderboard";
@@ -127,20 +126,6 @@
  }
  
  export default function CommunityFeed() {
-   const { user, loading } = useAuth();
- 
-   if (loading) {
-     return (
-       <div className="min-h-screen flex items-center justify-center bg-background">
-         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-       </div>
-     );
-   }
- 
-   if (!user) {
-     return <Navigate to="/auth" replace />;
-   }
- 
    return (
      <CommunityLayout>
        <CommunityFeedContent />

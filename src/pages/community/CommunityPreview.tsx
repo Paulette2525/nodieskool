@@ -10,6 +10,7 @@
  import { supabase } from "@/integrations/supabase/client";
  import { toast } from "sonner";
  import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
+import { useQueryClient } from "@tanstack/react-query";
  
  export function CommunityPreview() {
    const { community, memberCount } = useCommunityContext();
@@ -17,6 +18,7 @@
    const navigate = useNavigate();
    const location = useLocation();
    const [joining, setJoining] = useState(false);
+  const queryClient = useQueryClient();
  
    if (!community) return null;
  
@@ -35,6 +37,9 @@
          });
  
        if (error) throw error;
+      
+      // Invalidate queries to refresh membership data
+      await queryClient.invalidateQueries({ queryKey: ["community"] });
  
        toast.success(
          community.is_public

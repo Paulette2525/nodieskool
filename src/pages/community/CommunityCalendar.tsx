@@ -1,4 +1,3 @@
- import { Navigate } from "react-router-dom";
  import { CommunityLayout } from "@/components/layout/CommunityLayout";
  import { EventCard } from "@/components/calendar/EventCard";
  import { Card } from "@/components/ui/card";
@@ -75,20 +74,6 @@
  }
  
  export default function CommunityCalendar() {
-   const { user, loading } = useAuth();
- 
-   if (loading) {
-     return (
-       <div className="min-h-screen flex items-center justify-center bg-background">
-         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-       </div>
-     );
-   }
- 
-   if (!user) {
-     return <Navigate to="/auth" replace />;
-   }
- 
    return (
      <CommunityLayout>
        <CommunityCalendarContent />
