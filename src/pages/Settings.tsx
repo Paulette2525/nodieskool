@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { MainLayout } from "@/components/layout/MainLayout";
+ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,7 @@ import {
   AlertDialogTitle, 
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Loader2, Lock, Bell, Trash2, Eye, EyeOff } from "lucide-react";
+ import { Loader2, Lock, Bell, Trash2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -95,16 +95,8 @@ export default function Settings() {
   };
 
   return (
-    <MainLayout>
+     <AppLayout title="Paramètres" backTo="/profile">
       <div className="container max-w-2xl py-8 px-4">
-        {/* Back button */}
-        <Link to="/profile" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="h-4 w-4" />
-          Retour au profil
-        </Link>
-
-        <h1 className="text-3xl font-bold mb-8">Paramètres</h1>
-
         <div className="space-y-6">
           {/* Password Section */}
           <Card>
@@ -263,6 +255,6 @@ export default function Settings() {
           </Card>
         </div>
       </div>
-    </MainLayout>
+     </AppLayout>
   );
 }
