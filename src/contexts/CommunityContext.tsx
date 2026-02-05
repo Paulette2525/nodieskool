@@ -28,6 +28,7 @@
    isModerator: boolean;
    isMember: boolean;
    loading: boolean;
+   memberCount: number;
  }
  
  const CommunityContext = createContext<CommunityContextType | undefined>(undefined);
@@ -38,12 +39,14 @@
    const [community, setCommunity] = useState<Community | null>(null);
    const [role, setRole] = useState<CommunityRole>(null);
    const [loading, setLoading] = useState(true);
+   const [memberCount, setMemberCount] = useState(0);
  
    useEffect(() => {
      async function fetchCommunity() {
        if (!slug) {
          setCommunity(null);
          setRole(null);
+         setMemberCount(0);
          setLoading(false);
          return;
        }
@@ -60,11 +63,21 @@
          if (communityError || !communityData) {
            setCommunity(null);
            setRole(null);
+           setMemberCount(0);
            setLoading(false);
            return;
          }
  
          setCommunity(communityData as Community);
+ 
+         // Fetch member count
+         const { count } = await supabase
+           .from("community_members")
+           .select("*", { count: "exact", head: true })
+           .eq("community_id", communityData.id)
+           .eq("is_approved", true);
+ 
+         setMemberCount(count || 0);
  
          // Fetch user role if authenticated
          if (profile) {
@@ -83,6 +96,7 @@
          console.error("Error fetching community:", error);
          setCommunity(null);
          setRole(null);
+         setMemberCount(0);
        }
        setLoading(false);
      }
@@ -106,6 +120,7 @@
          isModerator,
          isMember,
          loading,
+         memberCount,
        }}
      >
        {children}
