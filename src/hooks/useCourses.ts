@@ -36,14 +36,17 @@ export interface Lesson {
 }
 
 export function useCourses() {
+   return useCoursesWithCommunity();
+ }
+ 
+ export function useCoursesWithCommunity(communityId?: string | null) {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
 
   const coursesQuery = useQuery({
-    queryKey: ["courses"],
+     queryKey: ["courses", communityId ?? "global"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("courses")
+       let query = supabase.from("courses")
         .select(`
           *,
           modules (
@@ -52,8 +55,13 @@ export function useCourses() {
           )
         `)
         .order("order_index");
-
-      if (error) throw error;
+       
+       if (communityId) {
+         query = query.eq("community_id", communityId);
+       }
+       
+       const { data, error } = await query;
+       if (error) throw error;
       return data as Course[];
     },
   });

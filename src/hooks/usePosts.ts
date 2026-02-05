@@ -24,14 +24,17 @@ export interface Post {
 }
 
 export function usePosts() {
+   return usePostsWithCommunity();
+ }
+ 
+ export function usePostsWithCommunity(communityId?: string | null) {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
 
   const postsQuery = useQuery({
-    queryKey: ["posts"],
+     queryKey: ["posts", communityId ?? "global"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("posts")
+       let query = supabase.from("posts")
         .select(`
           *,
           profiles (
@@ -45,8 +48,13 @@ export function usePosts() {
         `)
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
-
-      if (error) throw error;
+       
+       if (communityId) {
+         query = query.eq("community_id", communityId);
+       }
+       
+       const { data, error } = await query;
+       if (error) throw error;
       return data as Post[];
     },
   });
@@ -59,6 +67,7 @@ export function usePosts() {
         user_id: profile.id,
         content,
         image_url: imageUrl,
+         community_id: communityId ?? null,
       });
 
       if (error) throw error;

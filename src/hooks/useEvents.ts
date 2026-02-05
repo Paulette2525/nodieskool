@@ -23,14 +23,17 @@ export interface Event {
 }
 
 export function useEvents() {
+   return useEventsWithCommunity();
+ }
+ 
+ export function useEventsWithCommunity(communityId?: string | null) {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
 
   const eventsQuery = useQuery({
-    queryKey: ["events"],
+     queryKey: ["events", communityId ?? "global"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("events")
+       let query = supabase.from("events")
         .select(`
           *,
           profiles (
@@ -42,8 +45,13 @@ export function useEvents() {
         `)
         .gte("end_time", new Date().toISOString())
         .order("start_time");
-
-      if (error) throw error;
+       
+       if (communityId) {
+         query = query.eq("community_id", communityId);
+       }
+       
+       const { data, error } = await query;
+       if (error) throw error;
       return data as Event[];
     },
   });
