@@ -146,7 +146,7 @@
            
            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
              <Button size="lg" className="text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-shadow" asChild>
-               <Link to="/auth">
+                <Link to={user ? "/dashboard" : "/auth"}>
                  Créer ma communauté
                  <ArrowRight className="h-5 w-5 ml-2" />
                </Link>
@@ -330,7 +330,7 @@
                  Rejoignez des milliers de créateurs qui utilisent notre plateforme pour enseigner et inspirer
                </p>
                <Button size="lg" className="text-lg px-10 py-6 shadow-xl" asChild>
-                 <Link to="/auth">
+                  <Link to={user ? "/dashboard" : "/auth"}>
                    Commencer gratuitement
                    <ArrowRight className="h-5 w-5 ml-2" />
                  </Link>
