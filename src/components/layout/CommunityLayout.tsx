@@ -1,20 +1,20 @@
  import { ReactNode, useEffect } from "react";
- import { useParams, Navigate, useLocation } from "react-router-dom";
+ import { Navigate } from "react-router-dom";
  import { Loader2 } from "lucide-react";
  import { CommunityProvider, useCommunityContext } from "@/contexts/CommunityContext";
  import { CommunitySidebar } from "./CommunitySidebar";
  import { GlobalSearch } from "@/components/search/GlobalSearch";
  import { NotificationBell } from "@/components/notifications/NotificationBell";
  import { useAuth } from "@/hooks/useAuth";
+ import { CommunityPreview } from "@/pages/community/CommunityPreview";
  
  interface CommunityLayoutProps {
    children: ReactNode;
  }
  
  function CommunityLayoutInner({ children }: CommunityLayoutProps) {
-   const { community, loading, isMember } = useCommunityContext();
+   const { community, loading, isMember, isOwner } = useCommunityContext();
    const { user, loading: authLoading } = useAuth();
-   const location = useLocation();
  
    if (loading || authLoading) {
      return (
@@ -28,9 +28,9 @@
      return <Navigate to="/dashboard" replace />;
    }
  
-   // If community is private and user is not a member, redirect
-   if (!community.is_public && !isMember && user) {
-     return <Navigate to="/dashboard" replace />;
+   // If user is not a member, show the preview page
+   if (!isMember) {
+     return <CommunityPreview />;
    }
  
    return (

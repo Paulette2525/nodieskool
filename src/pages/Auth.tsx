@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, Link } from "react-router-dom";
+ import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+ import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+   const navigate = useNavigate();
 
   // Login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -32,7 +34,8 @@ export default function Auth() {
   }
 
   if (user) {
-    return <Navigate to="/community" replace />;
+     const redirectUrl = getAndClearRedirectUrl();
+     return <Navigate to={redirectUrl || "/dashboard"} replace />;
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -40,6 +43,12 @@ export default function Auth() {
     setIsLoading(true);
     try {
       await signIn(loginEmail, loginPassword);
+       const redirectUrl = getAndClearRedirectUrl();
+       if (redirectUrl) {
+         navigate(redirectUrl);
+       } else {
+         navigate("/dashboard");
+       }
       toast.success("Welcome back!");
     } catch (error: any) {
       toast.error(error.message);
