@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound";
  import CommunityLeaderboard from "./pages/community/CommunityLeaderboard";
  import CommunityCalendar from "./pages/community/CommunityCalendar";
  import CommunityAdmin from "./pages/community/CommunityAdmin";
+import Discover from "./pages/Discover";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
              <Route path="/dashboard" element={<Dashboard />} />
              <Route path="/create-community" element={<CreateCommunity />} />
              <Route path="/pricing" element={<Pricing />} />
+            <Route path="/discover" element={<Discover />} />
              
              {/* Community-scoped routes */}
              <Route path="/c/:slug" element={<CommunityFeed />} />
