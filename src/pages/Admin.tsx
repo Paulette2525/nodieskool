@@ -1,4 +1,4 @@
- import { useState } from "react";
+ import { useState, useEffect } from "react";
  import { Navigate } from "react-router-dom";
  import { useAuth } from "@/hooks/useAuth";
  import { useSuperAdmin } from "@/hooks/useSuperAdmin";
@@ -20,6 +20,7 @@
  import { SuperAdminUsers } from "@/components/super-admin/SuperAdminUsers";
  import { SuperAdminContent } from "@/components/super-admin/SuperAdminContent";
  import { SuperAdminSettings } from "@/components/super-admin/SuperAdminSettings";
+ import { AdminPinEntry } from "@/components/super-admin/AdminPinEntry";
  
  type AdminSection = "dashboard" | "communities" | "users" | "content" | "settings";
  
@@ -32,8 +33,10 @@
  ];
  
  export default function Admin() {
-   const { isAdmin, loading, rolesLoaded, user, signOut } = useAuth();
+   const { loading, rolesLoaded, user, signOut } = useAuth();
    const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
+   const [isUnlocked, setIsUnlocked] = useState(false);
+   const [checkingSession, setCheckingSession] = useState(true);
    
    const {
      stats,
@@ -48,8 +51,15 @@
      deletePost,
    } = useSuperAdmin();
  
+   useEffect(() => {
+     // Check if already unlocked in this session
+     const unlocked = sessionStorage.getItem("admin_unlocked") === "true";
+     setIsUnlocked(unlocked);
+     setCheckingSession(false);
+   }, []);
+ 
    // Wait for both auth loading AND roles to be loaded
-   if (loading || !rolesLoaded) {
+   if (loading || !rolesLoaded || checkingSession) {
      return (
        <div className="min-h-screen flex items-center justify-center bg-background">
          <div className="flex flex-col items-center gap-3">
@@ -65,10 +75,9 @@
      return <Navigate to="/auth" replace />;
    }
  
-   // If logged in but not admin, redirect to dashboard
-   if (!isAdmin) {
-     console.log("User is not admin, redirecting. isAdmin:", isAdmin);
-     return <Navigate to="/dashboard" replace />;
+   // Show PIN entry if not unlocked
+   if (!isUnlocked) {
+     return <AdminPinEntry onSuccess={() => setIsUnlocked(true)} />;
    }
  
    const renderContent = () => {
