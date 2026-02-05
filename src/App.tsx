@@ -42,6 +42,7 @@ const App = () => (
              <Route path="/pricing" element={<Pricing />} />
              
              {/* Community-scoped routes */}
+             <Route path="/c/:slug" element={<CommunityFeed />} />
              <Route path="/c/:slug/community" element={<CommunityFeed />} />
              <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
              <Route path="/c/:slug/leaderboard" element={<CommunityLeaderboard />} />
