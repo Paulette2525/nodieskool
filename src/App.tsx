@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
  import CommunityClassroom from "./pages/community/CommunityClassroom";
  import CommunityLeaderboard from "./pages/community/CommunityLeaderboard";
  import CommunityCalendar from "./pages/community/CommunityCalendar";
+ import CommunityAdmin from "./pages/community/CommunityAdmin";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
              <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
              <Route path="/c/:slug/leaderboard" element={<CommunityLeaderboard />} />
              <Route path="/c/:slug/calendar" element={<CommunityCalendar />} />
+              <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
              
              {/* Auth and user routes */}
             <Route path="/auth" element={<Auth />} />
