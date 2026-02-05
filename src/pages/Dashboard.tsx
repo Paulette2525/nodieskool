@@ -1,4 +1,4 @@
- import { Navigate, Link } from "react-router-dom";
+ import { Navigate, Link, useLocation } from "react-router-dom";
  import { Button } from "@/components/ui/button";
  import { Card } from "@/components/ui/card";
  import { Loader2, Plus, Users, BookOpen, Trophy, Sparkles } from "lucide-react";
@@ -8,11 +8,13 @@
  import { CommunityCard } from "@/components/community/CommunityCard";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
  import { Badge } from "@/components/ui/badge";
+ import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
  
  export default function Dashboard() {
    const { user, profile, loading: authLoading } = useAuth();
    const { myCommunities, isLoading } = useCommunities();
    const { currentPlan, limits } = useSubscription();
+    const location = useLocation();
  
    if (authLoading) {
      return (
@@ -23,6 +25,7 @@
    }
  
    if (!user) {
+      saveRedirectUrl(location.pathname + location.search + location.hash);
      return <Navigate to="/auth" replace />;
    }
  
