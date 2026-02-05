@@ -1,173 +1,129 @@
 
-# Plan : URLs de partage fonctionnelles pour les communautes
+# Plan : Interface Admin pour les Propriétaires de Communauté
 
-## Objectif
-Permettre aux utilisateurs de partager l'URL de leur communaute (ex: `/c/ma-communaute/community`) et que les visiteurs puissent :
-1. Voir un apercu de la communaute meme sans etre connecte
-2. Se connecter/s'inscrire puis rejoindre automatiquement la communaute
-3. Acceder au contenu une fois membre
+## Contexte du Problème
 
----
+L'architecture actuelle mélange deux concepts d'administration :
 
-## Problemes actuels identifies
+1. **Admin Global de Plateforme** (`/admin`) - Pour les super-administrateurs qui gèrent l'ensemble de la plateforme
+2. **Admin de Communauté** (`/c/:slug/admin`) - Pour les propriétaires/admins qui gèrent LEUR communauté
 
-1. **Redirection vers `/auth`** : Les visiteurs non connectes sont rediriges vers la page de connexion sans contexte
-2. **Pas de page d'apercu public** : Aucune preview de la communaute n'est visible avant inscription
-3. **Perte de l'URL cible** : Apres connexion, l'utilisateur est redirige vers `/community` au lieu de la communaute ciblee
-4. **Pas de bouton "Rejoindre"** : Les utilisateurs connectes non-membres n'ont pas d'option pour rejoindre
+Actuellement :
+- La route `/c/:slug/admin` est affichée dans la sidebar mais **n'existe pas**
+- La page `/admin` vérifie `isAdmin` qui est basé sur `user_roles` (vide pour tous les utilisateurs actuels)
+- Chaque créateur de communauté devrait pouvoir administrer sa propre communauté
 
----
+## Solution Proposée
 
-## Solution proposee
+### 1. Créer la Page Admin de Communauté
 
-### Phase 1 : Creer une page d'apercu public
+Créer une nouvelle page `/c/:slug/admin` accessible aux owners et admins de chaque communauté.
 
-Nouveau composant `src/pages/community/CommunityPreview.tsx` :
-- Affiche le nom, description, logo et image de couverture
-- Montre le nombre de membres (statistique publique)
-- Bouton "Rejoindre" pour les utilisateurs connectes non-membres
-- Bouton "Se connecter pour rejoindre" pour les visiteurs non authentifies
+**Fichier : `src/pages/community/CommunityAdmin.tsx`**
 
-### Phase 2 : Modifier le flux de redirection
+Cette page permettra de :
+- Gérer les membres de la communauté (rôles, suppression)
+- Gérer les formations liées à cette communauté
+- Gérer les événements de la communauté
+- Gérer les posts de la communauté
+- Configurer les paramètres de la communauté
 
-1. **Dans `CommunityLayout.tsx`** :
-   - Au lieu de rediriger vers `/dashboard` si non-membre, afficher la page d'apercu
-   - Permettre aux non-connectes de voir l'apercu public
-
-2. **Dans `Auth.tsx`** :
-   - Sauvegarder l'URL de destination dans `localStorage` avant redirection
-   - Apres connexion reussie, rediriger vers l'URL sauvegardee
-
-### Phase 3 : Logique de redirection intelligente
-
-1. **Nouveau hook `useRedirectUrl.ts`** :
-   ```text
-   - saveRedirectUrl(url) : sauvegarde l'URL cible
-   - getRedirectUrl() : recupere et efface l'URL sauvegardee
-   - clearRedirectUrl() : efface l'URL
-   ```
-
-2. **Flux utilisateur** :
-   ```text
-   Visiteur clique sur /c/slug/community
-          |
-          v
-   Est-il connecte ?
-          |
-   Non ---+--- Oui
-     |          |
-     v          v
-   Apercu    Est-il membre ?
-   public         |
-     |      Non --+-- Oui
-     v        |        |
-   Bouton     v        v
-   "Se       Apercu   Contenu
-   connecter" + Btn    complet
-              Rejoindre
-   ```
-
----
-
-## Fichiers a creer/modifier
-
-### Nouveaux fichiers
-| Fichier | Description |
-|---------|-------------|
-| `src/pages/community/CommunityPreview.tsx` | Page d'apercu public avec bouton rejoindre |
-| `src/hooks/useRedirectUrl.ts` | Hook pour gerer la sauvegarde/restauration de l'URL cible |
-
-### Fichiers a modifier
-| Fichier | Modifications |
-|---------|---------------|
-| `src/components/layout/CommunityLayout.tsx` | Afficher l'apercu au lieu de rediriger |
-| `src/pages/Auth.tsx` | Sauvegarder/restaurer l'URL de redirection |
-| `src/contexts/CommunityContext.tsx` | Ajouter comptage des membres |
-
----
-
-## Details techniques
-
-### 1. CommunityPreview.tsx
+### 2. Ajouter la Route dans App.tsx
 
 ```text
-+------------------------------------------+
-|  [Image de couverture]                   |
-|  +------+                                |
-|  | Logo |  Nom de la communaute          |
-|  +------+  @slug                         |
-|                                          |
-|  Description de la communaute...         |
-|                                          |
-|  [Users] 42 membres  [Public/Prive]      |
-|                                          |
-|  [====== Rejoindre la communaute =====]  |
-|                                          |
-+------------------------------------------+
+Nouvelle route : /c/:slug/admin -> CommunityAdmin
 ```
 
-### 2. useRedirectUrl.ts
+### 3. Créer un Hook `useCommunityAdmin`
+
+Hook spécifique pour récupérer les données d'administration filtrées par `community_id` :
+- Membres de la communauté (via `community_members`)
+- Formations de la communauté (via `courses.community_id`)
+- Événements de la communauté (via `events.community_id`)
+- Posts de la communauté (via `posts.community_id`)
+- Statistiques spécifiques à la communauté
+
+### 4. Composants Admin Spécifiques à la Communauté
+
+Créer des versions "community-scoped" des composants admin existants :
+- `CommunityAdminMembersTab` - Gestion des membres de la communauté
+- `CommunityAdminCoursesTab` - Formations avec `community_id` automatique
+- `CommunityAdminEventsTab` - Événements avec `community_id` automatique
+- `CommunityAdminPostsTab` - Posts de la communauté
+- `CommunityAdminSettingsTab` - Paramètres de la communauté
+
+### 5. Mettre à jour la Page Admin Globale (Optionnel)
+
+La page `/admin` actuelle reste pour les super-admins de la plateforme avec vue sur TOUTES les données. Pour y accéder, il faudrait attribuer le rôle `admin` dans `user_roles`.
+
+## Détails Techniques
+
+### Structure des Fichiers à Créer/Modifier
 
 ```text
-const REDIRECT_KEY = "community_redirect_url"
-
-saveRedirectUrl(url: string)
-  -> localStorage.setItem(REDIRECT_KEY, url)
-
-getAndClearRedirectUrl(): string | null
-  -> const url = localStorage.getItem(REDIRECT_KEY)
-  -> localStorage.removeItem(REDIRECT_KEY)
-  -> return url
-
-hasRedirectUrl(): boolean
-  -> return localStorage.getItem(REDIRECT_KEY) !== null
+src/
+├── pages/
+│   └── community/
+│       └── CommunityAdmin.tsx (NOUVEAU)
+├── hooks/
+│   └── useCommunityAdmin.ts (NOUVEAU)
+├── components/
+│   └── community-admin/
+│       ├── CommunityAdminStats.tsx (NOUVEAU)
+│       ├── CommunityAdminMembersTab.tsx (NOUVEAU)
+│       ├── CommunityAdminCoursesTab.tsx (NOUVEAU)
+│       ├── CommunityAdminEventsTab.tsx (NOUVEAU)
+│       ├── CommunityAdminPostsTab.tsx (NOUVEAU)
+│       └── CommunityAdminSettingsTab.tsx (NOUVEAU)
+└── App.tsx (MODIFIER - ajouter route)
 ```
 
-### 3. Modifications CommunityLayout.tsx
+### Hook `useCommunityAdmin.ts`
 
-Logique actuelle :
-```text
-if (!user) -> Navigate to /auth
-if (!isMember && !isPublic) -> Navigate to /dashboard
+```typescript
+// Logique principale
+- Query: membres via community_members JOIN profiles
+- Query: formations via courses WHERE community_id = X
+- Query: événements via events WHERE community_id = X
+- Query: posts via posts WHERE community_id = X
+- Mutations: updateMemberRole, removeMember, etc.
 ```
 
-Nouvelle logique :
-```text
-if (!community) -> Navigate to /dashboard
-if (isMember) -> Afficher contenu complet (children)
-else -> Afficher CommunityPreview avec option rejoindre
+### Contrôle d'Accès
+
+La page utilisera `useCommunityContext()` pour :
+- Vérifier que l'utilisateur est `owner` ou `admin` de la communauté
+- Rediriger vers le feed si pas autorisé
+- Filtrer automatiquement toutes les données par `community_id`
+
+### Mutations avec `community_id`
+
+Lors de la création de formations, événements, etc., le `community_id` sera automatiquement ajouté depuis le contexte :
+
+```typescript
+const { communityId } = useCommunityContext();
+
+// Création de cours
+await supabase.from("courses").insert({
+  title: "...",
+  community_id: communityId, // Automatique
+});
 ```
 
-### 4. Modifications Auth.tsx
+## Résumé des Actions
 
-Ajout apres connexion reussie :
-```text
-const redirectUrl = getAndClearRedirectUrl()
-if (redirectUrl) {
-  navigate(redirectUrl)
-} else {
-  navigate('/dashboard')
-}
-```
+| Étape | Action | Impact |
+|-------|--------|--------|
+| 1 | Créer `CommunityAdmin.tsx` | Page principale admin communauté |
+| 2 | Créer `useCommunityAdmin.ts` | Logique de données filtrées |
+| 3 | Créer composants admin communauté | UI de gestion |
+| 4 | Ajouter route dans App.tsx | Activer la navigation |
+| 5 | Tester le flux complet | Validation |
 
----
+## Résultat Attendu
 
-## Ordre d'implementation
-
-1. Creer `useRedirectUrl.ts`
-2. Creer `CommunityPreview.tsx` 
-3. Modifier `CommunityLayout.tsx` pour afficher l'apercu
-4. Modifier `Auth.tsx` pour gerer la redirection post-connexion
-5. Ajouter le comptage des membres dans le contexte
-6. Tester le flux complet
-
----
-
-## Resultat attendu
-
-| Scenario | Comportement actuel | Nouveau comportement |
-|----------|--------------------|--------------------|
-| Visiteur non connecte | Redirection vers /auth | Apercu public + bouton connexion |
-| Connecte, non-membre | Redirection vers /dashboard | Apercu + bouton "Rejoindre" |
-| Connecte, membre | Contenu complet | Contenu complet (inchange) |
-| Apres inscription via lien | Arrive sur /community | Rejoint automatiquement la communaute ciblee |
+Chaque propriétaire de communauté pourra :
+- Accéder à `/c/son-slug/admin` 
+- Voir uniquement les données de SA communauté
+- Gérer ses membres, formations, événements et posts
+- Configurer sa communauté (nom, description, couleurs, etc.)
