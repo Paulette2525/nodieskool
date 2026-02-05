@@ -1,6 +1,5 @@
  import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
  import { supabase } from "@/integrations/supabase/client";
- import { useAuth } from "./useAuth";
  import { toast } from "sonner";
  
  export interface PlatformUser {
@@ -61,8 +60,7 @@
    newUsersThisWeek: number;
  }
  
- export function useSuperAdmin() {
-   const { isAdmin } = useAuth();
+ export function useSuperAdmin(enabled: boolean = true) {
    const queryClient = useQueryClient();
  
    // Fetch all platform stats
@@ -98,7 +96,7 @@
          newUsersThisWeek: newWeek.count ?? 0,
        };
      },
-     enabled: isAdmin,
+     enabled,
    });
  
    // Fetch all users with their community counts
@@ -139,7 +137,7 @@
          communities_count: membershipCounts[p.id] ?? 0,
        }));
      },
-     enabled: isAdmin,
+     enabled,
    });
  
    // Fetch all communities with stats
@@ -195,7 +193,7 @@
          events_count: eventCounts[c.id] ?? 0,
        }));
      },
-     enabled: isAdmin,
+     enabled,
    });
  
    // Fetch recent posts across all communities
@@ -229,7 +227,7 @@
          community_slug: (p.community as any)?.slug ?? null,
        }));
      },
-     enabled: isAdmin,
+     enabled,
    });
  
    // Toggle community active status
