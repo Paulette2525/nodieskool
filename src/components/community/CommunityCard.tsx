@@ -87,7 +87,7 @@
    });
 
    const isOwner = role === "owner";
-   const communityUrl = `${window.location.origin}/c/${slug}`;
+   const communityUrl = `${window.location.origin}/c/${slug}/community`;
 
    const handleCopyLink = (e: React.MouseEvent) => {
      e.preventDefault();
