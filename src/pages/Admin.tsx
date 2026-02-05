@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { MainLayout } from "@/components/layout/MainLayout";
+ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { usePosts } from "@/hooks/usePosts";
@@ -42,14 +42,8 @@ export default function Admin() {
   }
 
   return (
-    <MainLayout>
+     <AppLayout title="Administration">
       <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Tableau de Bord Admin</h1>
-          <p className="text-muted-foreground mt-1">Gérez votre communauté</p>
-        </div>
-
         {/* Stats */}
         <AdminStats stats={stats} />
 
@@ -109,6 +103,6 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+     </AppLayout>
   );
 }

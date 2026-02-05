@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { MainLayout } from "@/components/layout/MainLayout";
+ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStorage } from "@/hooks/useStorage";
@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { BadgeCard } from "@/components/badges/BadgeCard";
-import { Camera, Loader2, MessageSquare, Heart, BookOpen, Trophy, Settings, ArrowLeft, Award } from "lucide-react";
+ import { Camera, Loader2, MessageSquare, Heart, BookOpen, Trophy, Settings, Award } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -96,14 +96,8 @@ export default function Profile() {
   const pointsToNextLevel = 100 - levelProgress;
 
   return (
-    <MainLayout>
+     <AppLayout title="Mon Profil">
       <div className="container max-w-4xl py-8 px-4">
-        {/* Back button */}
-        <Link to="/community" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="h-4 w-4" />
-          Retour à la communauté
-        </Link>
-
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="pt-6">
@@ -299,6 +293,6 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
+     </AppLayout>
   );
 }
