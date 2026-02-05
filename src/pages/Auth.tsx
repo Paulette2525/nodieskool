@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
  import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
- import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
+ import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
    const navigate = useNavigate();
+
+  const defaultTab = useMemo(() => (hasRedirectUrl() ? "signup" : "login"), []);
 
   // Login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -83,11 +85,17 @@ export default function Auth() {
           <CardDescription>Join our community of learners</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="login">Connexion</TabsTrigger>
+              <TabsTrigger value="signup">Créer un compte</TabsTrigger>
             </TabsList>
+
+            {hasRedirectUrl() && (
+              <div className="mb-4 rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                Créez un compte ou connectez-vous pour continuer.
+              </div>
+            )}
 
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
@@ -120,7 +128,7 @@ export default function Auth() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
+                  Se connecter
                 </Button>
               </form>
             </TabsContent>
@@ -174,7 +182,7 @@ export default function Auth() {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Account
+                  Créer mon compte
                 </Button>
               </form>
             </TabsContent>

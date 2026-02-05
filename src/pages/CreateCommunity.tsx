@@ -1,5 +1,5 @@
  import { useState } from "react";
- import { Navigate, useNavigate, Link } from "react-router-dom";
+ import { Navigate, useNavigate, Link, useLocation } from "react-router-dom";
  import { useForm } from "react-hook-form";
  import { zodResolver } from "@hookform/resolvers/zod";
  import * as z from "zod";
@@ -13,6 +13,7 @@
  import { useAuth } from "@/hooks/useAuth";
  import { useCommunities } from "@/hooks/useCommunities";
  import { useSubscription } from "@/hooks/useSubscription";
+ import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
  
  const formSchema = z.object({
    name: z.string().min(3, "Le nom doit contenir au moins 3 caractères").max(50),
@@ -29,6 +30,7 @@
  export default function CreateCommunity() {
    const { user, loading: authLoading } = useAuth();
    const navigate = useNavigate();
+    const location = useLocation();
    const { myCommunities, createCommunity } = useCommunities();
    const { limits } = useSubscription();
    const [slugTouched, setSlugTouched] = useState(false);
@@ -52,6 +54,7 @@
    }
  
    if (!user) {
+      saveRedirectUrl(location.pathname + location.search + location.hash);
      return <Navigate to="/auth" replace />;
    }
  
