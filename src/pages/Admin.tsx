@@ -1,6 +1,4 @@
  import { useState, useEffect } from "react";
- import { Navigate } from "react-router-dom";
- import { useAuth } from "@/hooks/useAuth";
  import { useSuperAdmin } from "@/hooks/useSuperAdmin";
  import { Button } from "@/components/ui/button";
  import { cn } from "@/lib/utils";
@@ -33,7 +31,6 @@
  ];
  
  export default function Admin() {
-   const { loading, rolesLoaded, user, signOut } = useAuth();
    const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
    const [isUnlocked, setIsUnlocked] = useState(false);
    const [checkingSession, setCheckingSession] = useState(true);
@@ -49,7 +46,7 @@
      updateUserRole,
      deleteUser,
      deletePost,
-   } = useSuperAdmin();
+   } = useSuperAdmin(isUnlocked);
  
    useEffect(() => {
      // Check if already unlocked in this session
@@ -58,24 +55,19 @@
      setCheckingSession(false);
    }, []);
  
-   // Wait for both auth loading AND roles to be loaded
-   if (loading || !rolesLoaded || checkingSession) {
+   // Wait for session check
+   if (checkingSession) {
      return (
        <div className="min-h-screen flex items-center justify-center bg-background">
          <div className="flex flex-col items-center gap-3">
            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-           <p className="text-sm text-muted-foreground">Chargement des permissions...</p>
+           <p className="text-sm text-muted-foreground">Chargement...</p>
          </div>
        </div>
      );
    }
  
-   // If not logged in, redirect to auth
-   if (!user) {
-     return <Navigate to="/auth" replace />;
-   }
- 
-   // Show PIN entry if not unlocked
+   // Show PIN entry if not unlocked (no login required)
    if (!isUnlocked) {
      return <AdminPinEntry onSuccess={() => setIsUnlocked(true)} />;
    }
@@ -157,10 +149,13 @@
            <Button
              variant="ghost"
              className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-             onClick={() => signOut()}
+             onClick={() => {
+               sessionStorage.removeItem("admin_unlocked");
+               window.location.href = "/";
+             }}
            >
              <LogOut className="h-4 w-4" />
-             Déconnexion
+             Quitter Admin
            </Button>
            <Button
              variant="ghost"
