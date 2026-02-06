@@ -9,7 +9,6 @@ const corsHeaders = {
 
 interface CertificateRequest {
   courseId: string;
-  userId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,11 +21,46 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { courseId, userId }: CertificateRequest = await req.json();
-
-    if (!courseId || !userId) {
-      throw new Error("Missing courseId or userId");
+    // Verify authenticated user from JWT
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing authorization header" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
     }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid authentication" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const { courseId }: CertificateRequest = await req.json();
+
+    if (!courseId) {
+      throw new Error("Missing courseId");
+    }
+
+    // Get the user's profile ID
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, full_name, username")
+      .eq("user_id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return new Response(
+        JSON.stringify({ success: false, error: "User profile not found" }),
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const userProfileId = profile.id;
 
     // Verify user has completed the course
     const { data: course, error: courseError } = await supabase
@@ -52,11 +86,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
     });
 
-    // Check user's progress
+    // Check user's progress using profile ID
     const { data: progress, error: progressError } = await supabase
       .from("lesson_progress")
       .select("lesson_id")
-      .eq("user_id", userId)
+      .eq("user_id", userProfileId)
       .in("lesson_id", lessonIds);
 
     if (progressError) throw progressError;
@@ -72,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: existingCert } = await supabase
       .from("certificates")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", userProfileId)
       .eq("course_id", courseId)
       .single();
 
@@ -93,18 +127,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Generate certificate number
     const { data: certNumber } = await supabase.rpc("generate_certificate_number");
 
-    // Get user profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, username")
-      .eq("id", userId)
-      .single();
-
     // Create certificate
     const { data: certificate, error: certError } = await supabase
       .from("certificates")
       .insert({
-        user_id: userId,
+        user_id: userProfileId,
         course_id: courseId,
         certificate_number: certNumber,
       })
@@ -115,14 +142,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Award bonus points for completing a course
     await supabase.rpc("update_user_points", {
-      _user_id: userId,
+      _user_id: userProfileId,
       _points: 50,
       _reason: `Certification obtenue: ${course.title}`,
     });
 
     // Create notification
     await supabase.rpc("create_notification", {
-      _user_id: userId,
+      _user_id: userProfileId,
       _type: "badge",
       _title: "Certificat obtenu !",
       _message: `Félicitations ! Vous avez obtenu le certificat pour "${course.title}"`,
@@ -135,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
         certificate: {
           ...certificate,
           course_title: course.title,
-          user_name: profile?.full_name || profile?.username,
+          user_name: profile.full_name || profile.username,
         },
         message: "Certificate generated successfully",
       }),
