@@ -25,9 +25,9 @@ export default function Discover() {
   const { data: communities, isLoading } = useQuery({
     queryKey: ["public-communities"],
     queryFn: async () => {
-      // Fetch all public communities
+      // Fetch all public communities using secure view (excludes owner_id)
       const { data: communitiesData, error } = await supabase
-        .from("communities")
+        .from("communities_public")
         .select("id, name, slug, description, logo_url, cover_url, is_public")
         .eq("is_public", true)
         .eq("is_active", true)

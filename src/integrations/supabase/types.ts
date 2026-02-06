@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_code_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip_address: string
+          was_successful: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip_address: string
+          was_successful?: boolean
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string
+          was_successful?: boolean
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           community_id: string | null
@@ -51,6 +72,13 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badges_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
             referencedColumns: ["id"]
           },
         ]
@@ -217,6 +245,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "community_members_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -256,6 +291,13 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_settings_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
             referencedColumns: ["id"]
           },
         ]
@@ -360,6 +402,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "courses_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "courses_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -453,6 +502,13 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
             referencedColumns: ["id"]
           },
           {
@@ -886,6 +942,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "posts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1208,9 +1271,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      communities_public: {
+        Row: {
+          cover_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_active: boolean | null
+          is_public: boolean | null
+          logo_url: string | null
+          name: string | null
+          primary_color: string | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_public?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          primary_color?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          is_public?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          primary_color?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cleanup_old_admin_attempts: { Args: never; Returns: undefined }
       count_user_communities: { Args: never; Returns: number }
       create_notification: {
         Args: {
