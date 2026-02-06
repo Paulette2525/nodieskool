@@ -63,34 +63,15 @@ export function useAdmin() {
     mutationFn: async ({ userId, points, reason }: { userId: string; points: number; reason: string }) => {
       if (!profile) throw new Error("Not authenticated");
 
-      // Update profile points
-      const { data: currentProfile } = await supabase
-        .from("profiles")
-        .select("points")
-        .eq("id", userId)
-        .single();
-
-      if (!currentProfile) throw new Error("User not found");
-
-      const newPoints = currentProfile.points + points;
-      const newLevel = Math.max(1, Math.floor(newPoints / 100) + 1);
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ points: newPoints, level: newLevel })
-        .eq("id", userId);
-
-      if (updateError) throw updateError;
-
-      // Log the points
-      const { error: logError } = await supabase.from("points_log").insert({
-        user_id: userId,
-        points,
-        reason,
-        awarded_by: profile.id,
+      // Use server-side RPC function for atomic point updates
+      const { error } = await supabase.rpc('update_user_points', {
+        _user_id: userId,
+        _points: points,
+        _reason: reason,
+        _awarded_by: profile.id
       });
 
-      if (logError) throw logError;
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-members"] });
