@@ -9,6 +9,14 @@ const corsHeaders = {
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MINUTES = 15;
+const SESSION_DURATION_HOURS = 24;
+
+// Generate cryptographically secure token
+function generateSecureToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -16,13 +24,70 @@ serve(async (req) => {
   }
 
   try {
-    const { code } = await req.json();
+    const body = await req.json();
+    const { code, action, sessionToken } = body;
     
     // Get client IP from headers
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
                      req.headers.get("x-real-ip") || 
                      "unknown";
 
+    // Create Supabase client with service role
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Handle session validation
+    if (action === "validate") {
+      if (!sessionToken) {
+        return new Response(
+          JSON.stringify({ valid: false }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      const { data: session, error } = await supabase
+        .from("admin_sessions")
+        .select("*")
+        .eq("session_token", sessionToken)
+        .eq("is_valid", true)
+        .gt("expires_at", new Date().toISOString())
+        .single();
+
+      if (error || !session) {
+        return new Response(
+          JSON.stringify({ valid: false }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      // Optionally check IP matches (extra security)
+      if (session.ip_address !== clientIP) {
+        console.warn(`Session IP mismatch: expected ${session.ip_address}, got ${clientIP}`);
+        // We allow this but log it - could be VPN changes, etc.
+      }
+
+      return new Response(
+        JSON.stringify({ valid: true }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Handle logout
+    if (action === "logout") {
+      if (sessionToken) {
+        await supabase
+          .from("admin_sessions")
+          .update({ is_valid: false })
+          .eq("session_token", sessionToken);
+      }
+      return new Response(
+        JSON.stringify({ success: true }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Handle code verification (existing logic)
     if (!code || typeof code !== "string") {
       return new Response(
         JSON.stringify({ valid: false, error: "Code requis" }),
@@ -30,17 +95,18 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client with service role for rate limiting table access
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     // Clean up old attempts (older than lockout duration)
     const cutoffTime = new Date(Date.now() - LOCKOUT_DURATION_MINUTES * 60 * 1000).toISOString();
     await supabase
       .from("admin_code_attempts")
       .delete()
       .lt("attempted_at", cutoffTime);
+
+    // Clean up expired sessions
+    await supabase
+      .from("admin_sessions")
+      .delete()
+      .lt("expires_at", new Date().toISOString());
 
     // Check recent failed attempts for this IP
     const { data: recentAttempts, error: attemptError } = await supabase
@@ -106,8 +172,29 @@ serve(async (req) => {
       );
     }
 
+    // Code is valid - create server-side session
+    const newSessionToken = generateSecureToken();
+    const expiresAt = new Date(Date.now() + SESSION_DURATION_HOURS * 60 * 60 * 1000).toISOString();
+
+    const { error: sessionError } = await supabase
+      .from("admin_sessions")
+      .insert({
+        session_token: newSessionToken,
+        ip_address: clientIP,
+        expires_at: expiresAt,
+        is_valid: true,
+      });
+
+    if (sessionError) {
+      console.error("Error creating session:", sessionError);
+      return new Response(
+        JSON.stringify({ valid: false, error: "Erreur création session" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     return new Response(
-      JSON.stringify({ valid: true }),
+      JSON.stringify({ valid: true, sessionToken: newSessionToken }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error) {

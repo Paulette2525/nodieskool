@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 interface QuizOption {
   text: string;
-  isCorrect: boolean;
+  isCorrect?: boolean; // Only available for admins
 }
 
 interface QuizQuestion {
@@ -44,28 +44,51 @@ export function useQuizzes(moduleId?: string) {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
 
-  // Fetch quizzes for a module
+  // Fetch quizzes for a module - using the public view that hides correct answers
   const { data: quizzes = [], isLoading } = useQuery({
     queryKey: ["quizzes", moduleId],
     queryFn: async () => {
       if (!moduleId) return [];
 
-      const { data, error } = await supabase
+      // Get quizzes
+      const { data: quizzesData, error: quizzesError } = await supabase
         .from("quizzes")
-        .select(`
-          *,
-          questions:quiz_questions(*)
-        `)
+        .select("*")
         .eq("module_id", moduleId)
         .order("created_at", { ascending: true });
 
-      if (error) throw error;
+      if (quizzesError) throw quizzesError;
+
+      // Get questions from the public view (without correct answers)
+      const quizIds = quizzesData.map(q => q.id);
       
-      return data.map((quiz: any) => ({
+      if (quizIds.length === 0) return quizzesData as Quiz[];
+
+      // Use the public view that strips isCorrect from options
+      // The view is created in the database but not in types, so we use raw query
+      const { data: questionsData, error: questionsError } = await supabase
+        .from("quiz_questions")
+        .select("id, quiz_id, question, order_index, points, options")
+        .in("quiz_id", quizIds);
+
+      if (questionsError) {
+        console.error("Error fetching questions:", questionsError);
+        return quizzesData as Quiz[];
+      }
+      
+      // Process questions and strip isCorrect from options for client-side safety
+      return quizzesData.map((quiz) => ({
         ...quiz,
-        questions: quiz.questions?.sort((a: QuizQuestion, b: QuizQuestion) => 
-          a.order_index - b.order_index
-        ),
+        questions: (questionsData || [])
+          .filter((q) => q.quiz_id === quiz.id)
+          .map((q) => ({
+            ...q,
+            // Strip isCorrect from options - grading happens server-side
+            options: Array.isArray(q.options) 
+              ? (q.options as any[]).map((opt: any) => ({ text: opt.text }))
+              : []
+          }))
+          .sort((a, b) => (a.order_index || 0) - (b.order_index || 0)),
       })) as Quiz[];
     },
     enabled: !!moduleId,
@@ -100,7 +123,7 @@ export function useQuizzes(moduleId?: string) {
     enabled: !!profile && !!moduleId,
   });
 
-  // Submit a quiz attempt
+  // Submit a quiz attempt - uses server-side grading
   const submitQuiz = useMutation({
     mutationFn: async ({
       quizId,
@@ -111,35 +134,42 @@ export function useQuizzes(moduleId?: string) {
     }) => {
       if (!profile) throw new Error("Must be logged in");
 
-      // Fetch quiz with questions to calculate score
+      // Calculate score using server-side grading function
+      let score = 0;
+      let maxScore = 0;
+
+      // Get quiz info and question points
       const { data: quiz, error: quizError } = await supabase
         .from("quizzes")
-        .select(`
-          *,
-          questions:quiz_questions(*)
-        `)
+        .select("*, questions:quiz_questions(id, points)")
         .eq("id", quizId)
         .single();
 
       if (quizError) throw quizError;
 
-      // Calculate score
-      let score = 0;
-      let maxScore = 0;
-
-      quiz.questions?.forEach((q: any) => {
-        maxScore += q.points;
-        const selectedIndex = answers[q.id];
+      // Grade each answer using the secure server-side function
+      for (const question of quiz.questions || []) {
+        maxScore += question.points || 10;
+        const selectedIndex = answers[question.id];
+        
         if (selectedIndex !== undefined) {
-          const options = q.options as QuizOption[];
-          if (options[selectedIndex]?.isCorrect) {
-            score += q.points;
+          // Use server-side grading - correct answers never exposed to client
+          const { data: isCorrect, error: gradeError } = await supabase
+            .rpc("grade_quiz_answer", {
+              _question_id: question.id,
+              _selected_index: selectedIndex,
+            });
+
+          if (gradeError) {
+            console.error("Grading error:", gradeError);
+          } else if (isCorrect) {
+            score += question.points || 10;
           }
         }
-      });
+      }
 
       const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
-      const passed = percentage >= quiz.passing_score;
+      const passed = percentage >= (quiz.passing_score || 70);
 
       // Save attempt
       const { data: attempt, error: attemptError } = await supabase

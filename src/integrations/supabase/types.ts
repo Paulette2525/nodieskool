@@ -35,6 +35,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_sessions: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          ip_address: string
+          is_valid: boolean | null
+          session_token: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          ip_address: string
+          is_valid?: boolean | null
+          session_token: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string
+          is_valid?: boolean | null
+          session_token?: string
+        }
+        Relationships: []
+      }
       badges: {
         Row: {
           community_id: string | null
@@ -1313,8 +1340,47 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_questions_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          options: Json | null
+          order_index: number | null
+          points: number | null
+          question: string | null
+          quiz_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          options?: never
+          order_index?: number | null
+          points?: number | null
+          question?: string | null
+          quiz_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          options?: never
+          order_index?: number | null
+          points?: number | null
+          question?: string | null
+          quiz_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      cleanup_expired_admin_sessions: { Args: never; Returns: undefined }
       cleanup_old_admin_attempts: { Args: never; Returns: undefined }
       count_user_communities: { Args: never; Returns: number }
       create_notification: {
@@ -1330,6 +1396,10 @@ export type Database = {
       generate_certificate_number: { Args: never; Returns: string }
       get_current_profile_id: { Args: never; Returns: string }
       get_user_max_communities: { Args: never; Returns: number }
+      grade_quiz_answer: {
+        Args: { _question_id: string; _selected_index: number }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
