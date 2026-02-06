@@ -51,22 +51,23 @@
      enabled: !!profile,
    });
  
-   // Get public communities for discovery
-   const publicCommunitiesQuery = useQuery({
-     queryKey: ["public-communities"],
-     queryFn: async () => {
-       const { data, error } = await supabase
-         .from("communities")
-         .select("*")
-         .eq("is_public", true)
-         .eq("is_active", true)
-         .order("created_at", { ascending: false })
-         .limit(20);
- 
-       if (error) throw error;
-       return data as Community[];
-     },
-   });
+  // Get public communities for discovery (using secure view that excludes owner_id)
+  const publicCommunitiesQuery = useQuery({
+    queryKey: ["public-communities"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("communities_public")
+        .select("id, name, slug, description, logo_url, cover_url, primary_color, is_public, is_active, created_at, updated_at")
+        .eq("is_public", true)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      // Map to Community type, owner_id is not available from public view
+      return (data || []).map(c => ({ ...c, owner_id: "" })) as Community[];
+    },
+  });
  
    // Create a new community
    const createCommunity = useMutation({
