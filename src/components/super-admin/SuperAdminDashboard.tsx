@@ -1,12 +1,13 @@
- import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
- import { Users, Building2, FileText, BookOpen, Calendar, TrendingUp, UserPlus } from "lucide-react";
- import { PlatformStats, PlatformCommunity, PlatformUser } from "@/hooks/useSuperAdmin";
- 
- interface SuperAdminDashboardProps {
-   stats: PlatformStats | undefined;
-   communities: PlatformCommunity[];
-   users: PlatformUser[];
- }
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Building2, FileText, BookOpen, Calendar, TrendingUp, UserPlus, Award, ClipboardCheck } from "lucide-react";
+import { PlatformStats, PlatformCommunity, PlatformUser, ActivityItem } from "@/hooks/useSuperAdmin";
+
+interface SuperAdminDashboardProps {
+  stats: PlatformStats | undefined;
+  communities: PlatformCommunity[];
+  users: PlatformUser[];
+  activity: ActivityItem[];
+}
  
  export function SuperAdminDashboard({ stats, communities, users }: SuperAdminDashboardProps) {
    const statCards = [
