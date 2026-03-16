@@ -1415,8 +1415,16 @@ export type Database = {
         Args: { _conversation_id: string }
         Returns: boolean
       }
+      is_course_community_admin: {
+        Args: { _course_id: string }
+        Returns: boolean
+      }
       is_member: { Args: never; Returns: boolean }
       is_moderator_or_admin: { Args: never; Returns: boolean }
+      is_module_community_admin: {
+        Args: { _module_id: string }
+        Returns: boolean
+      }
       update_user_points: {
         Args: {
           _awarded_by?: string
