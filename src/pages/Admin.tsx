@@ -249,6 +249,8 @@ export default function Admin() {
             {activeSection === "communities" && "Gérez toutes les communautés"}
             {activeSection === "users" && "Gérez tous les utilisateurs"}
             {activeSection === "content" && "Modérez le contenu de la plateforme"}
+            {activeSection === "activity" && "Suivi des actions utilisateur"}
+            {activeSection === "settings" && "Configurez la plateforme"}
             {activeSection === "settings" && "Configurez la plateforme"}
           </p>
         </header>
