@@ -46,7 +46,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 5);
+    const pastedData = e.clipboardData.getData("text").slice(0, 4);
     if (!/^\d+$/.test(pastedData)) return;
 
     const newDigits = [...digits];
