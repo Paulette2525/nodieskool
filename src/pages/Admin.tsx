@@ -8,6 +8,7 @@ import {
   Building2,
   Users,
   FileText,
+  Activity,
   Settings,
   Shield,
   LogOut,
@@ -18,16 +19,18 @@ import { SuperAdminCommunities } from "@/components/super-admin/SuperAdminCommun
 import { SuperAdminUsers } from "@/components/super-admin/SuperAdminUsers";
 import { SuperAdminContent } from "@/components/super-admin/SuperAdminContent";
 import { SuperAdminSettings } from "@/components/super-admin/SuperAdminSettings";
+import { SuperAdminActivity } from "@/components/super-admin/SuperAdminActivity";
 import { AdminPinEntry } from "@/components/super-admin/AdminPinEntry";
 import { supabase } from "@/integrations/supabase/client";
 
-type AdminSection = "dashboard" | "communities" | "users" | "content" | "settings";
+type AdminSection = "dashboard" | "communities" | "users" | "content" | "activity" | "settings";
 
 const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
   { id: "communities", label: "Communautés", icon: Building2 },
   { id: "users", label: "Utilisateurs", icon: Users },
   { id: "content", label: "Contenu", icon: FileText },
+  { id: "activity", label: "Activité", icon: Activity },
   { id: "settings", label: "Paramètres", icon: Settings },
 ];
 
@@ -42,6 +45,7 @@ export default function Admin() {
     users,
     communities,
     posts,
+    activity,
     isLoading,
     toggleCommunityActive,
     deleteCommunity,
@@ -149,7 +153,7 @@ export default function Admin() {
 
     switch (activeSection) {
       case "dashboard":
-        return <SuperAdminDashboard stats={stats} communities={communities} users={users} />;
+        return <SuperAdminDashboard stats={stats} communities={communities} users={users} activity={activity} />;
       case "communities":
         return (
           <SuperAdminCommunities
@@ -168,6 +172,8 @@ export default function Admin() {
         );
       case "content":
         return <SuperAdminContent posts={posts} deletePost={deletePost} />;
+      case "activity":
+        return <SuperAdminActivity activity={activity} />;
       case "settings":
         return <SuperAdminSettings />;
       default:
@@ -243,6 +249,8 @@ export default function Admin() {
             {activeSection === "communities" && "Gérez toutes les communautés"}
             {activeSection === "users" && "Gérez tous les utilisateurs"}
             {activeSection === "content" && "Modérez le contenu de la plateforme"}
+            {activeSection === "activity" && "Suivi des actions utilisateur"}
+            {activeSection === "settings" && "Configurez la plateforme"}
             {activeSection === "settings" && "Configurez la plateforme"}
           </p>
         </header>

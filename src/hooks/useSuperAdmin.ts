@@ -49,16 +49,27 @@
    community_slug: string | null;
  }
  
- export interface PlatformStats {
-   totalUsers: number;
-   totalCommunities: number;
-   activeCommunities: number;
-   totalPosts: number;
-   totalCourses: number;
-   totalEvents: number;
-   newUsersToday: number;
-   newUsersThisWeek: number;
- }
+export interface PlatformStats {
+  totalUsers: number;
+  totalCommunities: number;
+  activeCommunities: number;
+  totalPosts: number;
+  totalCourses: number;
+  totalEvents: number;
+  newUsersToday: number;
+  newUsersThisWeek: number;
+  totalLessonsCompleted: number;
+  totalQuizzesPassed: number;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: "points" | "lesson" | "quiz" | "event_register";
+  user_name: string;
+  detail: string;
+  created_at: string;
+  meta?: Record<string, any>;
+}
  
  export function useSuperAdmin(enabled: boolean = true) {
    const queryClient = useQueryClient();
@@ -72,15 +83,17 @@
        const weekAgo = new Date(today);
        weekAgo.setDate(weekAgo.getDate() - 7);
  
-       const [users, communities, posts, courses, events, newToday, newWeek] = await Promise.all([
-         supabase.from("profiles").select("id", { count: "exact", head: true }),
-         supabase.from("communities").select("id, is_active"),
-         supabase.from("posts").select("id", { count: "exact", head: true }),
-         supabase.from("courses").select("id", { count: "exact", head: true }),
-         supabase.from("events").select("id", { count: "exact", head: true }),
-         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
-         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString()),
-       ]);
+        const [users, communities, posts, courses, events, newToday, newWeek, lessonsCompleted, quizzesPassed] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("communities").select("id, is_active"),
+          supabase.from("posts").select("id", { count: "exact", head: true }),
+          supabase.from("courses").select("id", { count: "exact", head: true }),
+          supabase.from("events").select("id", { count: "exact", head: true }),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString()),
+          supabase.from("lesson_progress").select("id", { count: "exact", head: true }),
+          supabase.from("quiz_attempts").select("id", { count: "exact", head: true }).eq("passed", true),
+        ]);
  
        const communityData = communities.data ?? [];
        const activeCommunities = communityData.filter(c => c.is_active).length;
@@ -93,7 +106,9 @@
          totalCourses: courses.count ?? 0,
          totalEvents: events.count ?? 0,
          newUsersToday: newToday.count ?? 0,
-         newUsersThisWeek: newWeek.count ?? 0,
+          newUsersThisWeek: newWeek.count ?? 0,
+          totalLessonsCompleted: lessonsCompleted.count ?? 0,
+          totalQuizzesPassed: quizzesPassed.count ?? 0,
        };
      },
      enabled,
@@ -228,7 +243,82 @@
        }));
      },
      enabled,
-   });
+    });
+
+  // Fetch activity feed
+  const activityQuery = useQuery({
+    queryKey: ["super-admin-activity"],
+    queryFn: async (): Promise<ActivityItem[]> => {
+      const [pointsRes, lessonsRes, quizzesRes, attendeesRes] = await Promise.all([
+        supabase
+          .from("points_log")
+          .select("id, points, reason, created_at, user_id, profiles!points_log_user_id_fkey(username, full_name)")
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("lesson_progress")
+          .select("id, completed_at, user_id, profiles!lesson_progress_user_id_fkey(username, full_name), lessons!lesson_progress_lesson_id_fkey(title)")
+          .order("completed_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("quiz_attempts")
+          .select("id, score, max_score, percentage, passed, completed_at, user_id, profiles!quiz_attempts_user_id_fkey(username, full_name), quizzes!quiz_attempts_quiz_id_fkey(title)")
+          .order("completed_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("event_attendees")
+          .select("id, registered_at, user_id, profiles!event_attendees_user_id_fkey(username, full_name), events!event_attendees_event_id_fkey(title)")
+          .order("registered_at", { ascending: false })
+          .limit(50),
+      ]);
+
+      const items: ActivityItem[] = [];
+
+      (pointsRes.data ?? []).forEach((p: any) => {
+        items.push({
+          id: `points-${p.id}`,
+          type: "points",
+          user_name: p.profiles?.full_name || p.profiles?.username || "Inconnu",
+          detail: `+${p.points} pts — ${p.reason}`,
+          created_at: p.created_at,
+        });
+      });
+
+      (lessonsRes.data ?? []).forEach((l: any) => {
+        items.push({
+          id: `lesson-${l.id}`,
+          type: "lesson",
+          user_name: l.profiles?.full_name || l.profiles?.username || "Inconnu",
+          detail: `A terminé la leçon "${l.lessons?.title || "?"}"`,
+          created_at: l.completed_at,
+        });
+      });
+
+      (quizzesRes.data ?? []).forEach((q: any) => {
+        items.push({
+          id: `quiz-${q.id}`,
+          type: "quiz",
+          user_name: q.profiles?.full_name || q.profiles?.username || "Inconnu",
+          detail: `Quiz "${q.quizzes?.title || "?"}" — ${q.score}/${q.max_score} (${q.percentage}%) ${q.passed ? "✅" : "❌"}`,
+          created_at: q.completed_at,
+        });
+      });
+
+      (attendeesRes.data ?? []).forEach((a: any) => {
+        items.push({
+          id: `event-${a.id}`,
+          type: "event_register",
+          user_name: a.profiles?.full_name || a.profiles?.username || "Inconnu",
+          detail: `Inscrit à l'événement "${a.events?.title || "?"}"`,
+          created_at: a.registered_at,
+        });
+      });
+
+      items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      return items.slice(0, 100);
+    },
+    enabled,
+  });
  
    // Toggle community active status
    const toggleCommunityActive = useMutation({
@@ -330,22 +420,24 @@
      },
    });
  
-   return {
-     stats: statsQuery.data,
-     users: usersQuery.data ?? [],
-     communities: communitiesQuery.data ?? [],
-     posts: postsQuery.data ?? [],
-     isLoading: statsQuery.isLoading || usersQuery.isLoading || communitiesQuery.isLoading,
-     toggleCommunityActive,
-     deleteCommunity,
-     updateUserRole,
-     deleteUser,
-     deletePost,
-     refetch: () => {
-       queryClient.invalidateQueries({ queryKey: ["super-admin-stats"] });
-       queryClient.invalidateQueries({ queryKey: ["super-admin-users"] });
-       queryClient.invalidateQueries({ queryKey: ["super-admin-communities"] });
-       queryClient.invalidateQueries({ queryKey: ["super-admin-posts"] });
-     },
-   };
+    return {
+      stats: statsQuery.data,
+      users: usersQuery.data ?? [],
+      communities: communitiesQuery.data ?? [],
+      posts: postsQuery.data ?? [],
+      activity: activityQuery.data ?? [],
+      isLoading: statsQuery.isLoading || usersQuery.isLoading || communitiesQuery.isLoading,
+      toggleCommunityActive,
+      deleteCommunity,
+      updateUserRole,
+      deleteUser,
+      deletePost,
+      refetch: () => {
+        queryClient.invalidateQueries({ queryKey: ["super-admin-stats"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-users"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-communities"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-posts"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-activity"] });
+      },
+    };
  }

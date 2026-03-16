@@ -1,14 +1,15 @@
- import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
- import { Users, Building2, FileText, BookOpen, Calendar, TrendingUp, UserPlus } from "lucide-react";
- import { PlatformStats, PlatformCommunity, PlatformUser } from "@/hooks/useSuperAdmin";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Building2, FileText, BookOpen, Calendar, TrendingUp, UserPlus, Award, ClipboardCheck } from "lucide-react";
+import { PlatformStats, PlatformCommunity, PlatformUser, ActivityItem } from "@/hooks/useSuperAdmin";
+
+interface SuperAdminDashboardProps {
+  stats: PlatformStats | undefined;
+  communities: PlatformCommunity[];
+  users: PlatformUser[];
+  activity: ActivityItem[];
+}
  
- interface SuperAdminDashboardProps {
-   stats: PlatformStats | undefined;
-   communities: PlatformCommunity[];
-   users: PlatformUser[];
- }
- 
- export function SuperAdminDashboard({ stats, communities, users }: SuperAdminDashboardProps) {
+ export function SuperAdminDashboard({ stats, communities, users, activity }: SuperAdminDashboardProps) {
    const statCards = [
      {
        label: "Utilisateurs Totaux",
@@ -46,15 +47,29 @@
        bgColor: "bg-orange-100 dark:bg-orange-900/30",
        iconColor: "text-orange-600 dark:text-orange-400",
      },
-     {
-       label: "Nouveaux (7j)",
-       value: stats?.newUsersThisWeek ?? 0,
-       subValue: `${stats?.newUsersToday ?? 0} aujourd'hui`,
-       icon: UserPlus,
-       bgColor: "bg-teal-100 dark:bg-teal-900/30",
-       iconColor: "text-teal-600 dark:text-teal-400",
-     },
-   ];
+      {
+        label: "Nouveaux (7j)",
+        value: stats?.newUsersThisWeek ?? 0,
+        subValue: `${stats?.newUsersToday ?? 0} aujourd'hui`,
+        icon: UserPlus,
+        bgColor: "bg-teal-100 dark:bg-teal-900/30",
+        iconColor: "text-teal-600 dark:text-teal-400",
+      },
+      {
+        label: "Leçons terminées",
+        value: stats?.totalLessonsCompleted ?? 0,
+        icon: BookOpen,
+        bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+        iconColor: "text-emerald-600 dark:text-emerald-400",
+      },
+      {
+        label: "Quiz réussis",
+        value: stats?.totalQuizzesPassed ?? 0,
+        icon: ClipboardCheck,
+        bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+        iconColor: "text-indigo-600 dark:text-indigo-400",
+      },
+    ];
  
    const topCommunities = [...communities]
      .sort((a, b) => b.members_count - a.members_count)
@@ -65,7 +80,7 @@
    return (
      <div className="space-y-6">
        {/* Stats Grid */}
-       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
          {statCards.map((stat) => (
            <Card key={stat.label}>
              <CardContent className="p-4">
@@ -87,7 +102,7 @@
        </div>
  
        {/* Two Column Layout */}
-       <div className="grid md:grid-cols-2 gap-6">
+       <div className="grid md:grid-cols-3 gap-6">
          {/* Top Communities */}
          <Card>
            <CardHeader>
@@ -173,7 +188,41 @@
              </div>
            </CardContent>
          </Card>
-       </div>
-     </div>
-   );
- }
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Award className="h-5 w-5 text-primary" />
+              Dernières Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {activity.length === 0 ? (
+                <p className="text-muted-foreground text-sm">Aucune activité</p>
+              ) : (
+                activity.slice(0, 10).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{item.user_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{item.detail}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground shrink-0 ml-2">
+                      {new Date(item.created_at).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
