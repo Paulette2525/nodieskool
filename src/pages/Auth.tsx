@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
  import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
@@ -77,12 +77,12 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
-              G
-            </div>
-          </div>
-          <CardTitle className="text-2xl">Growth Academy</CardTitle>
-          <CardDescription>Join our community of learners</CardDescription>
+             <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
+               <Sparkles className="h-6 w-6" />
+             </div>
+           </div>
+           <CardTitle className="text-2xl">NodieSkool</CardTitle>
+           <CardDescription>Rejoignez notre communauté d'apprentissage</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue={defaultTab} className="w-full">

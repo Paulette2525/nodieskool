@@ -82,7 +82,7 @@
              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
                <Sparkles className="h-5 w-5 text-primary-foreground" />
              </div>
-             <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Vibe Platform</span>
+             <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">NodieSkool</span>
            </Link>
  
            <nav className="hidden md:flex items-center gap-6">
@@ -350,14 +350,14 @@
              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                <Sparkles className="h-5 w-5 text-primary-foreground" />
              </div>
-             <span className="font-bold">Vibe Platform</span>
-           </div>
-           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-             <Link to="/pricing" className="hover:text-foreground transition-colors">Tarifs</Link>
-             <Link to="/auth" className="hover:text-foreground transition-colors">Connexion</Link>
-           </div>
-           <p className="text-sm text-muted-foreground">
-             © 2025 Vibe Platform. Tous droits réservés.
+              <span className="font-bold">NodieSkool</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link to="/pricing" className="hover:text-foreground transition-colors">Tarifs</Link>
+              <Link to="/auth" className="hover:text-foreground transition-colors">Connexion</Link>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2026 NodieSkool. Tous droits réservés.
            </p>
          </div>
        </footer>

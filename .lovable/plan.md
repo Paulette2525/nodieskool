@@ -1,63 +1,88 @@
 
+Objectif
+- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
 
-# Plan: Rendre toutes les fonctionnalites existantes operationnelles
+Constat (important)
+- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
+- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
 
-## Problemes identifies
+Plan d’action (définitif, avec preuves à chaque étape)
 
-### 1. Duplication a la creation de communaute (BUG CRITIQUE)
-Le trigger `on_community_created` insere automatiquement le createur comme membre `owner`. Mais `useCommunities.ts` (lignes 98-104) fait aussi manuellement un INSERT dans `community_members`. Resultat: erreur "duplicate key" a chaque creation de communaute.
+1) Vérifier si la production embarque bien la nouvelle version
+- Télécharger la page publiée `/admin` et ses assets JS (bundle).
+- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
+  - la chaîne `AdminPinEntry`
+  - la chaîne `verify-admin-code`
+  - la chaîne `admin_unlocked`
+- Interprétation :
+  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
+  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
 
-**Correction:** Supprimer l'insertion manuelle du membre dans `useCommunities.ts` (lignes 96-107), ne garder que le `return community`.
+2) Publier la version actuelle (si la prod est en retard)
+- Déclencher la publication de la version Test actuelle vers l’URL publiée.
+- Après publication, retester `https://nodieskool.lovable.app/admin` :
+  - en navigation normale
+  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
+- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
 
-### 2. Leaderboard de la communaute affiche le classement global (BUG)
-Dans `CommunityFeed.tsx` ligne 16, `useLeaderboard()` est appele sans `community?.id`. Le sidebar "Top Membres" affiche donc le classement global au lieu des membres de la communaute.
+3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
+On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
 
-**Correction:** Changer en `useLeaderboard(community?.id)`.
+3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
+- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
+- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
 
-### 3. Branding incoherent - "Vibe Platform" / "Growth Academy"
-- Landing.tsx: "Vibe Platform" partout (header, footer)
-- Dashboard.tsx ligne 43: "Vibe Platform"
-- Discover.tsx ligne 83: "Vibe Platform"
-- Auth.tsx lignes 81-85: "G" + "Growth Academy"
-- Footer: "© 2025 Vibe Platform"
+3.2) Logs ciblés (temporairement) pour capturer la redirection
+- Ajouter des `console.log()` au tout début du composant Admin (montage) :
+  - `location.href`
+  - valeur de `sessionStorage.admin_unlocked`
+- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
+  - `location.href`
+  - si un mécanisme de “redirectUrl” est en train de forcer une destination
+- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
 
-**Correction:** Remplacer par "NodieSkool" partout et mettre l'annee a 2026.
+3.3) Vérification des gardes de routes / layouts
+- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
+  - des wrappers “RequireAuth”
+  - des `useEffect(() => navigate('/auth'))`
+  - des `<Navigate to="/auth" />` conditionnels
+- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
 
-### 4. Page `/contact` inexistante (lien mort)
-`Pricing.tsx` ligne 173 renvoie vers `/contact` qui n'existe pas → 404.
+4) Corriger la cause (selon le diagnostic)
+Cas A — Publication en retard (le plus probable)
+- Correction : publier (étape 2). Aucun changement de code nécessaire.
 
-**Correction:** Creer `src/pages/Contact.tsx` avec un formulaire simple et ajouter la route dans `App.tsx`.
+Cas B — Cache navigateur / service worker
+- Solution robuste :
+  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
+  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
+  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
+  - ensuite retirer les logs.
 
-### 5. Boutons "Nouveau cours" et "Nouvel evenement" non fonctionnels
-- `CommunityClassroom.tsx` ligne 33-37: le bouton "Nouveau cours" n'a pas d'action
-- `CommunityCalendar.tsx` ligne 25-29: le bouton "Nouvel evenement" n'a pas d'action
+Cas C — Une autre redirection vers /auth persiste
+- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
+- Exemple typique :
+  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
+  - ou une logique globale qui redirige les routes non publiques vers `/auth`
+- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
 
-**Correction:** Ajouter des dialogues de creation pour les cours et evenements dans ces pages, avec les mutations existantes (`createCourse`, `createEvent`).
+5) Validation end-to-end (critère “définitif”)
+- Tester sur l’URL publiée :
+  - accéder à `/admin` en non-connecté
+  - entrer un code faux → erreur “Code incorrect”
+  - entrer le bon code → accès au super admin
+  - refresh de la page → reste accessible (sessionStorage) pendant la session
+  - nouvelle fenêtre / navigation privée → redemande le PIN
+- Une fois validé, retirer les logs et le label de version.
 
-### 6. Boutons Pricing desactives (Stripe absent)
-Les boutons Pro/Business affichent "Bientot disponible" et sont `disabled`. Sans Stripe, pas de monetisation.
+Livrables (ce qui sera modifié si nécessaire)
+- Publication (si c’est la cause).
+- Sinon, modifications minimales et ciblées dans :
+  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
+  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
+  - éventuellement un layout global si un guard impose l’auth partout.
 
-**Correction partielle:** On ne peut pas integrer Stripe sans la cle API. On va rendre les boutons plus informatifs (rediriger vers contact au lieu de "disabled").
-
-### 7. Page `CommunityPreview` - le `member_count` ne se met pas a jour apres join
-Apres avoir rejoint, `window.location.reload()` est utilise (ligne 51) au lieu de rafraichir proprement le contexte.
-
-**Correction:** Utiliser `refetch()` du `CommunityContext` au lieu de `window.location.reload()`.
-
-## Fichiers a modifier
-
-| Fichier | Modification |
-|---------|-------------|
-| `src/hooks/useCommunities.ts` | Supprimer l'INSERT manuel du membre owner |
-| `src/pages/community/CommunityFeed.tsx` | Passer `community?.id` a `useLeaderboard` |
-| `src/pages/Landing.tsx` | Branding NodieSkool |
-| `src/pages/Dashboard.tsx` | Branding NodieSkool |
-| `src/pages/Discover.tsx` | Branding NodieSkool |
-| `src/pages/Auth.tsx` | Branding NodieSkool |
-| `src/pages/Contact.tsx` | Creer la page Contact |
-| `src/App.tsx` | Ajouter route `/contact` |
-| `src/pages/Pricing.tsx` | Lien contact fonctionnel |
-| `src/pages/community/CommunityClassroom.tsx` | Dialog creation de cours |
-| `src/pages/community/CommunityCalendar.tsx` | Dialog creation d'evenement |
-| `src/pages/community/CommunityPreview.tsx` | Utiliser refetch() au lieu de reload() |
-
+Pourquoi ce plan règle “définitivement”
+- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
+- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
+- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.
