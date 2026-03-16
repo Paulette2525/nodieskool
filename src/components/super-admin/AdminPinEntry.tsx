@@ -28,12 +28,12 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
     setError(null);
 
     // Move to next input
-    if (value && index < 3) {
+    if (value && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit when all filled
-    if (value && index === 3 && newDigits.every((d) => d !== "")) {
+    if (value && index === 4 && newDigits.every((d) => d !== "")) {
       verifyCode(newDigits.join(""));
     }
   };
