@@ -80,7 +80,7 @@ interface SuperAdminDashboardProps {
    return (
      <div className="space-y-6">
        {/* Stats Grid */}
-       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
          {statCards.map((stat) => (
            <Card key={stat.label}>
              <CardContent className="p-4">
