@@ -68,6 +68,8 @@ function ThumbnailUpload({
 
 function CommunityClassroomContent() {
   const { community, isAdmin } = useCommunityContext();
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const { courses, completedLessons, isLoading } = useCoursesWithCommunity(community?.id);
   const { profile } = useAuth();
   const { uploadCourseThumbnail, uploading } = useStorage();
