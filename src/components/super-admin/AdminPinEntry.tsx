@@ -106,7 +106,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
           </div>
           <CardTitle className="text-2xl">Administration</CardTitle>
           <CardDescription>
-            Entrez le code d'accès à 4 chiffres pour continuer
+            Entrez le code d'accès à 5 chiffres pour continuer
           </CardDescription>
         </CardHeader>
         <CardContent>
