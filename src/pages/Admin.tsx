@@ -45,6 +45,7 @@ export default function Admin() {
     users,
     communities,
     posts,
+    activity,
     isLoading,
     toggleCommunityActive,
     deleteCommunity,
