@@ -47,15 +47,29 @@ interface SuperAdminDashboardProps {
        bgColor: "bg-orange-100 dark:bg-orange-900/30",
        iconColor: "text-orange-600 dark:text-orange-400",
      },
-     {
-       label: "Nouveaux (7j)",
-       value: stats?.newUsersThisWeek ?? 0,
-       subValue: `${stats?.newUsersToday ?? 0} aujourd'hui`,
-       icon: UserPlus,
-       bgColor: "bg-teal-100 dark:bg-teal-900/30",
-       iconColor: "text-teal-600 dark:text-teal-400",
-     },
-   ];
+      {
+        label: "Nouveaux (7j)",
+        value: stats?.newUsersThisWeek ?? 0,
+        subValue: `${stats?.newUsersToday ?? 0} aujourd'hui`,
+        icon: UserPlus,
+        bgColor: "bg-teal-100 dark:bg-teal-900/30",
+        iconColor: "text-teal-600 dark:text-teal-400",
+      },
+      {
+        label: "Leçons terminées",
+        value: stats?.totalLessonsCompleted ?? 0,
+        icon: BookOpen,
+        bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+        iconColor: "text-emerald-600 dark:text-emerald-400",
+      },
+      {
+        label: "Quiz réussis",
+        value: stats?.totalQuizzesPassed ?? 0,
+        icon: ClipboardCheck,
+        bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+        iconColor: "text-indigo-600 dark:text-indigo-400",
+      },
+    ];
  
    const topCommunities = [...communities]
      .sort((a, b) => b.members_count - a.members_count)
