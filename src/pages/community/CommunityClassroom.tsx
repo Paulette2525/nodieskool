@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { CourseCard } from "@/components/classroom/CourseCard";
 import { Card } from "@/components/ui/card";
