@@ -172,6 +172,8 @@ export default function Admin() {
         );
       case "content":
         return <SuperAdminContent posts={posts} deletePost={deletePost} />;
+      case "activity":
+        return <SuperAdminActivity activity={activity} />;
       case "settings":
         return <SuperAdminSettings />;
       default:
