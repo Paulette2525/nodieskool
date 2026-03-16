@@ -106,7 +106,9 @@ export interface ActivityItem {
          totalCourses: courses.count ?? 0,
          totalEvents: events.count ?? 0,
          newUsersToday: newToday.count ?? 0,
-         newUsersThisWeek: newWeek.count ?? 0,
+          newUsersThisWeek: newWeek.count ?? 0,
+          totalLessonsCompleted: lessonsCompleted.count ?? 0,
+          totalQuizzesPassed: quizzesPassed.count ?? 0,
        };
      },
      enabled,
