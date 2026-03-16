@@ -9,7 +9,7 @@ interface SuperAdminDashboardProps {
   activity: ActivityItem[];
 }
  
- export function SuperAdminDashboard({ stats, communities, users }: SuperAdminDashboardProps) {
+ export function SuperAdminDashboard({ stats, communities, users, activity }: SuperAdminDashboardProps) {
    const statCards = [
      {
        label: "Utilisateurs Totaux",
