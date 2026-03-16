@@ -82,7 +82,7 @@
              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
                <Sparkles className="h-5 w-5 text-primary-foreground" />
              </div>
-             <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Vibe Platform</span>
+             <span className="font-bold text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">NodieSkool</span>
            </Link>
  
            <nav className="hidden md:flex items-center gap-6">
