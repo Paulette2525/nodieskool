@@ -92,7 +92,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const code = digits.join("");
-    if (code.length === 4) {
+    if (code.length === 5) {
       verifyCode(code);
     }
   };
