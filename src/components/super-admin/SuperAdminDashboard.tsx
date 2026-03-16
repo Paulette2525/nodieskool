@@ -188,7 +188,41 @@ interface SuperAdminDashboardProps {
              </div>
            </CardContent>
          </Card>
-       </div>
-     </div>
-   );
- }
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Award className="h-5 w-5 text-primary" />
+              Dernières Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {activity.length === 0 ? (
+                <p className="text-muted-foreground text-sm">Aucune activité</p>
+              ) : (
+                activity.slice(0, 10).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{item.user_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{item.detail}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground shrink-0 ml-2">
+                      {new Date(item.created_at).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
