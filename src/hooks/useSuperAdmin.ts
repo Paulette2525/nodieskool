@@ -243,7 +243,82 @@ export interface ActivityItem {
        }));
      },
      enabled,
-   });
+    });
+
+  // Fetch activity feed
+  const activityQuery = useQuery({
+    queryKey: ["super-admin-activity"],
+    queryFn: async (): Promise<ActivityItem[]> => {
+      const [pointsRes, lessonsRes, quizzesRes, attendeesRes] = await Promise.all([
+        supabase
+          .from("points_log")
+          .select("id, points, reason, created_at, user_id, profiles!points_log_user_id_fkey(username, full_name)")
+          .order("created_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("lesson_progress")
+          .select("id, completed_at, user_id, profiles!lesson_progress_user_id_fkey(username, full_name), lessons!lesson_progress_lesson_id_fkey(title)")
+          .order("completed_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("quiz_attempts")
+          .select("id, score, max_score, percentage, passed, completed_at, user_id, profiles!quiz_attempts_user_id_fkey(username, full_name), quizzes!quiz_attempts_quiz_id_fkey(title)")
+          .order("completed_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("event_attendees")
+          .select("id, registered_at, user_id, profiles!event_attendees_user_id_fkey(username, full_name), events!event_attendees_event_id_fkey(title)")
+          .order("registered_at", { ascending: false })
+          .limit(50),
+      ]);
+
+      const items: ActivityItem[] = [];
+
+      (pointsRes.data ?? []).forEach((p: any) => {
+        items.push({
+          id: `points-${p.id}`,
+          type: "points",
+          user_name: p.profiles?.full_name || p.profiles?.username || "Inconnu",
+          detail: `+${p.points} pts — ${p.reason}`,
+          created_at: p.created_at,
+        });
+      });
+
+      (lessonsRes.data ?? []).forEach((l: any) => {
+        items.push({
+          id: `lesson-${l.id}`,
+          type: "lesson",
+          user_name: l.profiles?.full_name || l.profiles?.username || "Inconnu",
+          detail: `A terminé la leçon "${l.lessons?.title || "?"}"`,
+          created_at: l.completed_at,
+        });
+      });
+
+      (quizzesRes.data ?? []).forEach((q: any) => {
+        items.push({
+          id: `quiz-${q.id}`,
+          type: "quiz",
+          user_name: q.profiles?.full_name || q.profiles?.username || "Inconnu",
+          detail: `Quiz "${q.quizzes?.title || "?"}" — ${q.score}/${q.max_score} (${q.percentage}%) ${q.passed ? "✅" : "❌"}`,
+          created_at: q.completed_at,
+        });
+      });
+
+      (attendeesRes.data ?? []).forEach((a: any) => {
+        items.push({
+          id: `event-${a.id}`,
+          type: "event_register",
+          user_name: a.profiles?.full_name || a.profiles?.username || "Inconnu",
+          detail: `Inscrit à l'événement "${a.events?.title || "?"}"`,
+          created_at: a.registered_at,
+        });
+      });
+
+      items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      return items.slice(0, 100);
+    },
+    enabled,
+  });
  
    // Toggle community active status
    const toggleCommunityActive = useMutation({
