@@ -78,7 +78,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
         onSuccess(data.sessionToken);
       } else {
         setError(data?.error || "Code incorrect");
-        setDigits(["", "", "", ""]);
+        setDigits(["", "", "", "", ""]);
         inputRefs.current[0]?.focus();
       }
     } catch (err) {
