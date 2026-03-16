@@ -24,7 +24,8 @@ import NotFound from "./pages/NotFound";
  import CommunityClassroom from "./pages/community/CommunityClassroom";
  import CommunityLeaderboard from "./pages/community/CommunityLeaderboard";
  import CommunityCalendar from "./pages/community/CommunityCalendar";
- import CommunityAdmin from "./pages/community/CommunityAdmin";
+import CommunityAdmin from "./pages/community/CommunityAdmin";
+import CommunityClassroomDetail from "./pages/community/CommunityClassroomDetail";
 import Discover from "./pages/Discover";
 import Contact from "./pages/Contact";
 
@@ -49,6 +50,7 @@ const App = () => (
              <Route path="/c/:slug" element={<CommunityFeed />} />
              <Route path="/c/:slug/community" element={<CommunityFeed />} />
              <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
+             <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
              <Route path="/c/:slug/leaderboard" element={<CommunityLeaderboard />} />
              <Route path="/c/:slug/calendar" element={<CommunityCalendar />} />
               <Route path="/c/:slug/admin" element={<CommunityAdmin />} />

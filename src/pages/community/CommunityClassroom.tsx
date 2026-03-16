@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { CourseCard } from "@/components/classroom/CourseCard";
 import { Card } from "@/components/ui/card";
@@ -67,6 +68,8 @@ function ThumbnailUpload({
 
 function CommunityClassroomContent() {
   const { community, isAdmin } = useCommunityContext();
+  const { slug } = useParams();
+  const navigate = useNavigate();
   const { courses, completedLessons, isLoading } = useCoursesWithCommunity(community?.id);
   const { profile } = useAuth();
   const { uploadCourseThumbnail, uploading } = useStorage();
@@ -289,6 +292,7 @@ function CommunityClassroomContent() {
                   completedLessons={progress.completed}
                   progress={progress.progress}
                   isLocked={false}
+                  onClick={() => navigate(`/c/${slug}/classroom/${course.id}`)}
                 />
                 {isAdmin && (
                   <Button

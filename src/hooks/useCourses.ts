@@ -125,11 +125,114 @@ export function useCourses() {
     },
   });
 
+  const createModule = useMutation({
+    mutationFn: async (data: { course_id: string; title: string; description?: string; order_index?: number }) => {
+      const { error } = await supabase.from("modules").insert({
+        course_id: data.course_id,
+        title: data.title,
+        description: data.description || null,
+        order_index: data.order_index ?? 0,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.success("Module créé !");
+    },
+    onError: (error) => toast.error("Erreur : " + error.message),
+  });
+
+  const updateModule = useMutation({
+    mutationFn: async (data: { id: string; title: string; description?: string; order_index?: number; is_locked?: boolean }) => {
+      const { error } = await supabase.from("modules").update({
+        title: data.title,
+        description: data.description || null,
+        order_index: data.order_index,
+        is_locked: data.is_locked,
+      }).eq("id", data.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.success("Module mis à jour !");
+    },
+    onError: (error) => toast.error("Erreur : " + error.message),
+  });
+
+  const deleteModule = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("modules").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.success("Module supprimé !");
+    },
+    onError: (error) => toast.error("Erreur : " + error.message),
+  });
+
+  const createLesson = useMutation({
+    mutationFn: async (data: { module_id: string; title: string; content?: string; video_url?: string; duration_minutes?: number; points_reward?: number; order_index?: number }) => {
+      const { error } = await supabase.from("lessons").insert({
+        module_id: data.module_id,
+        title: data.title,
+        content: data.content || null,
+        video_url: data.video_url || null,
+        duration_minutes: data.duration_minutes || null,
+        points_reward: data.points_reward ?? 10,
+        order_index: data.order_index ?? 0,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.success("Leçon créée !");
+    },
+    onError: (error) => toast.error("Erreur : " + error.message),
+  });
+
+  const updateLesson = useMutation({
+    mutationFn: async (data: { id: string; title: string; content?: string; video_url?: string; duration_minutes?: number; points_reward?: number; order_index?: number }) => {
+      const { error } = await supabase.from("lessons").update({
+        title: data.title,
+        content: data.content || null,
+        video_url: data.video_url || null,
+        duration_minutes: data.duration_minutes || null,
+        points_reward: data.points_reward,
+        order_index: data.order_index,
+      }).eq("id", data.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.success("Leçon mise à jour !");
+    },
+    onError: (error) => toast.error("Erreur : " + error.message),
+  });
+
+  const deleteLesson = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("lessons").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      toast.success("Leçon supprimée !");
+    },
+    onError: (error) => toast.error("Erreur : " + error.message),
+  });
+
   return {
     courses: coursesQuery.data ?? [],
     completedLessons: progressQuery.data ?? [],
     isLoading: coursesQuery.isLoading,
     completeLesson,
     createCourse,
+    createModule,
+    updateModule,
+    deleteModule,
+    createLesson,
+    updateLesson,
+    deleteLesson,
   };
 }
