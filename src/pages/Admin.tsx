@@ -23,13 +23,14 @@ import { SuperAdminActivity } from "@/components/super-admin/SuperAdminActivity"
 import { AdminPinEntry } from "@/components/super-admin/AdminPinEntry";
 import { supabase } from "@/integrations/supabase/client";
 
-type AdminSection = "dashboard" | "communities" | "users" | "content" | "settings";
+type AdminSection = "dashboard" | "communities" | "users" | "content" | "activity" | "settings";
 
 const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] = [
   { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
   { id: "communities", label: "Communautés", icon: Building2 },
   { id: "users", label: "Utilisateurs", icon: Users },
   { id: "content", label: "Contenu", icon: FileText },
+  { id: "activity", label: "Activité", icon: Activity },
   { id: "settings", label: "Paramètres", icon: Settings },
 ];
 
