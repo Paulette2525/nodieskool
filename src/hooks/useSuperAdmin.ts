@@ -420,22 +420,24 @@ export interface ActivityItem {
      },
    });
  
-   return {
-     stats: statsQuery.data,
-     users: usersQuery.data ?? [],
-     communities: communitiesQuery.data ?? [],
-     posts: postsQuery.data ?? [],
-     isLoading: statsQuery.isLoading || usersQuery.isLoading || communitiesQuery.isLoading,
-     toggleCommunityActive,
-     deleteCommunity,
-     updateUserRole,
-     deleteUser,
-     deletePost,
-     refetch: () => {
-       queryClient.invalidateQueries({ queryKey: ["super-admin-stats"] });
-       queryClient.invalidateQueries({ queryKey: ["super-admin-users"] });
-       queryClient.invalidateQueries({ queryKey: ["super-admin-communities"] });
-       queryClient.invalidateQueries({ queryKey: ["super-admin-posts"] });
-     },
-   };
+    return {
+      stats: statsQuery.data,
+      users: usersQuery.data ?? [],
+      communities: communitiesQuery.data ?? [],
+      posts: postsQuery.data ?? [],
+      activity: activityQuery.data ?? [],
+      isLoading: statsQuery.isLoading || usersQuery.isLoading || communitiesQuery.isLoading,
+      toggleCommunityActive,
+      deleteCommunity,
+      updateUserRole,
+      deleteUser,
+      deletePost,
+      refetch: () => {
+        queryClient.invalidateQueries({ queryKey: ["super-admin-stats"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-users"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-communities"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-posts"] });
+        queryClient.invalidateQueries({ queryKey: ["super-admin-activity"] });
+      },
+    };
  }
