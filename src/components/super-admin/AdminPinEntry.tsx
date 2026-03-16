@@ -10,7 +10,7 @@ interface AdminPinEntryProps {
 }
 
 export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
-  const [digits, setDigits] = useState<string[]>(["", "", "", ""]);
+  const [digits, setDigits] = useState<string[]>(["", "", "", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -28,12 +28,12 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
     setError(null);
 
     // Move to next input
-    if (value && index < 3) {
+    if (value && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit when all filled
-    if (value && index === 3 && newDigits.every((d) => d !== "")) {
+    if (value && index === 4 && newDigits.every((d) => d !== "")) {
       verifyCode(newDigits.join(""));
     }
   };
@@ -46,16 +46,16 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 4);
+    const pastedData = e.clipboardData.getData("text").slice(0, 5);
     if (!/^\d+$/.test(pastedData)) return;
 
     const newDigits = [...digits];
-    for (let i = 0; i < pastedData.length && i < 4; i++) {
+    for (let i = 0; i < pastedData.length && i < 5; i++) {
       newDigits[i] = pastedData[i];
     }
     setDigits(newDigits);
 
-    if (pastedData.length === 4) {
+    if (pastedData.length === 5) {
       verifyCode(pastedData);
     }
   };
@@ -78,7 +78,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
         onSuccess(data.sessionToken);
       } else {
         setError(data?.error || "Code incorrect");
-        setDigits(["", "", "", ""]);
+        setDigits(["", "", "", "", ""]);
         inputRefs.current[0]?.focus();
       }
     } catch (err) {
@@ -92,7 +92,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const code = digits.join("");
-    if (code.length === 4) {
+    if (code.length === 5) {
       verifyCode(code);
     }
   };
@@ -106,7 +106,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
           </div>
           <CardTitle className="text-2xl">Administration</CardTitle>
           <CardDescription>
-            Entrez le code d'accès à 4 chiffres pour continuer
+            Entrez le code d'accès à 5 chiffres pour continuer
           </CardDescription>
         </CardHeader>
         <CardContent>
