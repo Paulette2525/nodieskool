@@ -83,15 +83,17 @@ export interface ActivityItem {
        const weekAgo = new Date(today);
        weekAgo.setDate(weekAgo.getDate() - 7);
  
-       const [users, communities, posts, courses, events, newToday, newWeek] = await Promise.all([
-         supabase.from("profiles").select("id", { count: "exact", head: true }),
-         supabase.from("communities").select("id, is_active"),
-         supabase.from("posts").select("id", { count: "exact", head: true }),
-         supabase.from("courses").select("id", { count: "exact", head: true }),
-         supabase.from("events").select("id", { count: "exact", head: true }),
-         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
-         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString()),
-       ]);
+        const [users, communities, posts, courses, events, newToday, newWeek, lessonsCompleted, quizzesPassed] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("communities").select("id, is_active"),
+          supabase.from("posts").select("id", { count: "exact", head: true }),
+          supabase.from("courses").select("id", { count: "exact", head: true }),
+          supabase.from("events").select("id", { count: "exact", head: true }),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", weekAgo.toISOString()),
+          supabase.from("lesson_progress").select("id", { count: "exact", head: true }),
+          supabase.from("quiz_attempts").select("id", { count: "exact", head: true }).eq("passed", true),
+        ]);
  
        const communityData = communities.data ?? [];
        const activeCommunities = communityData.filter(c => c.is_active).length;
