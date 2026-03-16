@@ -10,7 +10,7 @@ interface AdminPinEntryProps {
 }
 
 export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
-  const [digits, setDigits] = useState<string[]>(["", "", "", ""]);
+  const [digits, setDigits] = useState<string[]>(["", "", "", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
