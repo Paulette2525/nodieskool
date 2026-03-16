@@ -24,7 +24,8 @@ import NotFound from "./pages/NotFound";
  import CommunityClassroom from "./pages/community/CommunityClassroom";
  import CommunityLeaderboard from "./pages/community/CommunityLeaderboard";
  import CommunityCalendar from "./pages/community/CommunityCalendar";
- import CommunityAdmin from "./pages/community/CommunityAdmin";
+import CommunityAdmin from "./pages/community/CommunityAdmin";
+import CommunityClassroomDetail from "./pages/community/CommunityClassroomDetail";
 import Discover from "./pages/Discover";
 import Contact from "./pages/Contact";
 
