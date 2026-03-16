@@ -50,7 +50,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
     if (!/^\d+$/.test(pastedData)) return;
 
     const newDigits = [...digits];
-    for (let i = 0; i < pastedData.length && i < 5; i++) {
+    for (let i = 0; i < pastedData.length && i < 4; i++) {
       newDigits[i] = pastedData[i];
     }
     setDigits(newDigits);
