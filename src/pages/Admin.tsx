@@ -19,6 +19,7 @@ import { SuperAdminCommunities } from "@/components/super-admin/SuperAdminCommun
 import { SuperAdminUsers } from "@/components/super-admin/SuperAdminUsers";
 import { SuperAdminContent } from "@/components/super-admin/SuperAdminContent";
 import { SuperAdminSettings } from "@/components/super-admin/SuperAdminSettings";
+import { SuperAdminActivity } from "@/components/super-admin/SuperAdminActivity";
 import { AdminPinEntry } from "@/components/super-admin/AdminPinEntry";
 import { supabase } from "@/integrations/supabase/client";
 
