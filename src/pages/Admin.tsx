@@ -153,7 +153,7 @@ export default function Admin() {
 
     switch (activeSection) {
       case "dashboard":
-        return <SuperAdminDashboard stats={stats} communities={communities} users={users} />;
+        return <SuperAdminDashboard stats={stats} communities={communities} users={users} activity={activity} />;
       case "communities":
         return (
           <SuperAdminCommunities
