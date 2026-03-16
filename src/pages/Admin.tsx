@@ -8,6 +8,7 @@ import {
   Building2,
   Users,
   FileText,
+  Activity,
   Settings,
   Shield,
   LogOut,
