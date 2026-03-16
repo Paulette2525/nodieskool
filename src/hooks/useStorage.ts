@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-type BucketName = "avatars" | "post-images";
+type BucketName = "avatars" | "post-images" | "course-thumbnails";
 
 export function useStorage() {
   const { user } = useAuth();
