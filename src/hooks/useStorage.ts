@@ -78,11 +78,16 @@ export function useStorage() {
     return uploadFile("post-images", file);
   };
 
+  const uploadCourseThumbnail = async (file: File): Promise<string | null> => {
+    return uploadFile("course-thumbnails", file);
+  };
+
   return {
     uploading,
     uploadFile,
     deleteFile,
     uploadAvatar,
     uploadPostImage,
+    uploadCourseThumbnail,
   };
 }
