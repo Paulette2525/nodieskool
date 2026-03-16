@@ -49,16 +49,27 @@
    community_slug: string | null;
  }
  
- export interface PlatformStats {
-   totalUsers: number;
-   totalCommunities: number;
-   activeCommunities: number;
-   totalPosts: number;
-   totalCourses: number;
-   totalEvents: number;
-   newUsersToday: number;
-   newUsersThisWeek: number;
- }
+export interface PlatformStats {
+  totalUsers: number;
+  totalCommunities: number;
+  activeCommunities: number;
+  totalPosts: number;
+  totalCourses: number;
+  totalEvents: number;
+  newUsersToday: number;
+  newUsersThisWeek: number;
+  totalLessonsCompleted: number;
+  totalQuizzesPassed: number;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: "points" | "lesson" | "quiz" | "event_register";
+  user_name: string;
+  detail: string;
+  created_at: string;
+  meta?: Record<string, any>;
+}
  
  export function useSuperAdmin(enabled: boolean = true) {
    const queryClient = useQueryClient();
