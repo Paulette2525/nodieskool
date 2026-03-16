@@ -41,14 +41,14 @@ import { useQueryClient } from "@tanstack/react-query";
       // Invalidate queries to refresh membership data
       await queryClient.invalidateQueries({ queryKey: ["community"] });
  
-       toast.success(
-         community.is_public
-           ? "Bienvenue dans la communauté !"
-           : "Demande d'adhésion envoyée !"
-       );
- 
-       // Refresh the page to update membership status
-       window.location.reload();
+        toast.success(
+          community.is_public
+            ? "Bienvenue dans la communauté !"
+            : "Demande d'adhésion envoyée !"
+        );
+
+        // Refresh community context to update membership status
+        refetch();
      } catch (error: any) {
        console.error("Error joining community:", error);
        toast.error("Erreur lors de l'adhésion à la communauté");
