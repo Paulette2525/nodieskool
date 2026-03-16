@@ -92,20 +92,10 @@
          .select()
          .single();
  
-       if (communityError) throw communityError;
- 
-       // Add the creator as owner
-       const { error: memberError } = await supabase
-         .from("community_members")
-         .insert({
-           community_id: community.id,
-           user_id: profile.id,
-           role: "owner",
-         });
- 
-       if (memberError) throw memberError;
- 
-       return community;
+        if (communityError) throw communityError;
+
+        // Owner membership is auto-created by the `on_community_created` trigger
+        return community;
      },
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ["my-communities"] });

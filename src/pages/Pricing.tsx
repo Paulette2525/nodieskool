@@ -144,13 +144,15 @@
                          Plan actuel
                        </Button>
                      ) : (
-                       <Button 
-                         className="w-full" 
-                         variant={plan.highlighted ? "default" : "outline"}
-                         disabled // Stripe not yet integrated
-                       >
-                         {plan.priceMonthly === 0 ? "Sélectionner" : "Bientôt disponible"}
-                       </Button>
+                        <Button 
+                          className="w-full" 
+                          variant={plan.highlighted ? "default" : "outline"}
+                          asChild
+                        >
+                          <Link to="/contact">
+                            {plan.priceMonthly === 0 ? "Sélectionner" : "Nous contacter"}
+                          </Link>
+                        </Button>
                      )
                    ) : (
                      <Button 

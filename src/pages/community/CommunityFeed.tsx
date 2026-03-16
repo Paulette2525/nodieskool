@@ -13,7 +13,7 @@
    const { profile } = useAuth();
    const { community } = useCommunityContext();
    const { posts, isLoading, createPost, deletePost, togglePin } = usePostsWithCommunity(community?.id);
-   const { data: leaderboard } = useLeaderboard();
+   const { data: leaderboard } = useLeaderboard(community?.id);
  
    const topMembers = leaderboard?.slice(0, 3) ?? [];
  

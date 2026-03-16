@@ -13,7 +13,7 @@
 import { useQueryClient } from "@tanstack/react-query";
  
  export function CommunityPreview() {
-   const { community, memberCount } = useCommunityContext();
+   const { community, memberCount, refetch } = useCommunityContext();
    const { user, profile } = useAuth();
    const navigate = useNavigate();
    const location = useLocation();
