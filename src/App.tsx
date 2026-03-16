@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
  import CommunityCalendar from "./pages/community/CommunityCalendar";
  import CommunityAdmin from "./pages/community/CommunityAdmin";
 import Discover from "./pages/Discover";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
