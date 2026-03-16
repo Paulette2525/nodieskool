@@ -292,6 +292,7 @@ function CommunityClassroomContent() {
                   completedLessons={progress.completed}
                   progress={progress.progress}
                   isLocked={false}
+                  onClick={() => navigate(`/c/${slug}/classroom/${course.id}`)}
                 />
                 {isAdmin && (
                   <Button
