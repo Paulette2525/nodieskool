@@ -55,7 +55,7 @@ export function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
     }
     setDigits(newDigits);
 
-    if (pastedData.length === 5) {
+    if (pastedData.length === 4) {
       verifyCode(pastedData);
     }
   };
