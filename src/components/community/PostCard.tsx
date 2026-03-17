@@ -126,12 +126,6 @@ export function PostCard({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-medium text-foreground">{author.name}</span>
-              <span className={cn(
-                "px-1.5 py-0.5 rounded text-[10px] font-medium",
-                getLevelBadge(author.level)
-              )}>
-                Lvl {author.level}
-              </span>
             </div>
             <p className="text-xs text-muted-foreground">
               @{author.username} · {formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: fr })}

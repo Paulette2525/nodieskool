@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Navigate, Link } from "react-router-dom";
- import { AppLayout } from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStorage } from "@/hooks/useStorage";
-import { useBadges } from "@/hooks/useBadges";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,9 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { BadgeCard } from "@/components/badges/BadgeCard";
- import { Camera, Loader2, MessageSquare, Heart, BookOpen, Trophy, Settings, Award } from "lucide-react";
+import { Camera, Loader2, MessageSquare, Heart, BookOpen, Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +19,6 @@ export default function Profile() {
   const { user, profile, loading } = useAuth();
   const { updateProfile } = useProfile();
   const { uploadAvatar, uploading } = useStorage();
-  const { allBadges, userBadges, earnedBadgeIds } = useBadges();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -31,7 +27,6 @@ export default function Profile() {
     bio: "",
   });
 
-  // Initialize form when profile loads
   useEffect(() => {
     if (profile) {
       setFormData({
@@ -42,19 +37,16 @@ export default function Profile() {
     }
   }, [profile]);
 
-  // Fetch user stats
   const { data: stats } = useQuery({
     queryKey: ["user-stats", profile?.id],
     queryFn: async () => {
       if (!profile) return null;
-
       const [postsRes, commentsRes, likesRes, progressRes] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact" }).eq("user_id", profile.id),
         supabase.from("post_comments").select("id", { count: "exact" }).eq("user_id", profile.id),
         supabase.from("post_likes").select("id", { count: "exact" }).eq("user_id", profile.id),
         supabase.from("lesson_progress").select("id", { count: "exact" }).eq("user_id", profile.id),
       ]);
-
       return {
         posts: postsRes.count || 0,
         comments: commentsRes.count || 0,
@@ -80,7 +72,6 @@ export default function Profile() {
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const url = await uploadAvatar(file);
     if (url) {
       await updateProfile.mutateAsync({ avatar_url: url });
@@ -92,17 +83,13 @@ export default function Profile() {
     await updateProfile.mutateAsync(formData);
   };
 
-  const levelProgress = profile ? (profile.points % 100) : 0;
-  const pointsToNextLevel = 100 - levelProgress;
-
   return (
-     <AppLayout title="Mon Profil">
+    <AppLayout title="Mon Profil">
       <div className="container max-w-4xl py-8 px-4">
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row items-center gap-6">
-              {/* Avatar */}
               <div className="relative group">
                 <Avatar className="h-24 w-24">
                   <AvatarImage src={profile?.avatar_url ?? undefined} />
@@ -130,14 +117,12 @@ export default function Profile() {
                 />
               </div>
 
-              {/* Info */}
               <div className="flex-1 text-center md:text-left">
                 <h1 className="text-2xl font-bold">{profile?.full_name || profile?.username}</h1>
                 <p className="text-muted-foreground">@{profile?.username}</p>
                 {profile?.bio && <p className="mt-2 text-sm">{profile.bio}</p>}
               </div>
 
-              {/* Actions */}
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" asChild>
                   <Link to="/settings">
@@ -147,28 +132,12 @@ export default function Profile() {
                 </Button>
               </div>
             </div>
-
-            {/* Level Progress */}
-            <div className="mt-6 p-4 bg-muted rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Niveau {profile?.level}</span>
-                </div>
-                <span className="text-sm text-muted-foreground">{profile?.points} points</span>
-              </div>
-              <Progress value={levelProgress} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">
-                {pointsToNextLevel} points pour atteindre le niveau {(profile?.level || 1) + 1}
-              </p>
-            </div>
           </CardContent>
         </Card>
 
         <Tabs defaultValue="stats" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="stats">Statistiques</TabsTrigger>
-            <TabsTrigger value="badges">Badges</TabsTrigger>
             <TabsTrigger value="edit">Modifier</TabsTrigger>
           </TabsList>
 
@@ -211,38 +180,6 @@ export default function Profile() {
                 </CardHeader>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="badges">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Mes Badges ({userBadges.length}/{allBadges.length})
-                </CardTitle>
-                <CardDescription>
-                  Collectionnez des badges en participant à la communauté
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {allBadges.map((badge) => {
-                    const userBadge = userBadges.find((ub) => ub.badge_id === badge.id);
-                    return (
-                      <BadgeCard
-                        key={badge.id}
-                        name={badge.name}
-                        description={badge.description}
-                        icon={badge.icon}
-                        isEarned={earnedBadgeIds.includes(badge.id)}
-                        awardedAt={userBadge?.awarded_at}
-                        size="md"
-                      />
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="edit">
@@ -293,6 +230,6 @@ export default function Profile() {
           </TabsContent>
         </Tabs>
       </div>
-     </AppLayout>
+    </AppLayout>
   );
 }

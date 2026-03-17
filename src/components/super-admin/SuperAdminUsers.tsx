@@ -113,11 +113,7 @@
                          </div>
                        </div>
                      </TableCell>
-                     <TableCell className="text-center">
-                       <span className="font-bold text-primary">Niv. {user.level}</span>
-                     </TableCell>
-                     <TableCell className="text-center">{user.points}</TableCell>
-                     <TableCell className="text-center">
+                      <TableCell className="text-center">
                        <div className="flex items-center justify-center gap-1">
                          <Building2 className="h-4 w-4 text-muted-foreground" />
                          {user.communities_count}

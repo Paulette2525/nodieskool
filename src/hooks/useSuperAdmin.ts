@@ -265,16 +265,6 @@ export interface ActivityItem {
 
       const items: ActivityItem[] = [];
 
-      (pointsRes.data ?? []).forEach((p: any) => {
-        items.push({
-          id: `points-${p.id}`,
-          type: "points",
-          user_name: p.profiles?.full_name || p.profiles?.username || "Inconnu",
-          detail: `+${p.points} pts — ${p.reason}`,
-          created_at: p.created_at,
-        });
-      });
-
       (lessonsRes.data ?? []).forEach((l: any) => {
         items.push({
           id: `lesson-${l.id}`,

@@ -681,25 +681,14 @@ export function AdminCoursesTab() {
                   placeholder="https://youtube.com/watch?v=..."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Durée (minutes)</Label>
-                  <Input
-                    type="number"
-                    value={lessonForm.duration_minutes}
-                    onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: e.target.value })}
-                    placeholder="15"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Points de récompense</Label>
-                  <Input
-                    type="number"
-                    value={lessonForm.points_reward}
-                    onChange={(e) => setLessonForm({ ...lessonForm, points_reward: e.target.value })}
-                    placeholder="10"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label>Durée (minutes)</Label>
+                <Input
+                  type="number"
+                  value={lessonForm.duration_minutes}
+                  onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: e.target.value })}
+                  placeholder="15"
+                />
               </div>
               <Button
                 className="w-full"

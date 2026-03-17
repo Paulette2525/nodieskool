@@ -61,9 +61,6 @@ export function CommentItem({
             <span className="text-sm font-medium">
               {comment.profiles.full_name || comment.profiles.username}
             </span>
-            <span className="text-xs text-muted-foreground">
-              Lvl {comment.profiles.level}
-            </span>
           </div>
           <p className="text-sm mt-1 whitespace-pre-wrap">{comment.content}</p>
         </div>

@@ -62,7 +62,7 @@
  
  const benefits = [
    "Hébergement de cours illimité",
-   "Système de gamification intégré",
+   "Messagerie privée intégrée",
    "Gestion des membres simplifiée",
    "Événements et calendrier",
    "Analytics et statistiques",

@@ -18,8 +18,6 @@ import { useNavigate } from "react-router-dom";
 const typeIcons: Record<string, string> = {
   like: "❤️",
   comment: "💬",
-  badge: "🏆",
-  points: "⭐",
   event: "📅",
   follow: "👤",
 };

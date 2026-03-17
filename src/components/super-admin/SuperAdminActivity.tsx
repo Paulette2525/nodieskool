@@ -24,7 +24,6 @@ export function SuperAdminActivity({ activity }: SuperAdminActivityProps) {
 
   const filters: { value: FilterType; label: string }[] = [
     { value: "all", label: "Tout" },
-    { value: "points", label: "Points" },
     { value: "lesson", label: "Leçons" },
     { value: "quiz", label: "Quiz" },
     { value: "event_register", label: "Événements" },
