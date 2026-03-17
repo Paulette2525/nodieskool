@@ -17,7 +17,6 @@ export interface Comment {
     username: string;
     full_name: string | null;
     avatar_url: string | null;
-    level: number;
   };
 }
 
@@ -36,8 +35,7 @@ export function useComments(postId: string) {
             id,
             username,
             full_name,
-            avatar_url,
-            level
+            avatar_url
           )
         `)
         .eq("post_id", postId)

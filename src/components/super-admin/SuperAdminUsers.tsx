@@ -81,23 +81,21 @@
          <div className="overflow-x-auto">
            <Table>
              <TableHeader>
-               <TableRow>
-                 <TableHead>Utilisateur</TableHead>
-                 <TableHead className="text-center">Niveau</TableHead>
-                 <TableHead className="text-center">Points</TableHead>
-                 <TableHead className="text-center">Communautés</TableHead>
-                 <TableHead className="text-center">Rôle Plateforme</TableHead>
-                 <TableHead>Inscrit le</TableHead>
-                 <TableHead className="text-right">Actions</TableHead>
-               </TableRow>
+                <TableRow>
+                  <TableHead>Utilisateur</TableHead>
+                  <TableHead className="text-center">Communautés</TableHead>
+                  <TableHead className="text-center">Rôle Plateforme</TableHead>
+                  <TableHead>Inscrit le</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
              </TableHeader>
              <TableBody>
                {filteredUsers.length === 0 ? (
-                 <TableRow>
-                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                     Aucun utilisateur trouvé
-                   </TableCell>
-                 </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      Aucun utilisateur trouvé
+                    </TableCell>
+                  </TableRow>
                ) : (
                  filteredUsers.map((user) => (
                    <TableRow key={user.id}>
@@ -115,11 +113,7 @@
                          </div>
                        </div>
                      </TableCell>
-                     <TableCell className="text-center">
-                       <span className="font-bold text-primary">Niv. {user.level}</span>
-                     </TableCell>
-                     <TableCell className="text-center">{user.points}</TableCell>
-                     <TableCell className="text-center">
+                      <TableCell className="text-center">
                        <div className="flex items-center justify-center gap-1">
                          <Building2 className="h-4 w-4 text-muted-foreground" />
                          {user.communities_count}

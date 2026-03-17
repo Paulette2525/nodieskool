@@ -8,8 +8,6 @@
    username: string;
    full_name: string | null;
    avatar_url: string | null;
-   points: number;
-   level: number;
    created_at: string;
    platform_role: string | null;
    communities_count: number;
@@ -64,7 +62,7 @@ export interface PlatformStats {
 
 export interface ActivityItem {
   id: string;
-  type: "points" | "lesson" | "quiz" | "event_register";
+  type: "lesson" | "quiz" | "event_register";
   user_name: string;
   detail: string;
   created_at: string;
@@ -139,14 +137,12 @@ export interface ActivityItem {
          return acc;
        }, {} as Record<string, string>);
  
-       return (profiles ?? []).map(p => ({
+      return (profiles ?? []).map(p => ({
          id: p.id,
          user_id: p.user_id,
          username: p.username,
          full_name: p.full_name,
          avatar_url: p.avatar_url,
-         points: p.points,
-         level: p.level,
          created_at: p.created_at,
          platform_role: roleMap[p.user_id] ?? null,
          communities_count: membershipCounts[p.id] ?? 0,
@@ -249,12 +245,7 @@ export interface ActivityItem {
   const activityQuery = useQuery({
     queryKey: ["super-admin-activity"],
     queryFn: async (): Promise<ActivityItem[]> => {
-      const [pointsRes, lessonsRes, quizzesRes, attendeesRes] = await Promise.all([
-        supabase
-          .from("points_log")
-          .select("id, points, reason, created_at, user_id, profiles!points_log_user_id_fkey(username, full_name)")
-          .order("created_at", { ascending: false })
-          .limit(50),
+      const [lessonsRes, quizzesRes, attendeesRes] = await Promise.all([
         supabase
           .from("lesson_progress")
           .select("id, completed_at, user_id, profiles!lesson_progress_user_id_fkey(username, full_name), lessons!lesson_progress_lesson_id_fkey(title)")
@@ -273,16 +264,6 @@ export interface ActivityItem {
       ]);
 
       const items: ActivityItem[] = [];
-
-      (pointsRes.data ?? []).forEach((p: any) => {
-        items.push({
-          id: `points-${p.id}`,
-          type: "points",
-          user_name: p.profiles?.full_name || p.profiles?.username || "Inconnu",
-          detail: `+${p.points} pts — ${p.reason}`,
-          created_at: p.created_at,
-        });
-      });
 
       (lessonsRes.data ?? []).forEach((l: any) => {
         items.push({

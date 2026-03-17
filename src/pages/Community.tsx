@@ -58,7 +58,6 @@ export default function Community() {
                   name: post.profiles.full_name || post.profiles.username,
                   username: post.profiles.username,
                   avatar: post.profiles.avatar_url,
-                  level: post.profiles.level,
                 }}
                 content={post.content}
                 imageUrl={post.image_url}

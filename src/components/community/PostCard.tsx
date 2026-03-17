@@ -30,7 +30,6 @@ interface PostCardProps {
     name: string;
     username: string;
     avatar?: string | null;
-    level: number;
   };
   content: string;
   imageUrl?: string | null;
@@ -101,16 +100,6 @@ export function PostCard({
     }
   };
 
-  const getLevelBadge = (level: number) => {
-    const colors = [
-      "bg-gray-100 text-gray-600",
-      "bg-emerald-100 text-emerald-700",
-      "bg-blue-100 text-blue-700",
-      "bg-purple-100 text-purple-700",
-      "bg-amber-100 text-amber-700",
-    ];
-    return colors[Math.min(level - 1, colors.length - 1)] || colors[0];
-  };
 
   // Only admins can manage posts (delete, pin)
   const canManage = isAdmin;
@@ -137,12 +126,6 @@ export function PostCard({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-medium text-foreground">{author.name}</span>
-              <span className={cn(
-                "px-1.5 py-0.5 rounded text-[10px] font-medium",
-                getLevelBadge(author.level)
-              )}>
-                Lvl {author.level}
-              </span>
             </div>
             <p className="text-xs text-muted-foreground">
               @{author.username} · {formatDistanceToNow(new Date(createdAt), { addSuffix: true, locale: fr })}

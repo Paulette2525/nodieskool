@@ -166,19 +166,6 @@ export function AdminSettingsTab() {
               onCheckedChange={(checked) => handleChange("enable_leaderboard", checked)}
             />
           </div>
-          <Separator />
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Gamification</Label>
-              <p className="text-sm text-muted-foreground">
-                Points, niveaux et badges
-              </p>
-            </div>
-            <Switch
-              checked={localSettings.enable_gamification}
-              onCheckedChange={(checked) => handleChange("enable_gamification", checked)}
-            />
-          </div>
         </CardContent>
       </Card>
 

@@ -6,8 +6,8 @@
  import { 
    Users, 
    BookOpen, 
-   Trophy, 
-   Calendar, 
+    MessageSquare, 
+    Calendar, 
    Sparkles,
    ArrowRight,
    Check,
@@ -31,11 +31,11 @@
      title: "Formations complètes",
      description: "Hébergez vos cours avec suivi de progression et quiz"
    },
-   {
-     icon: Trophy,
-     title: "Gamification intégrée",
-     description: "Points, badges et classements pour motiver vos membres"
-   },
+    {
+      icon: MessageSquare,
+      title: "Messagerie privée",
+      description: "Échangez en privé avec les membres de votre communauté"
+    },
    {
      icon: Calendar,
      title: "Événements live",
@@ -62,7 +62,7 @@
  
  const benefits = [
    "Hébergement de cours illimité",
-   "Système de gamification intégré",
+   "Messagerie privée intégrée",
    "Gestion des membres simplifiée",
    "Événements et calendrier",
    "Analytics et statistiques",

@@ -1,101 +1,88 @@
 
+Objectif
+- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
 
-# Plan : Suppression complète des badges, points et niveaux
+Constat (important)
+- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
+- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
 
-## Résumé
-Retirer toute trace du système de badges, points et niveaux de l'ensemble de la plateforme (UI, hooks, composants, données affichées).
+Plan d’action (définitif, avec preuves à chaque étape)
 
-## Changements
+1) Vérifier si la production embarque bien la nouvelle version
+- Télécharger la page publiée `/admin` et ses assets JS (bundle).
+- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
+  - la chaîne `AdminPinEntry`
+  - la chaîne `verify-admin-code`
+  - la chaîne `admin_unlocked`
+- Interprétation :
+  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
+  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
 
-### 1. Supprimer les fichiers dédiés
-- `src/hooks/useBadges.ts`
-- `src/components/badges/BadgeCard.tsx`
+2) Publier la version actuelle (si la prod est en retard)
+- Déclencher la publication de la version Test actuelle vers l’URL publiée.
+- Après publication, retester `https://nodieskool.lovable.app/admin` :
+  - en navigation normale
+  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
+- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
 
-### 2. Nettoyer `src/pages/Profile.tsx`
-- Retirer imports `useBadges`, `BadgeCard`, `Progress`, `Trophy`, `Award`
-- Supprimer le bloc "Level Progress" (lignes 151-164)
-- Supprimer l'onglet "Badges" du TabsList (passer de 3 à 2 onglets)
-- Supprimer le TabsContent "badges" entier (lignes 216-248)
-- Retirer `levelProgress`, `pointsToNextLevel` calculations
+3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
+On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
 
-### 3. Nettoyer `src/components/community/PostCard.tsx`
-- Retirer `level` de l'interface `PostCardProps.author`
-- Retirer l'affichage du niveau dans le composant
+3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
+- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
+- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
 
-### 4. Nettoyer `src/pages/community/CommunityFeed.tsx`
-- Retirer `level` du mapping des posts vers PostCard
+3.2) Logs ciblés (temporairement) pour capturer la redirection
+- Ajouter des `console.log()` au tout début du composant Admin (montage) :
+  - `location.href`
+  - valeur de `sessionStorage.admin_unlocked`
+- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
+  - `location.href`
+  - si un mécanisme de “redirectUrl” est en train de forcer une destination
+- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
 
-### 5. Nettoyer `src/components/community/CommentItem.tsx`
-- Retirer l'affichage "Lvl {comment.profiles.level}" (ligne 64-66)
+3.3) Vérification des gardes de routes / layouts
+- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
+  - des wrappers “RequireAuth”
+  - des `useEffect(() => navigate('/auth'))`
+  - des `<Navigate to="/auth" />` conditionnels
+- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
 
-### 6. Nettoyer `src/hooks/useComments.ts`
-- Retirer `level` du select des profils
+4) Corriger la cause (selon le diagnostic)
+Cas A — Publication en retard (le plus probable)
+- Correction : publier (étape 2). Aucun changement de code nécessaire.
 
-### 7. Nettoyer `src/hooks/useCommunityAdmin.ts`
-- Retirer `points` et `level` du type et du select
+Cas B — Cache navigateur / service worker
+- Solution robuste :
+  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
+  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
+  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
+  - ensuite retirer les logs.
 
-### 8. Nettoyer `src/hooks/useAdmin.ts`
-- Retirer `points` et `level` du type et du select
+Cas C — Une autre redirection vers /auth persiste
+- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
+- Exemple typique :
+  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
+  - ou une logique globale qui redirige les routes non publiques vers `/auth`
+- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
 
-### 9. Nettoyer `src/hooks/useSuperAdmin.ts`
-- Retirer `points` et `level` du type `SuperAdminUser`
-- Retirer le type `"points"` de `ActivityItem`
-- Retirer la requête `points_log` et le mapping dans l'activité
+5) Validation end-to-end (critère “définitif”)
+- Tester sur l’URL publiée :
+  - accéder à `/admin` en non-connecté
+  - entrer un code faux → erreur “Code incorrect”
+  - entrer le bon code → accès au super admin
+  - refresh de la page → reste accessible (sessionStorage) pendant la session
+  - nouvelle fenêtre / navigation privée → redemande le PIN
+- Une fois validé, retirer les logs et le label de version.
 
-### 10. Nettoyer `src/components/super-admin/SuperAdminUsers.tsx`
-- Retirer colonnes points/niveau si affichées
+Livrables (ce qui sera modifié si nécessaire)
+- Publication (si c’est la cause).
+- Sinon, modifications minimales et ciblées dans :
+  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
+  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
+  - éventuellement un layout global si un guard impose l’auth partout.
 
-### 11. Nettoyer `src/components/super-admin/SuperAdminActivity.tsx`
-- Retirer la config pour le type "points"
-
-### 12. Nettoyer `src/pages/CourseDetail.tsx`
-- Retirer l'affichage "+X points" (lignes 165-168) et l'import `Award`
-
-### 13. Nettoyer `src/components/admin/AdminCoursesTab.tsx`
-- Retirer le badge "+X pts" dans l'affichage des leçons
-- Retirer `points_reward` du formulaire de leçon
-
-### 14. Nettoyer `src/components/admin/AdminSettingsTab.tsx`
-- Retirer le toggle "Gamification" (points, niveaux et badges)
-
-### 15. Nettoyer `src/pages/Landing.tsx`
-- Remplacer la feature "Gamification intégrée" par autre chose (ex: "Messagerie privée") ou la supprimer
-- Retirer l'import `Trophy` si plus utilisé
-
-### 16. Nettoyer `src/components/notifications/NotificationBell.tsx`
-- Retirer les types `badge` et `points` du mapping d'icônes
-
-### 17. Nettoyer `src/hooks/useAuth.tsx`
-- Retirer `points` et `level` de l'interface `Profile` (optionnel, car les colonnes restent en BDD)
-
-### 18. Nettoyer `src/types/index.ts`
-- Retirer l'interface `Badge`
-
-## Fichiers supprimés
-| Fichier | 
-|---------|
-| `src/hooks/useBadges.ts` |
-| `src/components/badges/BadgeCard.tsx` |
-
-## Fichiers modifiés
-| Fichier | Modification |
-|---------|-------------|
-| `src/pages/Profile.tsx` | Retirer niveau, points, badges |
-| `src/components/community/PostCard.tsx` | Retirer level |
-| `src/pages/community/CommunityFeed.tsx` | Retirer level du mapping |
-| `src/components/community/CommentItem.tsx` | Retirer "Lvl X" |
-| `src/hooks/useComments.ts` | Retirer level du select |
-| `src/hooks/useCommunityAdmin.ts` | Retirer points/level |
-| `src/hooks/useAdmin.ts` | Retirer points/level |
-| `src/hooks/useSuperAdmin.ts` | Retirer points/level/activité points |
-| `src/components/super-admin/SuperAdminActivity.tsx` | Retirer type points |
-| `src/components/super-admin/SuperAdminUsers.tsx` | Retirer colonnes points/level |
-| `src/pages/CourseDetail.tsx` | Retirer affichage points |
-| `src/components/admin/AdminCoursesTab.tsx` | Retirer points_reward |
-| `src/components/admin/AdminSettingsTab.tsx` | Retirer toggle gamification |
-| `src/pages/Landing.tsx` | Remplacer feature gamification |
-| `src/components/notifications/NotificationBell.tsx` | Retirer badge/points |
-| `src/types/index.ts` | Retirer interface Badge |
-
-Aucune migration SQL nécessaire — les colonnes et tables restent en base mais ne sont plus utilisées.
-
+Pourquoi ce plan règle “définitivement”
+- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
+- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
+- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.

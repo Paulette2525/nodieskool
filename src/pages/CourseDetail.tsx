@@ -17,7 +17,6 @@ import {
   CheckCircle,
   Lock,
   Clock,
-  Award,
   Loader2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -162,10 +161,6 @@ export default function CourseDetail() {
                         </>
                       )}
                     </Button>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center sm:justify-start">
-                      <Award className="h-4 w-4" />
-                      <span>+{selectedLesson.points_reward} points</span>
-                    </div>
                   </div>
                 </div>
               </Card>

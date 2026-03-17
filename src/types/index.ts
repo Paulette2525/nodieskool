@@ -92,13 +92,6 @@ export interface LeaderboardEntry {
   trend: 'up' | 'down' | 'stable';
 }
 
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  iconUrl: string;
-  earnedAt?: Date;
-}
 
 export type UserRole = 'admin' | 'moderator' | 'member';
 

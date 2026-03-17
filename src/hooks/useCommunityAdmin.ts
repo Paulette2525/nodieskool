@@ -14,8 +14,6 @@ export interface CommunityMember {
     username: string;
     full_name: string | null;
     avatar_url: string | null;
-    points: number;
-    level: number;
   };
 }
 
@@ -38,7 +36,7 @@ export function useCommunityAdmin() {
         .select(`
           id, user_id, role, joined_at, is_approved,
           profile:profiles!community_members_user_id_fkey (
-            id, username, full_name, avatar_url, points, level
+            id, username, full_name, avatar_url
           )
         `)
         .eq("community_id", communityId)
