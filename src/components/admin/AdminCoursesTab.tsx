@@ -560,9 +560,6 @@ export function AdminCoursesTab() {
                                         ({lesson.duration_minutes} min)
                                       </span>
                                     )}
-                                    <Badge variant="outline" className="text-xs">
-                                      +{lesson.points_reward} pts
-                                    </Badge>
                                   </div>
                                   <div className="flex gap-1">
                                     <Button
