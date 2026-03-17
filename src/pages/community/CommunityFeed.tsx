@@ -9,7 +9,7 @@ import { useCommunityContext } from "@/contexts/CommunityContext";
 
 function CommunityFeedContent() {
   const { profile } = useAuth();
-  const { community } = useCommunityContext();
+  const { community, isAdmin: isCommunityAdmin } = useCommunityContext();
   const { posts, isLoading, createPost, deletePost, togglePin } = usePostsWithCommunity(community?.id);
 
   return (
@@ -50,6 +50,7 @@ function CommunityFeedContent() {
               likesCount={post.likes_count}
               commentsCount={post.comments_count}
               createdAt={post.created_at}
+              isCommunityAdmin={isCommunityAdmin}
               onDelete={() => deletePost.mutate(post.id)}
               onTogglePin={() => togglePin.mutate({ postId: post.id, isPinned: post.is_pinned })}
             />
