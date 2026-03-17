@@ -14,8 +14,9 @@ interface CommentItemProps {
   comment: Comment;
   canDelete: boolean;
   onDelete: () => void;
-  onReply?: (content: string, parentId: string) => void;
+  onReply?: (content: string, parentId: string) => Promise<void>;
   isReply?: boolean;
+  depth?: number;
 }
 
 export function CommentItem({ 
@@ -23,7 +24,8 @@ export function CommentItem({
   canDelete, 
   onDelete, 
   onReply,
-  isReply = false 
+  isReply = false,
+  depth = 0,
 }: CommentItemProps) {
   const { profile } = useAuth();
   const { isLiked, toggleLike } = useCommentLikes(comment.id);
@@ -44,8 +46,10 @@ export function CommentItem({
     }
   };
 
+  const indent = Math.min(depth, 4);
+
   return (
-    <div className={cn("flex gap-3", isReply && "ml-8 mt-2")}>
+    <div className={cn("flex gap-3", isReply && "mt-2")} style={{ marginLeft: `${indent * 24}px` }}>
       <Avatar className="h-8 w-8 flex-shrink-0">
         <AvatarImage src={comment.profiles.avatar_url ?? undefined} />
         <AvatarFallback className="text-xs bg-primary/10 text-primary">
@@ -73,7 +77,6 @@ export function CommentItem({
             })}
           </span>
           
-          {/* Like button */}
           <Button
             variant="ghost"
             size="sm"
@@ -88,8 +91,7 @@ export function CommentItem({
             {comment.likes_count > 0 && <span>{comment.likes_count}</span>}
           </Button>
           
-          {/* Reply button - only show for top-level comments */}
-          {!isReply && profile && onReply && (
+          {profile && onReply && (
             <Button
               variant="ghost"
               size="sm"
@@ -101,7 +103,6 @@ export function CommentItem({
             </Button>
           )}
           
-          {/* Delete button - admin only */}
           {canDelete && (
             <Button
               variant="ghost"
@@ -114,7 +115,6 @@ export function CommentItem({
           )}
         </div>
 
-        {/* Reply input */}
         {showReplyInput && (
           <div className="mt-2 flex gap-2">
             <Textarea
