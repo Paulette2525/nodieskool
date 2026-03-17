@@ -83,11 +83,13 @@ export default function Settings() {
     setIsTogglingPush(true);
     try {
       if (enabled) {
-        const success = await subscribeToPush();
-        if (success) {
+        const result = await subscribeToPush();
+        if (result === true) {
           toast.success("Notifications push activées");
+        } else if (result === "fallback") {
+          toast.info("Notifications in-app activées. Pour les notifications push, autorisez-les dans les paramètres de votre navigateur.");
         } else {
-          toast.error("Impossible d'activer les notifications push. Vérifiez les permissions de votre navigateur.");
+          toast.error("Erreur lors de l'activation des notifications");
         }
       } else {
         const success = await unsubscribeFromPush();
@@ -213,15 +215,13 @@ export default function Settings() {
                 <div className="space-y-0.5">
                   <Label>Notifications push</Label>
                   <p className="text-sm text-muted-foreground">
-                    {isSupported
-                      ? "Recevoir des notifications sur votre appareil"
-                      : "Non supporté par votre navigateur"}
+                    Recevoir des notifications sur votre appareil
                   </p>
                 </div>
                 <Switch
                   checked={isSubscribed}
                   onCheckedChange={handleTogglePush}
-                  disabled={!isSupported || isPushLoading || isTogglingPush}
+                  disabled={isPushLoading || isTogglingPush}
                 />
               </div>
             </CardContent>

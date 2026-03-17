@@ -993,6 +993,7 @@ export type Database = {
           id: string
           level: number
           points: number
+          push_notifications_enabled: boolean
           updated_at: string
           user_id: string
           username: string
@@ -1005,6 +1006,7 @@ export type Database = {
           id?: string
           level?: number
           points?: number
+          push_notifications_enabled?: boolean
           updated_at?: string
           user_id: string
           username: string
@@ -1017,6 +1019,7 @@ export type Database = {
           id?: string
           level?: number
           points?: number
+          push_notifications_enabled?: boolean
           updated_at?: string
           user_id?: string
           username?: string
