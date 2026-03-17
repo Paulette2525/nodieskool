@@ -9,7 +9,7 @@ import { useCommunityContext } from "@/contexts/CommunityContext";
 
 function CommunityFeedContent() {
   const { profile } = useAuth();
-  const { community } = useCommunityContext();
+  const { community, isAdmin: isCommunityAdmin } = useCommunityContext();
   const { posts, isLoading, createPost, deletePost, togglePin } = usePostsWithCommunity(community?.id);
 
   return (
