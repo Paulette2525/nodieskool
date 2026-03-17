@@ -21,208 +21,104 @@ export default function Profile() {
   const { uploadAvatar, uploading } = useStorage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [formData, setFormData] = useState({
-    full_name: "",
-    username: "",
-    bio: "",
-  });
+  const [formData, setFormData] = useState({ full_name: "", username: "", bio: "" });
 
   useEffect(() => {
-    if (profile) {
-      setFormData({
-        full_name: profile.full_name || "",
-        username: profile.username || "",
-        bio: profile.bio || "",
-      });
-    }
+    if (profile) setFormData({ full_name: profile.full_name || "", username: profile.username || "", bio: profile.bio || "" });
   }, [profile]);
 
   const { data: stats } = useQuery({
     queryKey: ["user-stats", profile?.id],
     queryFn: async () => {
       if (!profile) return null;
-      const [postsRes, commentsRes, likesRes, progressRes] = await Promise.all([
+      const [p, c, l, pr] = await Promise.all([
         supabase.from("posts").select("id", { count: "exact" }).eq("user_id", profile.id),
         supabase.from("post_comments").select("id", { count: "exact" }).eq("user_id", profile.id),
         supabase.from("post_likes").select("id", { count: "exact" }).eq("user_id", profile.id),
         supabase.from("lesson_progress").select("id", { count: "exact" }).eq("user_id", profile.id),
       ]);
-      return {
-        posts: postsRes.count || 0,
-        comments: commentsRes.count || 0,
-        likes: likesRes.count || 0,
-        lessonsCompleted: progressRes.count || 0,
-      };
+      return { posts: p.count || 0, comments: c.count || 0, likes: l.count || 0, lessonsCompleted: pr.count || 0 };
     },
     enabled: !!profile,
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  if (!user) return <Navigate to="/auth" replace />;
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await uploadAvatar(file);
-    if (url) {
-      await updateProfile.mutateAsync({ avatar_url: url });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateProfile.mutateAsync(formData);
+    const file = e.target.files?.[0]; if (!file) return;
+    const url = await uploadAvatar(file); if (url) await updateProfile.mutateAsync({ avatar_url: url });
   };
 
   return (
     <AppLayout title="Mon Profil">
-      <div className="container max-w-4xl py-8 px-4">
-        {/* Profile Header */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center gap-6">
+      <div className="max-w-2xl mx-auto py-6 px-4">
+        <Card className="mb-5 rounded-2xl border-border/50 shadow-card">
+          <CardContent className="pt-5">
+            <div className="flex flex-col md:flex-row items-center gap-5">
               <div className="relative group">
-                <Avatar className="h-24 w-24">
+                <Avatar className="h-20 w-20">
                   <AvatarImage src={profile?.avatar_url ?? undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
                     {(profile?.full_name || profile?.username || "U").split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  disabled={uploading}
-                >
-                  {uploading ? (
-                    <Loader2 className="h-6 w-6 text-white animate-spin" />
-                  ) : (
-                    <Camera className="h-6 w-6 text-white" />
-                  )}
+                <button onClick={() => fileInputRef.current?.click()} className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" disabled={uploading}>
+                  {uploading ? <Loader2 className="h-5 w-5 text-white animate-spin" /> : <Camera className="h-5 w-5 text-white" />}
                 </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
               </div>
-
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl font-bold">{profile?.full_name || profile?.username}</h1>
-                <p className="text-muted-foreground">@{profile?.username}</p>
-                {profile?.bio && <p className="mt-2 text-sm">{profile.bio}</p>}
+                <h1 className="text-lg font-bold">{profile?.full_name || profile?.username}</h1>
+                <p className="text-xs text-muted-foreground">@{profile?.username}</p>
+                {profile?.bio && <p className="mt-1.5 text-xs text-muted-foreground">{profile.bio}</p>}
               </div>
-
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/settings">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Paramètres
-                  </Link>
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" asChild className="rounded-xl text-xs h-8">
+                <Link to="/settings"><Settings className="h-3.5 w-3.5 mr-1.5" />Paramètres</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="stats" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="stats">Statistiques</TabsTrigger>
-            <TabsTrigger value="edit">Modifier</TabsTrigger>
+        <Tabs defaultValue="stats" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2 rounded-xl h-9">
+            <TabsTrigger value="stats" className="text-xs rounded-lg">Statistiques</TabsTrigger>
+            <TabsTrigger value="edit" className="text-xs rounded-lg">Modifier</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Publications</CardDescription>
-                  <CardTitle className="text-3xl flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                    {stats?.posts || 0}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Commentaires</CardDescription>
-                  <CardTitle className="text-3xl flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5 text-blue-500" />
-                    {stats?.comments || 0}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Likes donnés</CardDescription>
-                  <CardTitle className="text-3xl flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-red-500" />
-                    {stats?.likes || 0}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Leçons terminées</CardDescription>
-                  <CardTitle className="text-3xl flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-green-500" />
-                    {stats?.lessonsCompleted || 0}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
+            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+              {[
+                { label: "Publications", value: stats?.posts || 0, icon: MessageSquare, color: "text-primary" },
+                { label: "Commentaires", value: stats?.comments || 0, icon: MessageSquare, color: "text-blue-500" },
+                { label: "Likes", value: stats?.likes || 0, icon: Heart, color: "text-red-500" },
+                { label: "Leçons", value: stats?.lessonsCompleted || 0, icon: BookOpen, color: "text-success" },
+              ].map((s) => (
+                <Card key={s.label} className="rounded-2xl border-border/50 shadow-card">
+                  <CardHeader className="pb-1.5 pt-4 px-4">
+                    <CardDescription className="text-[10px]">{s.label}</CardDescription>
+                    <CardTitle className="text-2xl flex items-center gap-1.5">
+                      <s.icon className={`h-4 w-4 ${s.color}`} />{s.value}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
           <TabsContent value="edit">
-            <Card>
-              <CardHeader>
-                <CardTitle>Modifier le profil</CardTitle>
-                <CardDescription>
-                  Mettez à jour vos informations personnelles
-                </CardDescription>
+            <Card className="rounded-2xl border-border/50 shadow-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Modifier le profil</CardTitle>
+                <CardDescription className="text-xs">Mettez à jour vos informations</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Nom complet</Label>
-                    <Input
-                      id="full_name"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      placeholder="Votre nom complet"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Nom d'utilisateur</Label>
-                    <Input
-                      id="username"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      placeholder="votre_username"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={formData.bio}
-                      onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                      placeholder="Parlez-nous de vous..."
-                      rows={4}
-                    />
-                  </div>
-                  <Button type="submit" disabled={updateProfile.isPending}>
-                    {updateProfile.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Enregistrer les modifications
+                <form onSubmit={async (e) => { e.preventDefault(); await updateProfile.mutateAsync(formData); }} className="space-y-3">
+                  <div className="space-y-1.5"><Label htmlFor="full_name" className="text-xs">Nom complet</Label><Input id="full_name" value={formData.full_name} onChange={(e) => setFormData({ ...formData, full_name: e.target.value })} className="rounded-xl h-9 text-sm" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="username" className="text-xs">Nom d'utilisateur</Label><Input id="username" value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })} className="rounded-xl h-9 text-sm" /></div>
+                  <div className="space-y-1.5"><Label htmlFor="bio" className="text-xs">Bio</Label><Textarea id="bio" value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} rows={3} className="rounded-xl text-sm" /></div>
+                  <Button type="submit" disabled={updateProfile.isPending} className="rounded-xl text-xs h-9">
+                    {updateProfile.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}Enregistrer
                   </Button>
                 </form>
               </CardContent>

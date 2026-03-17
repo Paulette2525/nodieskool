@@ -13,17 +13,15 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-       <Sidebar />
+      <Sidebar />
       <main className="flex-1 overflow-auto w-full md:w-auto">
-        {/* Top bar with search and notifications */}
         {user && (
-          <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b px-4 py-3 hidden md:flex items-center justify-between gap-4">
+          <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 px-4 py-2.5 hidden md:flex items-center justify-between gap-4">
             <GlobalSearch />
             <NotificationBell />
           </div>
         )}
-        {/* Add padding top on mobile to account for the menu button */}
-        <div className="pt-16 md:pt-0">
+        <div className="pt-14 md:pt-0">
           {children}
         </div>
       </main>

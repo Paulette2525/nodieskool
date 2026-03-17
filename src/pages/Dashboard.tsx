@@ -17,11 +17,7 @@ export default function Dashboard() {
   const location = useLocation();
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   }
 
   if (!user) {
@@ -33,23 +29,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
+            <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">NodieSkool</span>
+            <span className="font-bold text-base">NodieSkool</span>
           </Link>
-
-          <div className="flex items-center gap-4">
-            <Badge variant="outline" className="capitalize">
-              Plan {currentPlan}
-            </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="capitalize text-xs rounded-full border-border/50">{currentPlan}</Badge>
             <Link to="/profile">
-              <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+              <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all">
                 <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                   {(profile?.full_name || profile?.username || "U").charAt(0)}
                 </AvatarFallback>
               </Avatar>
@@ -58,82 +51,51 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            Bonjour, {profile?.full_name || profile?.username} 👋
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gérez vos communautés et découvrez de nouvelles opportunités
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Bonjour, {profile?.full_name || profile?.username} 👋</h1>
+          <p className="text-sm text-muted-foreground mt-1">Gérez vos communautés et découvrez de nouvelles opportunités</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="p-4 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Users className="h-6 w-6 text-primary" />
+        <div className="flex items-center gap-3 mb-6">
+          <Card className="flex items-center gap-3 px-4 py-3 rounded-2xl border-border/50 shadow-card">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Users className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{myCommunities.length}</p>
-              <p className="text-sm text-muted-foreground">Communautés</p>
+              <p className="text-xl font-bold text-foreground">{myCommunities.length}</p>
+              <p className="text-[11px] text-muted-foreground">Communautés</p>
             </div>
           </Card>
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Mes communautés</h2>
+          <h2 className="text-base font-semibold">Mes communautés</h2>
           {canCreateMore && (
-            <Button asChild>
-              <Link to="/create-community">
-                <Plus className="h-4 w-4 mr-2" />
-                Créer une communauté
-              </Link>
+            <Button asChild size="sm" className="rounded-xl text-xs h-9">
+              <Link to="/create-community"><Plus className="h-3.5 w-3.5 mr-1.5" />Créer</Link>
             </Button>
           )}
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
         ) : myCommunities.length === 0 ? (
-          <Card className="p-12 text-center">
-            <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-              <Users className="h-8 w-8 text-muted-foreground" />
+          <Card className="p-10 text-center rounded-2xl border-border/50">
+            <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
+              <Users className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Aucune communauté</h3>
-            <p className="text-muted-foreground mb-4">
-              Créez votre première communauté ou rejoignez-en une existante
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button asChild>
-                <Link to="/create-community">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Créer une communauté
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/discover">
-                  Découvrir
-                </Link>
-              </Button>
+            <h3 className="text-sm font-semibold mb-1.5">Aucune communauté</h3>
+            <p className="text-xs text-muted-foreground mb-4">Créez votre première communauté ou rejoignez-en une</p>
+            <div className="flex gap-2 justify-center">
+              <Button asChild size="sm" className="rounded-xl text-xs"><Link to="/create-community"><Plus className="h-3.5 w-3.5 mr-1.5" />Créer</Link></Button>
+              <Button variant="outline" asChild size="sm" className="rounded-xl text-xs"><Link to="/discover">Découvrir</Link></Button>
             </div>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {myCommunities.map((community) => (
-              <CommunityCard
-                key={community.id}
-                id={community.id}
-                name={community.name}
-                slug={community.slug}
-                description={community.description}
-                logoUrl={community.logo_url}
-                coverUrl={community.cover_url}
-                primaryColor={community.primary_color}
-                isPublic={community.is_public}
-                role={community.role}
-              />
+              <CommunityCard key={community.id} id={community.id} name={community.name} slug={community.slug} description={community.description} logoUrl={community.logo_url} coverUrl={community.cover_url} primaryColor={community.primary_color} isPublic={community.is_public} role={community.role} />
             ))}
           </div>
         )}
