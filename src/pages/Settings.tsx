@@ -1,30 +1,32 @@
 import { useState } from "react";
-import { Navigate, Link } from "react-router-dom";
- import { AppLayout } from "@/components/layout/AppLayout";
+import { Navigate } from "react-router-dom";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
- import { Loader2, Lock, Bell, Trash2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Lock, Bell, Trash2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function Settings() {
   const { user, loading, signOut } = useAuth();
+  const { isSupported, isSubscribed, isLoading: isPushLoading, subscribeToPush, unsubscribeFromPush } = usePushNotifications();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,10 +34,10 @@ export default function Settings() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [isTogglingPush, setIsTogglingPush] = useState(false);
 
   // Preferences state
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
 
   if (loading) {
     return (
@@ -51,7 +53,7 @@ export default function Settings() {
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newPassword !== confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
       return;
@@ -64,12 +66,8 @@ export default function Settings() {
 
     setIsUpdatingPassword(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-
       toast.success("Mot de passe mis à jour avec succès");
       setCurrentPassword("");
       setNewPassword("");
@@ -81,10 +79,32 @@ export default function Settings() {
     }
   };
 
+  const handleTogglePush = async (enabled: boolean) => {
+    setIsTogglingPush(true);
+    try {
+      if (enabled) {
+        const success = await subscribeToPush();
+        if (success) {
+          toast.success("Notifications push activées");
+        } else {
+          toast.error("Impossible d'activer les notifications push. Vérifiez les permissions de votre navigateur.");
+        }
+      } else {
+        const success = await unsubscribeFromPush();
+        if (success) {
+          toast.success("Notifications push désactivées");
+        }
+      }
+    } catch {
+      toast.error("Erreur lors de la modification des notifications push");
+    } finally {
+      setIsTogglingPush(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
     try {
-      // Sign out and inform user to contact support for account deletion
       await signOut();
       toast.info("Pour supprimer définitivement votre compte, veuillez contacter le support.");
     } catch (error: any) {
@@ -95,7 +115,7 @@ export default function Settings() {
   };
 
   return (
-     <AppLayout title="Paramètres" backTo="/profile">
+    <AppLayout title="Paramètres" backTo="/profile">
       <div className="container max-w-2xl py-8 px-4">
         <div className="space-y-6">
           {/* Password Section */}
@@ -105,9 +125,7 @@ export default function Settings() {
                 <Lock className="h-5 w-5" />
                 Mot de passe
               </CardTitle>
-              <CardDescription>
-                Modifiez votre mot de passe de connexion
-              </CardDescription>
+              <CardDescription>Modifiez votre mot de passe de connexion</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePasswordUpdate} className="space-y-4">
@@ -180,34 +198,30 @@ export default function Settings() {
                 <Bell className="h-5 w-5" />
                 Notifications
               </CardTitle>
-              <CardDescription>
-                Gérez vos préférences de notification
-              </CardDescription>
+              <CardDescription>Gérez vos préférences de notification</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Notifications par email</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Recevoir des notifications par email
-                  </p>
+                  <p className="text-sm text-muted-foreground">Recevoir des notifications par email</p>
                 </div>
-                <Switch
-                  checked={emailNotifications}
-                  onCheckedChange={setEmailNotifications}
-                />
+                <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Notifications push</Label>
                   <p className="text-sm text-muted-foreground">
-                    Recevoir des notifications sur votre appareil
+                    {isSupported
+                      ? "Recevoir des notifications sur votre appareil"
+                      : "Non supporté par votre navigateur"}
                   </p>
                 </div>
                 <Switch
-                  checked={pushNotifications}
-                  onCheckedChange={setPushNotifications}
+                  checked={isSubscribed}
+                  onCheckedChange={handleTogglePush}
+                  disabled={!isSupported || isPushLoading || isTogglingPush}
                 />
               </div>
             </CardContent>
@@ -220,23 +234,19 @@ export default function Settings() {
                 <Trash2 className="h-5 w-5" />
                 Zone de danger
               </CardTitle>
-              <CardDescription>
-                Actions irréversibles sur votre compte
-              </CardDescription>
+              <CardDescription>Actions irréversibles sur votre compte</CardDescription>
             </CardHeader>
             <CardContent>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
-                    Supprimer mon compte
-                  </Button>
+                  <Button variant="destructive">Supprimer mon compte</Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Êtes-vous absolument sûr ?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Cette action est irréversible. Elle supprimera définitivement votre compte
-                      et toutes les données associées de nos serveurs.
+                      Cette action est irréversible. Elle supprimera définitivement votre compte et toutes les données
+                      associées de nos serveurs.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -255,6 +265,6 @@ export default function Settings() {
           </Card>
         </div>
       </div>
-     </AppLayout>
+    </AppLayout>
   );
 }

@@ -21,14 +21,12 @@ export function usePushNotifications() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check support
   useEffect(() => {
     const supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
     setIsSupported(supported);
     if (!supported) setIsLoading(false);
   }, []);
 
-  // Check current subscription status
   useEffect(() => {
     if (!isSupported || !profile) {
       setIsLoading(false);
@@ -56,10 +54,8 @@ export function usePushNotifications() {
       if (permission !== "granted") return false;
 
       const registration = await navigator.serviceWorker.ready;
-      
-      // Check for existing subscription
       let subscription = await registration.pushManager.getSubscription();
-      
+
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
           userVisuallyShownEnabled: true,
@@ -69,8 +65,8 @@ export function usePushNotifications() {
 
       const subJson = subscription.toJSON();
 
-      // Save to database
-      const { error } = await supabase
+      // Use type assertion since the table was just created
+      const { error } = await (supabase as any)
         .from("push_subscriptions")
         .upsert(
           {
@@ -103,8 +99,7 @@ export function usePushNotifications() {
         const endpoint = subscription.endpoint;
         await subscription.unsubscribe();
 
-        // Remove from database
-        await supabase
+        await (supabase as any)
           .from("push_subscriptions")
           .delete()
           .eq("user_id", profile.id)
