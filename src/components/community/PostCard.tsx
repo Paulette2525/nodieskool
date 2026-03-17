@@ -51,6 +51,7 @@ export function PostCard({
   likesCount,
   commentsCount,
   createdAt,
+  isCommunityAdmin,
   onDelete,
   onTogglePin,
 }: PostCardProps) {
