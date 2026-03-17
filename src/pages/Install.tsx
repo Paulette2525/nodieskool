@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Share, Plus, Check, Smartphone, Monitor } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -71,7 +72,7 @@ const Install = () => {
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <img src="/pwa-192x192.png" alt="Tribbue" className="w-20 h-20 rounded-2xl mx-auto shadow-lg" />
+          <img src={tribbueLogoImg} alt="Tribbue" className="w-20 h-20 rounded-2xl mx-auto shadow-lg" />
           <h1 className="text-2xl font-bold text-foreground">Installer Tribbue</h1>
           <p className="text-muted-foreground text-sm">
             Accédez à Tribbue directement depuis votre écran d'accueil, comme une application native.
