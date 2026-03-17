@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,15 @@ export default function Auth() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const defaultTab = useMemo(() => (hasRedirectUrl() ? "signup" : "login"), []);
+
+  // Auto-redirect after OAuth completion on mobile
+  useEffect(() => {
+    if (user && localStorage.getItem('oauth_pending')) {
+      localStorage.removeItem('oauth_pending');
+      const redirectUrl = getAndClearRedirectUrl();
+      navigate(redirectUrl || "/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
