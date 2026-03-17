@@ -81,15 +81,13 @@
          <div className="overflow-x-auto">
            <Table>
              <TableHeader>
-               <TableRow>
-                 <TableHead>Utilisateur</TableHead>
-                 <TableHead className="text-center">Niveau</TableHead>
-                 <TableHead className="text-center">Points</TableHead>
-                 <TableHead className="text-center">Communautés</TableHead>
-                 <TableHead className="text-center">Rôle Plateforme</TableHead>
-                 <TableHead>Inscrit le</TableHead>
-                 <TableHead className="text-right">Actions</TableHead>
-               </TableRow>
+                <TableRow>
+                  <TableHead>Utilisateur</TableHead>
+                  <TableHead className="text-center">Communautés</TableHead>
+                  <TableHead className="text-center">Rôle Plateforme</TableHead>
+                  <TableHead>Inscrit le</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
              </TableHeader>
              <TableBody>
                {filteredUsers.length === 0 ? (
