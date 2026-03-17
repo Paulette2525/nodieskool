@@ -6,8 +6,8 @@
  import { 
    Users, 
    BookOpen, 
-   Trophy, 
-   Calendar, 
+    MessageSquare, 
+    Calendar, 
    Sparkles,
    ArrowRight,
    Check,
