@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Download, Share, Plus } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -65,9 +66,9 @@ export function InstallBanner() {
     <div className="fixed bottom-0 md:bottom-auto md:top-0 left-0 right-0 z-50 safe-area-bottom md:safe-area-top animate-in slide-in-from-bottom md:slide-in-from-top duration-300">
       <div className="mx-3 mb-3 md:mb-0 md:mt-3 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-lg shadow-lg p-3 flex items-center gap-3">
         <img
-          src="/pwa-192x192.png"
+          src={tribbueLogoImg}
           alt="Tribbue"
-          className="w-10 h-10 rounded-xl shrink-0"
+          className="w-10 h-10 rounded-xl shrink-0 object-contain"
         />
 
         <div className="flex-1 min-w-0">
