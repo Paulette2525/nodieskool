@@ -2,7 +2,8 @@
  import { Button } from "@/components/ui/button";
  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
- import { Check, Sparkles, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
  import { useAuth } from "@/hooks/useAuth";
  import { useSubscription } from "@/hooks/useSubscription";
  
@@ -73,12 +74,10 @@
                <ArrowLeft className="h-5 w-5" />
              </Link>
            </Button>
-           <Link to="/" className="flex items-center gap-2">
-             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-               <Sparkles className="h-5 w-5 text-primary-foreground" />
-             </div>
-             <span className="font-bold">Tarifs</span>
-           </Link>
+            <Link to="/" className="flex items-center gap-2">
+              <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
+              <span className="font-bold">Tarifs</span>
+            </Link>
          </div>
        </header>
  

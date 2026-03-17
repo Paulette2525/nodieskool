@@ -1,33 +1,54 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import Auth from "./pages/Auth";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import Community from "./pages/Community";
-import Classroom from "./pages/Classroom";
-import CourseDetail from "./pages/CourseDetail";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
-import Landing from "./pages/Landing";
-import Dashboard from "./pages/Dashboard";
-import CreateCommunity from "./pages/CreateCommunity";
-import Pricing from "./pages/Pricing";
-import CommunityFeed from "./pages/community/CommunityFeed";
-import CommunityClassroom from "./pages/community/CommunityClassroom";
-import CommunityAdmin from "./pages/community/CommunityAdmin";
-import CommunityClassroomDetail from "./pages/community/CommunityClassroomDetail";
-import Discover from "./pages/Discover";
-import Contact from "./pages/Contact";
-import Install from "./pages/Install";
+import { Loader2 } from "lucide-react";
 import { InstallBanner } from "./components/pwa/InstallBanner";
 
-const queryClient = new QueryClient();
+// Eagerly loaded (critical path)
+import Dashboard from "./pages/Dashboard";
+import Auth from "./pages/Auth";
+
+// Lazy loaded
+const Landing = lazy(() => import("./pages/Landing"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Community = lazy(() => import("./pages/Community"));
+const Classroom = lazy(() => import("./pages/Classroom"));
+const CourseDetail = lazy(() => import("./pages/CourseDetail"));
+const Admin = lazy(() => import("./pages/Admin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const CreateCommunity = lazy(() => import("./pages/CreateCommunity"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const CommunityFeed = lazy(() => import("./pages/community/CommunityFeed"));
+const CommunityClassroom = lazy(() => import("./pages/community/CommunityClassroom"));
+const CommunityAdmin = lazy(() => import("./pages/community/CommunityAdmin"));
+const CommunityClassroomDetail = lazy(() => import("./pages/community/CommunityClassroomDetail"));
+const Discover = lazy(() => import("./pages/Discover"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Install = lazy(() => import("./pages/Install"));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+  </div>
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -37,37 +58,39 @@ const App = () => (
         <Sonner />
         <InstallBanner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/create-community" element={<CreateCommunity />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/install" element={<Install />} />
-            
-            {/* Community-scoped routes */}
-            <Route path="/c/:slug" element={<CommunityFeed />} />
-            <Route path="/c/:slug/community" element={<CommunityFeed />} />
-            <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
-            <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
-            <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
-            
-            {/* Auth and user routes */}
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            
-            {/* Legacy routes */}
-            <Route path="/community" element={<Community />} />
-            <Route path="/classroom" element={<Classroom />} />
-            <Route path="/classroom/:id" element={<CourseDetail />} />
-            <Route path="/admin" element={<Admin />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/create-community" element={<CreateCommunity />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/install" element={<Install />} />
+              
+              {/* Community-scoped routes */}
+              <Route path="/c/:slug" element={<CommunityFeed />} />
+              <Route path="/c/:slug/community" element={<CommunityFeed />} />
+              <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
+              <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
+              <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
+              
+              {/* Auth and user routes */}
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              
+              {/* Legacy routes */}
+              <Route path="/community" element={<Community />} />
+              <Route path="/classroom" element={<Classroom />} />
+              <Route path="/classroom/:id" element={<CourseDetail />} />
+              <Route path="/admin" element={<Admin />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

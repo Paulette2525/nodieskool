@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Send, Mail, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, Mail, MessageSquare } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -40,9 +41,7 @@ export default function Contact() {
             </Link>
           </Button>
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
             <span className="font-bold">Contact</span>
           </Link>
         </div>

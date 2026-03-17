@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -68,7 +67,7 @@ export default function Landing() {
         <div className="absolute top-20 left-10 w-64 h-64 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-accent/8 rounded-full blur-3xl pointer-events-none" />
         
-        <motion.div className="max-w-3xl mx-auto text-center relative" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="max-w-3xl mx-auto text-center relative animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Badge variant="secondary" className="mb-5 px-3 py-1.5 text-xs font-medium bg-primary/8 text-primary border-none rounded-full">
             Plateforme communautaire tout-en-un
           </Badge>
@@ -91,14 +90,14 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
-            {stats.map((stat, i) => (
-              <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.08 }} className="text-center">
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center animate-in fade-in duration-500">
                 <div className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Features */}
@@ -110,16 +109,14 @@ export default function Landing() {
             <p className="text-sm text-muted-foreground max-w-lg mx-auto">Une plateforme complète pour créer et développer votre communauté</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map((feature, i) => (
-              <motion.div key={feature.title} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.06 }} viewport={{ once: true }}>
-                <Card className="p-5 h-full hover:shadow-card-hover transition-all duration-200 border-border/50 rounded-2xl shadow-card">
-                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-foreground mb-1.5">{feature.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{feature.description}</p>
-                </Card>
-              </motion.div>
+            {features.map((feature) => (
+              <Card key={feature.title} className="p-5 h-full hover:shadow-card-hover transition-all duration-200 border-border/50 rounded-2xl shadow-card">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                  <feature.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-sm text-foreground mb-1.5">{feature.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{feature.description}</p>
+              </Card>
             ))}
           </div>
         </div>
@@ -129,7 +126,7 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-10 items-center">
-            <motion.div initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }}>
+            <div>
               <Badge variant="secondary" className="mb-3 text-xs rounded-full">Gratuit pour commencer</Badge>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Lancez-vous gratuitement</h2>
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">Commencez avec notre plan gratuit et évoluez selon vos besoins. Pas de carte bancaire requise.</p>
@@ -142,8 +139,8 @@ export default function Landing() {
                 ))}
               </ul>
               <Button size="sm" className="shadow-sm rounded-xl text-xs h-9" asChild><Link to="/pricing">Voir les tarifs<ArrowRight className="h-3.5 w-3.5 ml-1.5" /></Link></Button>
-            </motion.div>
-            <motion.div className="relative" initial={{ opacity: 0, x: 16 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }}>
+            </div>
+            <div className="relative">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/15 via-primary/8 to-accent/8 border border-border/50 shadow-lg flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-background/70 to-transparent" />
                 <div className="relative text-center p-8">
@@ -152,7 +149,7 @@ export default function Landing() {
                   <p className="text-xs text-muted-foreground">Prête en quelques minutes</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -187,17 +184,15 @@ export default function Landing() {
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto">
           <Card className="p-10 md:p-14 text-center bg-gradient-to-br from-primary/3 via-background to-accent/3 border-border/50 rounded-2xl">
-            <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }}>
-              <div className="inline-flex items-center gap-0.5 mb-4">
-                {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-accent text-accent" />)}
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Prêt à créer votre communauté ?</h2>
-              <p className="text-sm text-muted-foreground mb-8 max-w-lg mx-auto">Rejoignez des milliers de créateurs qui utilisent notre plateforme</p>
-              <Button size="lg" className="text-sm px-8 py-5 shadow-md rounded-xl" asChild>
-                <Link to={user ? "/dashboard" : "/auth"}>Commencer gratuitement<ArrowRight className="h-4 w-4 ml-2" /></Link>
-              </Button>
-              <p className="text-[11px] text-muted-foreground mt-5">Pas de carte bancaire • Annulez à tout moment</p>
-            </motion.div>
+            <div className="inline-flex items-center gap-0.5 mb-4">
+              {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-accent text-accent" />)}
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Prêt à créer votre communauté ?</h2>
+            <p className="text-sm text-muted-foreground mb-8 max-w-lg mx-auto">Rejoignez des milliers de créateurs qui utilisent notre plateforme</p>
+            <Button size="lg" className="text-sm px-8 py-5 shadow-md rounded-xl" asChild>
+              <Link to={user ? "/dashboard" : "/auth"}>Commencer gratuitement<ArrowRight className="h-4 w-4 ml-2" /></Link>
+            </Button>
+            <p className="text-[11px] text-muted-foreground mt-5">Pas de carte bancaire • Annulez à tout moment</p>
           </Card>
         </div>
       </section>
