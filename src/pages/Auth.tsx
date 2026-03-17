@@ -19,6 +19,15 @@ export default function Auth() {
   const navigate = useNavigate();
   const defaultTab = useMemo(() => (hasRedirectUrl() ? "signup" : "login"), []);
 
+  // Auto-redirect after OAuth completion on mobile
+  useEffect(() => {
+    if (user && localStorage.getItem('oauth_pending')) {
+      localStorage.removeItem('oauth_pending');
+      const redirectUrl = getAndClearRedirectUrl();
+      navigate(redirectUrl || "/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
+
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
