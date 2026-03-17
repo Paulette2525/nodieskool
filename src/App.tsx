@@ -25,6 +25,7 @@ import CommunityClassroomDetail from "./pages/community/CommunityClassroomDetail
 import Discover from "./pages/Discover";
 import Contact from "./pages/Contact";
 import Install from "./pages/Install";
+import { InstallBanner } from "./components/pwa/InstallBanner";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <InstallBanner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
