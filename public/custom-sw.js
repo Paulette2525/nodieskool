@@ -1,6 +1,6 @@
 // Custom Service Worker for Push Notifications
 self.addEventListener('push', (event) => {
-  let data = { title: 'Tribbue', body: 'Nouvelle notification', icon: '/pwa-192x192.png' };
+  let data = { title: 'Tribbue', body: 'Nouvelle notification', icon: '/tribbue-logo.png' };
 
   if (event.data) {
     try {
