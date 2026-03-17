@@ -13,10 +13,11 @@ import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, signOut } = useAuth();
   const { myCommunities, isLoading } = useCommunities();
   const { currentPlan, limits } = useSubscription();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
