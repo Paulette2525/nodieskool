@@ -37,7 +37,7 @@ function CommunityLayoutInner({ children }: CommunityLayoutProps) {
   if (!isMember) return <CommunityPreview />;
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
+    <div className="flex h-screen w-full bg-background overflow-hidden">
       <CommunitySidebar />
       <main className="flex-1 flex flex-col overflow-hidden w-full md:w-auto">
         {user && (

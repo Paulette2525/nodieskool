@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Image, Send, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,18 @@ export function CreatePostCard({ userAvatar, userName, onPost }: CreatePostCardP
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { uploadPostImage, uploading } = useStorage();
+
+  const autoResize = useCallback(() => {
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+    }
+  }, []);
+
+  useEffect(() => { autoResize(); }, [content, autoResize]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,12 +76,13 @@ export function CreatePostCard({ userAvatar, userName, onPost }: CreatePostCardP
         </Avatar>
         <div className="flex-1">
           <Textarea
+            ref={textareaRef}
             placeholder="Partagez quelque chose..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onFocus={() => setIsFocused(true)}
-            className="min-h-[40px] resize-none border-0 p-0 focus-visible:ring-0 placeholder:text-muted-foreground/60 text-sm"
-            rows={isFocused ? 3 : 1}
+            className="min-h-[36px] max-h-[200px] resize-none border-0 p-0 focus-visible:ring-0 placeholder:text-muted-foreground/60 text-sm overflow-y-auto"
+            rows={1}
           />
           
           {imagePreview && (
