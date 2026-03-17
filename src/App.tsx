@@ -42,6 +42,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/install" element={<Install />} />
             
             {/* Community-scoped routes */}
             <Route path="/c/:slug" element={<CommunityFeed />} />
