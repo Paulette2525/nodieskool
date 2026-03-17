@@ -236,17 +236,20 @@
            )}
  
            {/* Footer */}
-           <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-             {memberCount !== undefined && (
-               <span className="flex items-center gap-1">
-                 <Users className="h-3 w-3" />
-                 {memberCount} membres
-               </span>
-             )}
-             <Badge variant={isPublic ? "secondary" : "outline"} className="text-xs">
-               {isPublic ? "Public" : "Privé"}
-             </Badge>
-           </div>
+            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+              {memberCount !== undefined && (
+                <span className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {memberCount} membres
+                </span>
+              )}
+              <Badge variant={isPublic ? "secondary" : "outline"} className="text-xs">
+                {isPublic ? "Public" : "Privé"}
+              </Badge>
+              <Button size="sm" className="ml-auto rounded-xl text-xs h-7 px-3">
+                Entrer <ArrowRight className="h-3 w-3" />
+              </Button>
+            </div>
          </Link>
        </Card>
 
