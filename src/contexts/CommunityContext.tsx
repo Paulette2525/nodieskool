@@ -81,14 +81,15 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
           if (publicData) {
             setCommunity(publicData as unknown as Community);
-            // Fetch owner name
+            setOwnerName(null);
+            // Fetch member count via RPC (bypasses RLS)
             if (publicData.id) {
-              // We can't get owner from public view, set defaults
-              setOwnerName(null);
-              // Fetch member count from public perspective - won't work without membership
+              const { data: countData } = await supabase.rpc('get_community_member_count', { _community_id: publicData.id });
+              setMemberCount(countData || 0);
+            } else {
               setMemberCount(0);
-              setAdminCount(0);
             }
+            setAdminCount(0);
             setRole(null);
             setLoading(false);
             return;
