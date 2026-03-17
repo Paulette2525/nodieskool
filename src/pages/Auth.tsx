@@ -43,6 +43,17 @@ export default function Auth() {
     finally { setIsLoading(false); }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de la connexion Google");
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       {/* Subtle background decoration */}
