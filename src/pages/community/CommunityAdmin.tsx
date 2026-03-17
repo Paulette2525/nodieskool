@@ -8,7 +8,7 @@
  import { CommunityAdminStats } from "@/components/community-admin/CommunityAdminStats";
  import { CommunityAdminMembersTab } from "@/components/community-admin/CommunityAdminMembersTab";
  import { CommunityAdminCoursesTab } from "@/components/community-admin/CommunityAdminCoursesTab";
- import { CommunityAdminEventsTab } from "@/components/community-admin/CommunityAdminEventsTab";
+ 
  import { CommunityAdminPostsTab } from "@/components/community-admin/CommunityAdminPostsTab";
  import { CommunityAdminSettingsTab } from "@/components/community-admin/CommunityAdminSettingsTab";
  
