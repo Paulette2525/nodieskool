@@ -150,25 +150,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) throw error;
-
-    // Create profile
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        user_id: data.user.id,
-        username,
-        full_name: fullName,
-      });
-
-      if (profileError) throw profileError;
-
-      // Assign member role
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: data.user.id,
-        role: "member",
-      });
-
-      if (roleError) throw roleError;
-    }
   };
 
   const signIn = async (email: string, password: string) => {
