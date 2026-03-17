@@ -137,14 +137,12 @@ export interface ActivityItem {
          return acc;
        }, {} as Record<string, string>);
  
-       return (profiles ?? []).map(p => ({
+      return (profiles ?? []).map(p => ({
          id: p.id,
          user_id: p.user_id,
          username: p.username,
          full_name: p.full_name,
          avatar_url: p.avatar_url,
-         points: p.points,
-         level: p.level,
          created_at: p.created_at,
          platform_role: roleMap[p.user_id] ?? null,
          communities_count: membershipCounts[p.id] ?? 0,
