@@ -1,7 +1,7 @@
  import { Navigate, Link, useLocation } from "react-router-dom";
  import { Button } from "@/components/ui/button";
  import { Card } from "@/components/ui/card";
- import { Loader2, Plus, Users, BookOpen, Trophy, Sparkles } from "lucide-react";
+ import { Loader2, Plus, Users, Sparkles } from "lucide-react";
  import { useAuth } from "@/hooks/useAuth";
  import { useCommunities } from "@/hooks/useCommunities";
  import { useSubscription } from "@/hooks/useSubscription";
