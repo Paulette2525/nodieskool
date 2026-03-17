@@ -3,7 +3,7 @@
  import { useCommunityContext } from "@/contexts/CommunityContext";
  import { useCommunityAdmin } from "@/hooks/useCommunityAdmin";
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
- import { Loader2, Users, BookOpen, Calendar, FileText, Settings } from "lucide-react";
+ import { Loader2, Users, BookOpen, FileText, Settings } from "lucide-react";
  
  import { CommunityAdminStats } from "@/components/community-admin/CommunityAdminStats";
  import { CommunityAdminMembersTab } from "@/components/community-admin/CommunityAdminMembersTab";
