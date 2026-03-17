@@ -24,6 +24,7 @@ import CommunityAdmin from "./pages/community/CommunityAdmin";
 import CommunityClassroomDetail from "./pages/community/CommunityClassroomDetail";
 import Discover from "./pages/Discover";
 import Contact from "./pages/Contact";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
