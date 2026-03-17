@@ -19,8 +19,6 @@ import { useAuth } from "@/hooks/useAuth";
 const navigation = [
   { name: "Communauté", href: "/community", icon: Users },
   { name: "Formations", href: "/classroom", icon: BookOpen },
-  { name: "Classement", href: "/leaderboard", icon: Trophy },
-  { name: "Calendrier", href: "/calendar", icon: Calendar },
 ];
 
 interface SidebarProps {
