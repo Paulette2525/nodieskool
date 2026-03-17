@@ -1,48 +1,88 @@
 
+Objectif
+- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
 
-# Plan : Refonte de la page d'invitation, de l'interface communauté, et ajout de miniature
+Constat (important)
+- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
+- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
 
-## Problème
-1. La page d'aperçu/invitation (CommunityPreview) est basique et peu engageante
-2. L'interface intérieure de la communauté (CommunityFeed) manque d'accueil visuel
-3. Pas de possibilité d'ajouter un logo/miniature lors de la création d'une communauté
+Plan d’action (définitif, avec preuves à chaque étape)
 
-## Changements
+1) Vérifier si la production embarque bien la nouvelle version
+- Télécharger la page publiée `/admin` et ses assets JS (bundle).
+- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
+  - la chaîne `AdminPinEntry`
+  - la chaîne `verify-admin-code`
+  - la chaîne `admin_unlocked`
+- Interprétation :
+  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
+  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
 
-### 1. Refonte de `CommunityPreview.tsx` -- Page d'invitation
-- Cover image plein écran avec overlay gradient élégant
-- Logo centré en grand avec effet d'ombre
-- Titre et description mis en avant avec typographie plus impactante
-- Section de stats visuelles (membres, type public/privé) avec des icones stylisées
-- Bouton CTA proéminent avec animation subtile
-- Ajouter des éléments visuels : pattern de fond quand pas de cover, indicateurs visuels
+2) Publier la version actuelle (si la prod est en retard)
+- Déclencher la publication de la version Test actuelle vers l’URL publiée.
+- Après publication, retester `https://nodieskool.lovable.app/admin` :
+  - en navigation normale
+  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
+- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
 
-### 2. Refonte de `CommunityFeed.tsx` -- Page d'accueil communauté
-- Ajouter un header visuel avec cover image et logo de la communauté en haut
-- Afficher le nom et la description de façon plus attractive
-- Barre de stats rapides (nombre de membres, posts)
-- Meilleure séparation visuelle entre le header et le feed de posts
+3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
+On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
 
-### 3. Ajout d'upload de miniature dans `CreateCommunity.tsx`
-- Ajouter un champ d'upload d'image pour le logo de la communauté
-- Utiliser le bucket `avatars` existant (ou créer un bucket `community-logos`)
-- Prévisualisation de l'image sélectionnée avant upload
-- Upload lors de la soumission du formulaire, stockage de l'URL dans `logo_url`
+3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
+- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
+- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
 
-### 4. Ajout upload logo/cover dans `CommunityAdminSettingsTab.tsx`
-- Permettre de changer le logo et la cover depuis les paramètres admin
+3.2) Logs ciblés (temporairement) pour capturer la redirection
+- Ajouter des `console.log()` au tout début du composant Admin (montage) :
+  - `location.href`
+  - valeur de `sessionStorage.admin_unlocked`
+- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
+  - `location.href`
+  - si un mécanisme de “redirectUrl” est en train de forcer une destination
+- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
 
-### 5. Bucket de stockage
-- Créer un bucket `community-assets` pour les logos et covers de communautés via migration SQL
+3.3) Vérification des gardes de routes / layouts
+- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
+  - des wrappers “RequireAuth”
+  - des `useEffect(() => navigate('/auth'))`
+  - des `<Navigate to="/auth" />` conditionnels
+- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
 
-## Fichiers modifiés
+4) Corriger la cause (selon le diagnostic)
+Cas A — Publication en retard (le plus probable)
+- Correction : publier (étape 2). Aucun changement de code nécessaire.
 
-| Fichier | Modification |
-|---------|-------------|
-| `src/pages/community/CommunityPreview.tsx` | Refonte complète du design |
-| `src/pages/community/CommunityFeed.tsx` | Ajout header visuel avec cover/logo |
-| `src/pages/CreateCommunity.tsx` | Ajout upload logo |
-| `src/components/community-admin/CommunityAdminSettingsTab.tsx` | Ajout upload logo + cover |
-| `src/hooks/useStorage.ts` | Ajouter `community-assets` au type BucketName |
-| Migration SQL | Créer bucket `community-assets` avec policies |
+Cas B — Cache navigateur / service worker
+- Solution robuste :
+  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
+  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
+  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
+  - ensuite retirer les logs.
 
+Cas C — Une autre redirection vers /auth persiste
+- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
+- Exemple typique :
+  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
+  - ou une logique globale qui redirige les routes non publiques vers `/auth`
+- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
+
+5) Validation end-to-end (critère “définitif”)
+- Tester sur l’URL publiée :
+  - accéder à `/admin` en non-connecté
+  - entrer un code faux → erreur “Code incorrect”
+  - entrer le bon code → accès au super admin
+  - refresh de la page → reste accessible (sessionStorage) pendant la session
+  - nouvelle fenêtre / navigation privée → redemande le PIN
+- Une fois validé, retirer les logs et le label de version.
+
+Livrables (ce qui sera modifié si nécessaire)
+- Publication (si c’est la cause).
+- Sinon, modifications minimales et ciblées dans :
+  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
+  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
+  - éventuellement un layout global si un guard impose l’auth partout.
+
+Pourquoi ce plan règle “définitivement”
+- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
+- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
+- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.
