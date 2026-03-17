@@ -62,7 +62,7 @@ export interface PlatformStats {
 
 export interface ActivityItem {
   id: string;
-  type: "points" | "lesson" | "quiz" | "event_register";
+  type: "lesson" | "quiz" | "event_register";
   user_name: string;
   detail: string;
   created_at: string;
