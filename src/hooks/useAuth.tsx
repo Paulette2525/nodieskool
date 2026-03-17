@@ -25,6 +25,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, username: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
