@@ -71,26 +71,28 @@
  
    // Create a new community
    const createCommunity = useMutation({
-     mutationFn: async (data: {
-       name: string;
-       slug: string;
-       description?: string;
-       is_public?: boolean;
-     }) => {
-       if (!profile) throw new Error("Not authenticated");
- 
-       // Create the community
-       const { data: community, error: communityError } = await supabase
-         .from("communities")
-         .insert({
-           name: data.name,
-           slug: data.slug.toLowerCase().replace(/\s+/g, "-"),
-           description: data.description || null,
-           is_public: data.is_public ?? true,
-           owner_id: profile.id,
-         })
-         .select()
-         .single();
+    mutationFn: async (data: {
+      name: string;
+      slug: string;
+      description?: string;
+      is_public?: boolean;
+      logo_url?: string | null;
+    }) => {
+      if (!profile) throw new Error("Not authenticated");
+
+      // Create the community
+      const { data: community, error: communityError } = await supabase
+        .from("communities")
+        .insert({
+          name: data.name,
+          slug: data.slug.toLowerCase().replace(/\s+/g, "-"),
+          description: data.description || null,
+          is_public: data.is_public ?? true,
+          owner_id: profile.id,
+          logo_url: data.logo_url || null,
+        })
+        .select()
+        .single();
  
         if (communityError) throw communityError;
 
