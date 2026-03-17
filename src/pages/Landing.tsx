@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, BookOpen, MessageSquare, Calendar, ArrowRight, Check, Globe, Zap, Shield, Star, Play } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
+import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 const features = [
@@ -35,6 +37,16 @@ const benefits = [
 export default function Landing() {
   const { user } = useAuth();
   const { publicCommunities } = useCommunities();
+  const navigate = useNavigate();
+
+  // Fallback: if user lands here after OAuth, redirect to dashboard
+  useEffect(() => {
+    if (user && localStorage.getItem('oauth_pending')) {
+      localStorage.removeItem('oauth_pending');
+      const redirectUrl = getAndClearRedirectUrl();
+      navigate(redirectUrl || "/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

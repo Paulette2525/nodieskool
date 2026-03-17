@@ -171,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('oauth_pending', 'true');
     const { lovable } = await import("@/integrations/lovable/index");
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: window.location.origin + '/auth',
       extraParams: {
         prompt: "select_account",
       },
