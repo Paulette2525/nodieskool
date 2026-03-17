@@ -1,74 +1,88 @@
-# Plan : Optimisations du fil d'actualité, commentaires, navigation et formations
 
-## 1. Permettre aux membres de modifier et supprimer leurs propres publications
+Objectif
+- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
 
-**PostCard.tsx** :
+Constat (important)
+- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
+- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
 
-- Ajouter une prop `onEdit` et afficher le menu "..." (DropdownMenu) pour l'auteur du post aussi (pas seulement les admins)
-- L'auteur voit "Modifier" et "Supprimer" ; l'admin voit en plus "Epingler"
-- Pour la modification : ouvrir un Dialog avec un Textarea auto-resize pré-rempli du contenu, permettant de voir tout le texte
-- Ajouter une mutation `updatePost` dans `usePosts.ts`
+Plan d’action (définitif, avec preuves à chaque étape)
 
-**usePosts.ts** :
+1) Vérifier si la production embarque bien la nouvelle version
+- Télécharger la page publiée `/admin` et ses assets JS (bundle).
+- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
+  - la chaîne `AdminPinEntry`
+  - la chaîne `verify-admin-code`
+  - la chaîne `admin_unlocked`
+- Interprétation :
+  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
+  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
 
-- Ajouter une mutation `updatePost` (supabase update sur `posts` par id)
+2) Publier la version actuelle (si la prod est en retard)
+- Déclencher la publication de la version Test actuelle vers l’URL publiée.
+- Après publication, retester `https://nodieskool.lovable.app/admin` :
+  - en navigation normale
+  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
+- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
 
-La RLS autorise deja les utilisateurs a modifier/supprimer leurs propres posts.
+3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
+On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
 
-## 2. Tronquer les publications longues avec "Voir plus"
+3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
+- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
+- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
 
-**PostCard.tsx** :
+3.2) Logs ciblés (temporairement) pour capturer la redirection
+- Ajouter des `console.log()` au tout début du composant Admin (montage) :
+  - `location.href`
+  - valeur de `sessionStorage.admin_unlocked`
+- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
+  - `location.href`
+  - si un mécanisme de “redirectUrl” est en train de forcer une destination
+- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
 
-- Limiter l'affichage du contenu a 7 lignes (via `line-clamp-4`)
-- Ajouter un bouton "Voir plus" qui revele le texte complet
-- Gerer un state `expanded` local
+3.3) Vérification des gardes de routes / layouts
+- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
+  - des wrappers “RequireAuth”
+  - des `useEffect(() => navigate('/auth'))`
+  - des `<Navigate to="/auth" />` conditionnels
+- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
 
-## 3. Navigation sticky sur desktop
+4) Corriger la cause (selon le diagnostic)
+Cas A — Publication en retard (le plus probable)
+- Correction : publier (étape 2). Aucun changement de code nécessaire.
 
-**CommunityLayout.tsx et MainLayout.tsx** :
+Cas B — Cache navigateur / service worker
+- Solution robuste :
+  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
+  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
+  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
+  - ensuite retirer les logs.
 
-- La sidebar est deja `fixed`/`relative` -- le probleme est que le `<main>` a `overflow-auto` mais la top bar est `sticky top-0` ce qui devrait fonctionner
-- Verifier et corriger : le `pt-14 md:pt-0` sur le contenu enfant peut causer un decalage. S'assurer que la top bar reste fixe en rendant le main `relative` avec scroll interne
+Cas C — Une autre redirection vers /auth persiste
+- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
+- Exemple typique :
+  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
+  - ou une logique globale qui redirige les routes non publiques vers `/auth`
+- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
 
-## 4. Reponses imbriquees aux commentaires (tous les niveaux)
+5) Validation end-to-end (critère “définitif”)
+- Tester sur l’URL publiée :
+  - accéder à `/admin` en non-connecté
+  - entrer un code faux → erreur “Code incorrect”
+  - entrer le bon code → accès au super admin
+  - refresh de la page → reste accessible (sessionStorage) pendant la session
+  - nouvelle fenêtre / navigation privée → redemande le PIN
+- Une fois validé, retirer les logs et le label de version.
 
-**CommentItem.tsx** :
+Livrables (ce qui sera modifié si nécessaire)
+- Publication (si c’est la cause).
+- Sinon, modifications minimales et ciblées dans :
+  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
+  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
+  - éventuellement un layout global si un guard impose l’auth partout.
 
-- Permettre de repondre a N'IMPORTE QUEL commentaire (pas seulement les top-level)
-- Retirer la condition `!isReply` sur le bouton Repondre
-- Passer `onReply` a tous les niveaux
-
-**CommentSection.tsx** :
-
-- Construire un arbre recursif de commentaires au lieu de 2 niveaux
-- Creer un composant recursif `CommentThread` qui affiche les replies de chaque commentaire
-
-## 5. Simplifier le formulaire de creation de chapitre (lecon)
-
-**CommunityClassroomDetail.tsx (LessonForm)** :
-
-- Retirer les champs "Duree (min)" et "Points"
-- Retirer le champ "Ordre" (auto-incrementer)
-- Garder uniquement : Titre, Contenu, URL video
-- Simplifier le formulaire de module aussi (retirer "Ordre", auto-incrementer)
-
-## 6. Retirer l'affichage des points dans la vue lecon
-
-**CommunityClassroomDetail.tsx** :
-
-- Retirer la ligne "+X points" affichee sous le bouton "Marquer comme terminee"
-
----
-
-## Resume des fichiers a modifier
-
-
-| Fichier                                            | Modifications                                                           |
-| -------------------------------------------------- | ----------------------------------------------------------------------- |
-| `src/components/community/PostCard.tsx`            | Edit/delete pour auteur, troncature "Voir plus", dialog de modification |
-| `src/hooks/usePosts.ts`                            | Ajouter mutation `updatePost`                                           |
-| `src/components/community/CommentItem.tsx`         | Reponse sur tous les commentaires (pas seulement top-level)             |
-| `src/components/community/CommentSection.tsx`      | Arbre recursif de commentaires                                          |
-| `src/pages/community/CommunityClassroomDetail.tsx` | Simplifier LessonForm et ModuleForm, retirer points                     |
-| `src/components/layout/CommunityLayout.tsx`        | Corriger sticky top bar                                                 |
-| `src/components/layout/MainLayout.tsx`             | Corriger sticky top bar                                                 |
+Pourquoi ce plan règle “définitivement”
+- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
+- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
+- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.

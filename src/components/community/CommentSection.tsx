@@ -5,9 +5,57 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useComments } from "@/hooks/useComments";
 import { CommentItem } from "./CommentItem";
+import type { Comment } from "@/hooks/useComments";
 
 interface CommentSectionProps {
   postId: string;
+}
+
+function CommentThread({
+  comment,
+  allComments,
+  canDelete,
+  onDelete,
+  onReply,
+  depth = 0,
+}: {
+  comment: Comment;
+  allComments: Comment[];
+  canDelete: boolean;
+  onDelete: (id: string) => void;
+  onReply: (content: string, parentId: string) => Promise<void>;
+  depth?: number;
+}) {
+  const replies = allComments.filter((c) => c.parent_id === comment.id);
+  const maxIndent = 4;
+
+  return (
+    <div>
+      <CommentItem
+        comment={comment}
+        canDelete={canDelete}
+        onDelete={() => onDelete(comment.id)}
+        onReply={onReply}
+        isReply={depth > 0}
+        depth={Math.min(depth, maxIndent)}
+      />
+      {replies.length > 0 && (
+        <div>
+          {replies.map((reply) => (
+            <CommentThread
+              key={reply.id}
+              comment={reply}
+              allComments={allComments}
+              canDelete={canDelete}
+              onDelete={onDelete}
+              onReply={onReply}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function CommentSection({ postId }: CommentSectionProps) {
@@ -25,21 +73,10 @@ export function CommentSection({ postId }: CommentSectionProps) {
     await createComment.mutateAsync({ content, parentId });
   };
 
-  // Separate top-level comments and replies
   const topLevelComments = comments.filter((c) => !c.parent_id);
-  const repliesMap = comments.reduce((acc, comment) => {
-    if (comment.parent_id) {
-      if (!acc[comment.parent_id]) {
-        acc[comment.parent_id] = [];
-      }
-      acc[comment.parent_id].push(comment);
-    }
-    return acc;
-  }, {} as Record<string, typeof comments>);
 
   return (
     <div className="mt-4 pt-4 border-t space-y-4">
-      {/* Comment input */}
       {profile && (
         <div className="flex gap-2">
           <Textarea
@@ -68,7 +105,6 @@ export function CommentSection({ postId }: CommentSectionProps) {
         </div>
       )}
 
-      {/* Comments list */}
       {isLoading ? (
         <div className="flex justify-center py-4">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -78,26 +114,16 @@ export function CommentSection({ postId }: CommentSectionProps) {
           Aucun commentaire. Soyez le premier à commenter !
         </p>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {topLevelComments.map((comment) => (
-            <div key={comment.id}>
-              <CommentItem
-                comment={comment}
-                canDelete={isAdmin}
-                onDelete={() => deleteComment.mutate(comment.id)}
-                onReply={handleReply}
-              />
-              {/* Replies */}
-              {repliesMap[comment.id]?.map((reply) => (
-                <CommentItem
-                  key={reply.id}
-                  comment={reply}
-                  canDelete={isAdmin}
-                  onDelete={() => deleteComment.mutate(reply.id)}
-                  isReply
-                />
-              ))}
-            </div>
+            <CommentThread
+              key={comment.id}
+              comment={comment}
+              allComments={comments}
+              canDelete={isAdmin}
+              onDelete={(id) => deleteComment.mutate(id)}
+              onReply={handleReply}
+            />
           ))}
         </div>
       )}

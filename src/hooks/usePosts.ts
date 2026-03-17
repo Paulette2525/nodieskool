@@ -74,10 +74,27 @@ export function usePosts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Post created!");
+      toast.success("Post créé !");
     },
     onError: (error) => {
-      toast.error("Failed to create post: " + error.message);
+      toast.error("Erreur : " + error.message);
+    },
+  });
+
+  const updatePost = useMutation({
+    mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
+      const { error } = await supabase
+        .from("posts")
+        .update({ content })
+        .eq("id", postId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("Post modifié !");
+    },
+    onError: (error) => {
+      toast.error("Erreur : " + error.message);
     },
   });
 
@@ -88,10 +105,10 @@ export function usePosts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Post deleted!");
+      toast.success("Post supprimé !");
     },
     onError: (error) => {
-      toast.error("Failed to delete post: " + error.message);
+      toast.error("Erreur : " + error.message);
     },
   });
 
@@ -112,6 +129,7 @@ export function usePosts() {
     posts: postsQuery.data ?? [],
     isLoading: postsQuery.isLoading,
     createPost,
+    updatePost,
     deletePost,
     togglePin,
   };
@@ -131,8 +149,6 @@ export function usePostLikes(postId: string) {
         .select("id")
         .eq("post_id", postId)
         .eq("user_id", profile.id)
-        // When there is no row, PostgREST returns 406 with `.single()`.
-        // We want "no like" to be a normal case, not an error.
         .maybeSingle();
 
       if (error) throw error;
@@ -147,7 +163,6 @@ export function usePostLikes(postId: string) {
       if (!profile) throw new Error("Not authenticated");
 
       if (likeQuery.data) {
-        // Unlike
         const { error } = await supabase
           .from("post_likes")
           .delete()
@@ -155,7 +170,6 @@ export function usePostLikes(postId: string) {
           .eq("user_id", profile.id);
         if (error) throw error;
       } else {
-        // Like
         const { error } = await supabase.from("post_likes").insert({
           post_id: postId,
           user_id: profile.id,

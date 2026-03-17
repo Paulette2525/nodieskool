@@ -22,13 +22,11 @@ import {
   PlayCircle,
   CheckCircle,
   Lock,
-  Award,
   Loader2,
   Plus,
   Edit,
   Trash2,
   BookOpen,
-  GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,12 +45,11 @@ function ModuleForm({
 }) {
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [description, setDescription] = useState(initialData?.description ?? "");
-  const [orderIndex, setOrderIndex] = useState(initialData?.order_index ?? 0);
   const [isLocked, setIsLocked] = useState(initialData?.is_locked ?? false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ title, description, order_index: orderIndex, is_locked: isLocked });
+    onSubmit({ title, description, order_index: initialData?.order_index ?? 0, is_locked: isLocked });
   };
 
   return (
@@ -70,15 +67,9 @@ function ModuleForm({
             <Label>Description</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description du module..." rows={2} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Ordre</Label>
-              <Input type="number" value={orderIndex} onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)} />
-            </div>
-            <div className="flex items-center justify-between pt-6">
-              <Label>Verrouillé</Label>
-              <Switch checked={isLocked} onCheckedChange={setIsLocked} />
-            </div>
+          <div className="flex items-center justify-between">
+            <Label>Verrouillé</Label>
+            <Switch checked={isLocked} onCheckedChange={setIsLocked} />
           </div>
           <Button type="submit" className="w-full" disabled={isPending || !title}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -100,19 +91,16 @@ function LessonForm({
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onSubmit: (data: { title: string; content: string; video_url: string; duration_minutes: number; points_reward: number; order_index: number }) => void;
-  initialData?: { title: string; content: string; video_url: string; duration_minutes: number; points_reward: number; order_index: number };
+  initialData?: { title: string; content: string; video_url: string; order_index: number };
   isPending: boolean;
 }) {
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [content, setContent] = useState(initialData?.content ?? "");
   const [videoUrl, setVideoUrl] = useState(initialData?.video_url ?? "");
-  const [duration, setDuration] = useState(initialData?.duration_minutes ?? 0);
-  const [points, setPoints] = useState(initialData?.points_reward ?? 10);
-  const [orderIndex, setOrderIndex] = useState(initialData?.order_index ?? 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ title, content, video_url: videoUrl, duration_minutes: duration, points_reward: points, order_index: orderIndex });
+    onSubmit({ title, content, video_url: videoUrl, duration_minutes: 0, points_reward: 10, order_index: initialData?.order_index ?? 0 });
   };
 
   return (
@@ -133,20 +121,6 @@ function LessonForm({
           <div className="space-y-2">
             <Label>URL vidéo (YouTube, etc.)</Label>
             <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Durée (min)</Label>
-              <Input type="number" value={duration} onChange={(e) => setDuration(parseInt(e.target.value) || 0)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Points</Label>
-              <Input type="number" value={points} onChange={(e) => setPoints(parseInt(e.target.value) || 10)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Ordre</Label>
-              <Input type="number" value={orderIndex} onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)} />
-            </div>
           </div>
           <Button type="submit" className="w-full" disabled={isPending || !title}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -171,11 +145,9 @@ function CommunityClassroomDetailContent() {
 
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
 
-  // Module form state
   const [moduleFormOpen, setModuleFormOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
 
-  // Lesson form state
   const [lessonFormOpen, setLessonFormOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [targetModuleId, setTargetModuleId] = useState<string | null>(null);
@@ -223,7 +195,6 @@ function CommunityClassroomDetailContent() {
     }
   };
 
-  // Module CRUD
   const handleCreateModule = () => {
     setEditingModule(null);
     setModuleFormOpen(true);
@@ -238,7 +209,8 @@ function CommunityClassroomDetailContent() {
     if (editingModule) {
       updateModule.mutate({ id: editingModule.id, ...data }, { onSuccess: () => setModuleFormOpen(false) });
     } else {
-      createModule.mutate({ course_id: course.id, ...data }, { onSuccess: () => setModuleFormOpen(false) });
+      const autoOrder = sortedModules.length > 0 ? Math.max(...sortedModules.map(m => m.order_index)) + 1 : 0;
+      createModule.mutate({ course_id: course.id, ...data, order_index: autoOrder }, { onSuccess: () => setModuleFormOpen(false) });
     }
   };
 
@@ -248,7 +220,6 @@ function CommunityClassroomDetailContent() {
     }
   };
 
-  // Lesson CRUD
   const handleCreateLesson = (moduleId: string) => {
     setEditingLesson(null);
     setTargetModuleId(moduleId);
@@ -265,7 +236,10 @@ function CommunityClassroomDetailContent() {
     if (editingLesson) {
       updateLesson.mutate({ id: editingLesson.id, ...data }, { onSuccess: () => setLessonFormOpen(false) });
     } else if (targetModuleId) {
-      createLesson.mutate({ module_id: targetModuleId, ...data }, { onSuccess: () => setLessonFormOpen(false) });
+      const mod = sortedModules.find(m => m.id === targetModuleId);
+      const lessons = mod?.lessons || [];
+      const autoOrder = lessons.length > 0 ? Math.max(...lessons.map(l => l.order_index)) + 1 : 0;
+      createLesson.mutate({ module_id: targetModuleId, ...data, order_index: autoOrder }, { onSuccess: () => setLessonFormOpen(false) });
     }
   };
 
@@ -309,7 +283,7 @@ function CommunityClassroomDetailContent() {
                     {selectedLesson.content}
                   </p>
                 )}
-                <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="mt-4">
                   <Button
                     onClick={handleCompleteLesson}
                     disabled={completedLessons.includes(selectedLesson.id) || completeLesson.isPending}
@@ -323,10 +297,6 @@ function CommunityClassroomDetailContent() {
                       <><CheckCircle className="h-4 w-4" />Marquer comme terminée</>
                     )}
                   </Button>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Award className="h-4 w-4" />
-                    <span>+{selectedLesson.points_reward} points</span>
-                  </div>
                 </div>
               </div>
             </Card>
@@ -394,7 +364,6 @@ function CommunityClassroomDetailContent() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent>
-                        {/* Admin actions for module */}
                         {isAdmin && (
                           <div className="flex items-center gap-1 mb-2 pl-6">
                             <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => handleEditModule(module)}>
@@ -431,9 +400,6 @@ function CommunityClassroomDetailContent() {
                                     <PlayCircle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                   )}
                                   <span className="line-clamp-1 flex-1">{lesson.title}</span>
-                                  {lesson.duration_minutes && (
-                                    <span className="text-xs text-muted-foreground flex-shrink-0">{lesson.duration_minutes}m</span>
-                                  )}
                                 </button>
                                 {isAdmin && (
                                   <div className="flex opacity-0 group-hover/lesson:opacity-100 transition-opacity">
@@ -459,7 +425,6 @@ function CommunityClassroomDetailContent() {
         </div>
       </div>
 
-      {/* Module Form Dialog */}
       <ModuleForm
         open={moduleFormOpen}
         onOpenChange={setModuleFormOpen}
@@ -473,7 +438,6 @@ function CommunityClassroomDetailContent() {
         isPending={createModule.isPending || updateModule.isPending}
       />
 
-      {/* Lesson Form Dialog */}
       <LessonForm
         open={lessonFormOpen}
         onOpenChange={setLessonFormOpen}
@@ -482,8 +446,6 @@ function CommunityClassroomDetailContent() {
           title: editingLesson.title,
           content: editingLesson.content || "",
           video_url: editingLesson.video_url || "",
-          duration_minutes: editingLesson.duration_minutes || 0,
-          points_reward: editingLesson.points_reward,
           order_index: editingLesson.order_index,
         } : undefined}
         isPending={createLesson.isPending || updateLesson.isPending}
