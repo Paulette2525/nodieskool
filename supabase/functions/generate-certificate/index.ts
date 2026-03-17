@@ -140,13 +140,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (certError) throw certError;
 
-    // Award bonus points for completing a course
-    await supabase.rpc("update_user_points", {
-      _user_id: userProfileId,
-      _points: 50,
-      _reason: `Certification obtenue: ${course.title}`,
-    });
-
     // Create notification
     await supabase.rpc("create_notification", {
       _user_id: userProfileId,

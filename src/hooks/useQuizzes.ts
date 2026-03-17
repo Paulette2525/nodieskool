@@ -188,15 +188,6 @@ export function useQuizzes(moduleId?: string) {
 
       if (attemptError) throw attemptError;
 
-      // Award points if passed
-      if (passed) {
-        await supabase.rpc("update_user_points", {
-          _user_id: profile.id,
-          _points: Math.round(score / 2),
-          _reason: `Quiz réussi: ${quiz.title}`,
-        });
-      }
-
       return attempt as QuizAttempt;
     },
     onSuccess: (attempt) => {
