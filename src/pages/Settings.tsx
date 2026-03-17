@@ -215,9 +215,7 @@ export default function Settings() {
                 <div className="space-y-0.5">
                   <Label>Notifications push</Label>
                   <p className="text-sm text-muted-foreground">
-                    {isSupported
-                      ? "Recevoir des notifications sur votre appareil"
-                      : "Non supporté par votre navigateur"}
+                    Recevoir des notifications sur votre appareil
                   </p>
                 </div>
                 <Switch
