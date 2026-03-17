@@ -365,15 +365,17 @@ function CommunityClassroomDetailContent() {
                       </AccordionTrigger>
                       <AccordionContent>
                         {isAdmin && (
-                          <div className="flex items-center gap-1 mb-2 pl-6">
-                            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => handleEditModule(module)}>
-                              <Edit className="h-3 w-3" />Modifier
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-destructive hover:text-destructive" onClick={() => handleDeleteModule(module.id)}>
-                              <Trash2 className="h-3 w-3" />Supprimer
-                            </Button>
-                            <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 ml-auto" onClick={() => handleCreateLesson(module.id)}>
-                              <Plus className="h-3 w-3" />Leçon
+                          <div className="space-y-1 mb-2 pl-6">
+                            <div className="flex items-center gap-1">
+                              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={() => handleEditModule(module)}>
+                                <Edit className="h-3 w-3" />Modifier
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-destructive hover:text-destructive" onClick={() => handleDeleteModule(module.id)}>
+                                <Trash2 className="h-3 w-3" />Supprimer
+                              </Button>
+                            </div>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1 w-full" onClick={() => handleCreateLesson(module.id)}>
+                              <Plus className="h-3 w-3" />Ajouter une leçon
                             </Button>
                           </div>
                         )}
