@@ -245,12 +245,7 @@ export interface ActivityItem {
   const activityQuery = useQuery({
     queryKey: ["super-admin-activity"],
     queryFn: async (): Promise<ActivityItem[]> => {
-      const [pointsRes, lessonsRes, quizzesRes, attendeesRes] = await Promise.all([
-        supabase
-          .from("points_log")
-          .select("id, points, reason, created_at, user_id, profiles!points_log_user_id_fkey(username, full_name)")
-          .order("created_at", { ascending: false })
-          .limit(50),
+      const [lessonsRes, quizzesRes, attendeesRes] = await Promise.all([
         supabase
           .from("lesson_progress")
           .select("id, completed_at, user_id, profiles!lesson_progress_user_id_fkey(username, full_name), lessons!lesson_progress_lesson_id_fkey(title)")
