@@ -115,8 +115,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         setOwnerName(ownerProfile?.full_name || ownerProfile?.username || null);
 
         // Fetch member count via RPC (works for all users)
-        const { data: countData } = await supabase.rpc('get_community_member_count', { _community_id: communityData.id });
-        setMemberCount(countData || 0);
+        const { data: countData } = await supabase.rpc('get_community_member_count' as any, { _community_id: communityData.id });
+        setMemberCount(typeof countData === 'number' ? countData : 0);
 
         // Fetch admin count
         const { count: admins } = await supabase
