@@ -65,12 +65,13 @@ export function CreatePostCard({ userAvatar, userName, onPost }: CreatePostCardP
         </Avatar>
         <div className="flex-1">
           <Textarea
+            ref={textareaRef}
             placeholder="Partagez quelque chose..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onFocus={() => setIsFocused(true)}
-            className="min-h-[40px] resize-none border-0 p-0 focus-visible:ring-0 placeholder:text-muted-foreground/60 text-sm"
-            rows={isFocused ? 3 : 1}
+            className="min-h-[36px] max-h-[200px] resize-none border-0 p-0 focus-visible:ring-0 placeholder:text-muted-foreground/60 text-sm overflow-y-auto"
+            rows={1}
           />
           
           {imagePreview && (
