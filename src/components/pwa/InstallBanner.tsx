@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Download, Share, Plus } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Button } from "@/components/ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
