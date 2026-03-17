@@ -1,6 +1,6 @@
 // Custom Service Worker for Push Notifications
 self.addEventListener('push', (event) => {
-  let data = { title: 'NodieSkool', body: 'Nouvelle notification', icon: '/pwa-192x192.png' };
+  let data = { title: 'Tribbue', body: 'Nouvelle notification', icon: '/pwa-192x192.png' };
 
   if (event.data) {
     try {
@@ -17,7 +17,7 @@ self.addEventListener('push', (event) => {
       badge: data.badge || '/pwa-192x192.png',
       data: data.data || {},
       vibrate: [200, 100, 200],
-      tag: 'nodieskool-notification',
+      tag: 'tribbue-notification',
       renotify: true,
     })
   );

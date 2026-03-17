@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => ({
         importScripts: ["/custom-sw.js"],
       },
       manifest: {
-        name: "NodieSkool",
-        short_name: "NodieSkool",
+        name: "Tribbue",
+        short_name: "Tribbue",
         description: "Plateforme communautaire d'apprentissage",
         theme_color: "#0f172a",
         background_color: "#ffffff",

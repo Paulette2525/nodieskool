@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, Users, Globe, Sparkles, ArrowLeft } from "lucide-react";
+import { Loader2, Users, Globe, ArrowLeft } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,8 +38,7 @@ export default function Discover() {
           <div className="flex items-center gap-3">
             {user && <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-lg"><Link to="/dashboard"><ArrowLeft className="h-4 w-4" /></Link></Button>}
             <Link to="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center"><Sparkles className="h-4 w-4 text-primary-foreground" /></div>
-              <span className="font-bold text-base">NodieSkool</span>
+              <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
             </Link>
           </div>
           {!user && <Button asChild size="sm" className="rounded-xl text-xs h-9"><Link to="/auth">Se connecter</Link></Button>}

@@ -66,12 +66,12 @@ export function InstallBanner() {
       <div className="mx-3 mt-3 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-lg shadow-lg p-3 flex items-center gap-3">
         <img
           src="/pwa-192x192.png"
-          alt="NodieSkool"
+          alt="Tribbue"
           className="w-10 h-10 rounded-xl shrink-0"
         />
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate">NodieSkool</p>
+          <p className="text-sm font-semibold text-foreground truncate">Tribbue</p>
           {isIOS ? (
             <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
               Tap <Share className="w-3 h-3 inline" /> puis <Plus className="w-3 h-3 inline" /> Écran d'accueil

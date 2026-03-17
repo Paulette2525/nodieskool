@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
@@ -51,11 +52,9 @@ export default function Auth() {
       <Card className="w-full max-w-sm rounded-2xl border-border/50 shadow-lg relative">
         <CardHeader className="text-center pb-4">
           <div className="flex items-center justify-center mb-3">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
           </div>
-          <CardTitle className="text-lg">NodieSkool</CardTitle>
+          <CardTitle className="text-lg">Tribbue</CardTitle>
           <CardDescription className="text-xs">Rejoignez notre communauté d'apprentissage</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
