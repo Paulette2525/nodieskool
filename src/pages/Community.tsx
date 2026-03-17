@@ -9,7 +9,7 @@ import { usePosts } from "@/hooks/usePosts";
 
 export default function Community() {
   const { user, profile, loading } = useAuth();
-  const { posts, isLoading, createPost, deletePost, togglePin } = usePosts();
+  const { posts, isLoading, createPost, updatePost, deletePost, togglePin } = usePosts();
 
   if (loading) {
     return (
