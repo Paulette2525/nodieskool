@@ -13,8 +13,9 @@ import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn, signUp, signInWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const defaultTab = useMemo(() => (hasRedirectUrl() ? "signup" : "login"), []);
 
