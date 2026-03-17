@@ -10,7 +10,7 @@ import { useCommunityContext } from "@/contexts/CommunityContext";
 function CommunityFeedContent() {
   const { profile } = useAuth();
   const { community, isAdmin: isCommunityAdmin } = useCommunityContext();
-  const { posts, isLoading, createPost, deletePost, togglePin } = usePostsWithCommunity(community?.id);
+  const { posts, isLoading, createPost, updatePost, deletePost, togglePin } = usePostsWithCommunity(community?.id);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
