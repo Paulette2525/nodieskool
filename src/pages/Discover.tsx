@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, Users, Globe, Sparkles, ArrowLeft } from "lucide-react";
+import { Loader2, Users, Globe, ArrowLeft } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
