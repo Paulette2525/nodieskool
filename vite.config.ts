@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/~oauth/],
+        importScripts: ["/custom-sw.js"],
       },
       manifest: {
         name: "NodieSkool",
