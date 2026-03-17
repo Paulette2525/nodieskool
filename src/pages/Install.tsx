@@ -71,10 +71,10 @@ const Install = () => {
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <img src="/pwa-192x192.png" alt="NodieSkool" className="w-20 h-20 rounded-2xl mx-auto shadow-lg" />
-          <h1 className="text-2xl font-bold text-foreground">Installer NodieSkool</h1>
+          <img src="/pwa-192x192.png" alt="Tribbue" className="w-20 h-20 rounded-2xl mx-auto shadow-lg" />
+          <h1 className="text-2xl font-bold text-foreground">Installer Tribbue</h1>
           <p className="text-muted-foreground text-sm">
-            Accédez à NodieSkool directement depuis votre écran d'accueil, comme une application native.
+            Accédez à Tribbue directement depuis votre écran d'accueil, comme une application native.
           </p>
         </div>
 

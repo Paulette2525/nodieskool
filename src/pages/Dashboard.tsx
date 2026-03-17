@@ -33,10 +33,7 @@ export default function Dashboard() {
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-base">NodieSkool</span>
+            <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
           </Link>
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="capitalize text-xs rounded-full border-border/50">{currentPlan}</Badge>

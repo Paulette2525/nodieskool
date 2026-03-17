@@ -17,7 +17,7 @@ self.addEventListener('push', (event) => {
       badge: data.badge || '/pwa-192x192.png',
       data: data.data || {},
       vibrate: [200, 100, 200],
-      tag: 'nodieskool-notification',
+      tag: 'tribbue-notification',
       renotify: true,
     })
   );

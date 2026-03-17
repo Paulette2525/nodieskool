@@ -95,7 +95,7 @@ async function vapidAuth(endpoint: string, privKeyB64: string, pubKeyB64: string
   const exp = Math.floor(Date.now() / 1000) + 12 * 3600;
 
   const header = b64url(new TextEncoder().encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
-  const payload = b64url(new TextEncoder().encode(JSON.stringify({ aud, exp, sub: 'mailto:contact@nodieskool.com' })));
+  const payload = b64url(new TextEncoder().encode(JSON.stringify({ aud, exp, sub: 'mailto:contact@tribbue.com' })));
   const unsigned = `${header}.${payload}`;
 
   const privBytes = b64urlDecode(privKeyB64);

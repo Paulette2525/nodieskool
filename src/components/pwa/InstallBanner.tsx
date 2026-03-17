@@ -71,7 +71,7 @@ export function InstallBanner() {
         />
 
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate">NodieSkool</p>
+          <p className="text-sm font-semibold text-foreground truncate">Tribbue</p>
           {isIOS ? (
             <p className="text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
               Tap <Share className="w-3 h-3 inline" /> puis <Plus className="w-3 h-3 inline" /> Écran d'accueil
