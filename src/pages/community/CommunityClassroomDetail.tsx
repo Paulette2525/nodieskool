@@ -404,7 +404,7 @@ function CommunityClassroomDetailContent() {
                                   <span className="line-clamp-1 flex-1">{lesson.title}</span>
                                 </button>
                                 {isAdmin && (
-                                  <div className="flex opacity-0 group-hover/lesson:opacity-100 transition-opacity">
+                                  <div className="flex shrink-0">
                                     <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleEditLesson(lesson)}>
                                       <Edit className="h-3 w-3" />
                                     </Button>
