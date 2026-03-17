@@ -55,7 +55,7 @@ const Install = () => {
             </div>
             <h1 className="text-2xl font-bold text-foreground">Déjà installée !</h1>
             <p className="text-muted-foreground">
-              NodieSkool est déjà installée sur votre appareil.
+              Tribbue est déjà installée sur votre appareil.
             </p>
             <Button onClick={() => navigate("/dashboard")} className="w-full rounded-xl">
               Aller au dashboard
