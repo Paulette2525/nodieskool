@@ -27,17 +27,30 @@ export function usePushNotifications() {
     if (!supported) setIsLoading(false);
   }, []);
 
+  // Check both browser subscription and DB preference
   useEffect(() => {
-    if (!isSupported || !profile) {
+    if (!profile) {
       setIsLoading(false);
       return;
     }
 
     (async () => {
       try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        setIsSubscribed(!!subscription);
+        if (isSupported) {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          if (subscription) {
+            setIsSubscribed(true);
+            return;
+          }
+        }
+        // Fallback: check DB preference
+        const { data } = await supabase
+          .from("profiles")
+          .select("push_notifications_enabled")
+          .eq("id", profile.id)
+          .single();
+        setIsSubscribed(data?.push_notifications_enabled ?? false);
       } catch {
         setIsSubscribed(false);
       } finally {
@@ -46,12 +59,32 @@ export function usePushNotifications() {
     })();
   }, [isSupported, profile]);
 
-  const subscribeToPush = useCallback(async () => {
-    if (!isSupported || !profile) return false;
+  const subscribeToPush = useCallback(async (): Promise<true | "fallback" | false> => {
+    if (!profile) return false;
+
+    // If browser doesn't support push, save preference in DB
+    if (!isSupported) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ push_notifications_enabled: true })
+        .eq("id", profile.id);
+      if (error) return false;
+      setIsSubscribed(true);
+      return "fallback";
+    }
 
     try {
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") return false;
+      if (permission !== "granted") {
+        // Permission denied — save preference in DB anyway
+        const { error } = await supabase
+          .from("profiles")
+          .update({ push_notifications_enabled: true })
+          .eq("id", profile.id);
+        if (error) return false;
+        setIsSubscribed(true);
+        return "fallback";
+      }
 
       const registration = await navigator.serviceWorker.ready;
       let subscription = await registration.pushManager.getSubscription();
@@ -65,7 +98,6 @@ export function usePushNotifications() {
 
       const subJson = subscription.toJSON();
 
-      // Use type assertion since the table was just created
       const { error } = await (supabase as any)
         .from("push_subscriptions")
         .upsert(
@@ -80,6 +112,12 @@ export function usePushNotifications() {
 
       if (error) throw error;
 
+      // Also save DB preference
+      await supabase
+        .from("profiles")
+        .update({ push_notifications_enabled: true })
+        .eq("id", profile.id);
+
       setIsSubscribed(true);
       return true;
     } catch (err) {
@@ -89,22 +127,29 @@ export function usePushNotifications() {
   }, [isSupported, profile]);
 
   const unsubscribeFromPush = useCallback(async () => {
-    if (!isSupported || !profile) return false;
+    if (!profile) return false;
 
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      if (isSupported) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
 
-      if (subscription) {
-        const endpoint = subscription.endpoint;
-        await subscription.unsubscribe();
+        if (subscription) {
+          const endpoint = subscription.endpoint;
+          await subscription.unsubscribe();
 
-        await (supabase as any)
-          .from("push_subscriptions")
-          .delete()
-          .eq("user_id", profile.id)
-          .eq("endpoint", endpoint);
+          await (supabase as any)
+            .from("push_subscriptions")
+            .delete()
+            .eq("user_id", profile.id)
+            .eq("endpoint", endpoint);
+        }
       }
+
+      await supabase
+        .from("profiles")
+        .update({ push_notifications_enabled: false })
+        .eq("id", profile.id);
 
       setIsSubscribed(false);
       return true;

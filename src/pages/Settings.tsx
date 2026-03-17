@@ -83,11 +83,13 @@ export default function Settings() {
     setIsTogglingPush(true);
     try {
       if (enabled) {
-        const success = await subscribeToPush();
-        if (success) {
+        const result = await subscribeToPush();
+        if (result === true) {
           toast.success("Notifications push activées");
+        } else if (result === "fallback") {
+          toast.info("Notifications in-app activées. Pour les notifications push, autorisez-les dans les paramètres de votre navigateur.");
         } else {
-          toast.error("Impossible d'activer les notifications push. Vérifiez les permissions de votre navigateur.");
+          toast.error("Erreur lors de l'activation des notifications");
         }
       } else {
         const success = await unsubscribeFromPush();
