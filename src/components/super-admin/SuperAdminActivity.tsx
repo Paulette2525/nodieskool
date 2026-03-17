@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ActivityItem } from "@/hooks/useSuperAdmin";
-import { Award, BookOpen, ClipboardCheck, CalendarCheck, Filter } from "lucide-react";
+import { BookOpen, ClipboardCheck, CalendarCheck, Filter } from "lucide-react";
 
 interface SuperAdminActivityProps {
   activity: ActivityItem[];
