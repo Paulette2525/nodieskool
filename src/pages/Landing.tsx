@@ -37,6 +37,16 @@ const benefits = [
 export default function Landing() {
   const { user } = useAuth();
   const { publicCommunities } = useCommunities();
+  const navigate = useNavigate();
+
+  // Fallback: if user lands here after OAuth, redirect to dashboard
+  useEffect(() => {
+    if (user && localStorage.getItem('oauth_pending')) {
+      localStorage.removeItem('oauth_pending');
+      const redirectUrl = getAndClearRedirectUrl();
+      navigate(redirectUrl || "/dashboard", { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen bg-background">

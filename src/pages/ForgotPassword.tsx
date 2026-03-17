@@ -72,9 +72,7 @@ export default function ForgotPassword() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
-              G
-            </div>
+            <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
           </div>
           <CardTitle className="text-2xl">Mot de passe oublié ?</CardTitle>
           <CardDescription>

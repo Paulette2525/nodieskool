@@ -138,7 +138,7 @@ export default function Auth() {
           <div className="flex items-center justify-center mb-3">
             <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
           </div>
-          <CardTitle className="text-lg">Tribbue</CardTitle>
+          
           <CardDescription className="text-xs">Rejoignez notre communauté d'apprentissage</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
