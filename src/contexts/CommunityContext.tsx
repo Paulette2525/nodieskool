@@ -81,14 +81,15 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
           if (publicData) {
             setCommunity(publicData as unknown as Community);
-            // Fetch owner name
+            setOwnerName(null);
+            // Fetch member count via RPC (bypasses RLS)
             if (publicData.id) {
-              // We can't get owner from public view, set defaults
-              setOwnerName(null);
-              // Fetch member count from public perspective - won't work without membership
+              const { data: countData } = await supabase.rpc('get_community_member_count' as any, { _community_id: publicData.id });
+              setMemberCount(typeof countData === 'number' ? countData : 0);
+            } else {
               setMemberCount(0);
-              setAdminCount(0);
             }
+            setAdminCount(0);
             setRole(null);
             setLoading(false);
             return;
@@ -113,14 +114,9 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
         setOwnerName(ownerProfile?.full_name || ownerProfile?.username || null);
 
-        // Fetch member count
-        const { count } = await supabase
-          .from("community_members")
-          .select("*", { count: "exact", head: true })
-          .eq("community_id", communityData.id)
-          .eq("is_approved", true);
-
-        setMemberCount(count || 0);
+        // Fetch member count via RPC (works for all users)
+        const { data: countData } = await supabase.rpc('get_community_member_count' as any, { _community_id: communityData.id });
+        setMemberCount(typeof countData === 'number' ? countData : 0);
 
         // Fetch admin count
         const { count: admins } = await supabase

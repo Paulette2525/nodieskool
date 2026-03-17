@@ -1432,6 +1432,10 @@ export type Database = {
         Returns: string
       }
       generate_certificate_number: { Args: never; Returns: string }
+      get_community_member_count: {
+        Args: { _community_id: string }
+        Returns: number
+      }
       get_current_profile_id: { Args: never; Returns: string }
       get_user_max_communities: { Args: never; Returns: number }
       grade_quiz_answer: {
