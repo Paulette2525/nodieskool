@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, MessageSquare, Calendar, Sparkles, ArrowRight, Check, Globe, Zap, Shield, Star, Play } from "lucide-react";
+import { Users, BookOpen, MessageSquare, Calendar, ArrowRight, Check, Globe, Zap, Shield, Star, Play } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 const features = [
   { icon: Users, title: "Communauté engagée", description: "Créez un espace de discussion et d'entraide pour votre audience" },
@@ -42,10 +43,7 @@ export default function Landing() {
       <header className="border-b border-border/50 bg-card/60 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-base">NodieSkool</span>
+            <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
           </Link>
           <nav className="hidden md:flex items-center gap-5">
             <Link to="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Fonctionnalités</Link>
@@ -72,7 +70,7 @@ export default function Landing() {
         
         <motion.div className="max-w-3xl mx-auto text-center relative" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Badge variant="secondary" className="mb-5 px-3 py-1.5 text-xs font-medium bg-primary/8 text-primary border-none rounded-full">
-            <Sparkles className="h-3.5 w-3.5 mr-1.5" />Plateforme communautaire tout-en-un
+            Plateforme communautaire tout-en-un
           </Badge>
           
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-5 leading-[1.1] tracking-tight">
@@ -208,14 +206,13 @@ export default function Landing() {
       <footer className="border-t border-border/50 py-8 px-4 bg-muted/20">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center"><Sparkles className="h-3.5 w-3.5 text-primary-foreground" /></div>
-            <span className="font-bold text-sm">NodieSkool</span>
+            <img src={tribbueLogoImg} alt="Tribbue" className="h-7 object-contain" />
           </div>
           <div className="flex items-center gap-5 text-xs text-muted-foreground">
             <Link to="/pricing" className="hover:text-foreground transition-colors">Tarifs</Link>
             <Link to="/auth" className="hover:text-foreground transition-colors">Connexion</Link>
           </div>
-          <p className="text-[11px] text-muted-foreground">© 2026 NodieSkool. Tous droits réservés.</p>
+          <p className="text-[11px] text-muted-foreground">© 2026 Tribbue. Tous droits réservés.</p>
         </div>
       </footer>
     </div>
