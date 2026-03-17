@@ -17,7 +17,6 @@ import {
   CheckCircle,
   Lock,
   Clock,
-  Award,
   Loader2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
