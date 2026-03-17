@@ -13,8 +13,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: data.icon || '/pwa-192x192.png',
-      badge: data.badge || '/pwa-192x192.png',
+      icon: data.icon || '/tribbue-logo.png',
+      badge: data.badge || '/tribbue-logo.png',
       data: data.data || {},
       vibrate: [200, 100, 200],
       tag: 'tribbue-notification',
