@@ -168,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    localStorage.setItem('oauth_pending', 'true');
     const { lovable } = await import("@/integrations/lovable/index");
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
@@ -175,7 +176,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         prompt: "select_account",
       },
     });
-    if (result.error) throw result.error;
+    if (result.error) {
+      localStorage.removeItem('oauth_pending');
+      throw result.error;
+    }
   };
 
   const refreshProfile = async () => {
