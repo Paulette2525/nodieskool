@@ -31,11 +31,11 @@
      title: "Formations complètes",
      description: "Hébergez vos cours avec suivi de progression et quiz"
    },
-   {
-     icon: Trophy,
-     title: "Gamification intégrée",
-     description: "Points, badges et classements pour motiver vos membres"
-   },
+    {
+      icon: MessageSquare,
+      title: "Messagerie privée",
+      description: "Échangez en privé avec les membres de votre communauté"
+    },
    {
      icon: Calendar,
      title: "Événements live",
