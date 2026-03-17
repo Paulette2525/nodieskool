@@ -1,7 +1,7 @@
-import { Navigate, Link, useLocation } from "react-router-dom";
+import { Navigate, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, Plus, Users } from "lucide-react";
+import { Loader2, Plus, Users, User, Settings, LogOut } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
@@ -10,6 +10,7 @@ import { CommunityCard } from "@/components/community/CommunityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
   const { user, profile, loading: authLoading } = useAuth();
