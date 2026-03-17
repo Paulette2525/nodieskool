@@ -14,8 +14,6 @@ export interface CommunityMember {
     username: string;
     full_name: string | null;
     avatar_url: string | null;
-    points: number;
-    level: number;
   };
 }
 
