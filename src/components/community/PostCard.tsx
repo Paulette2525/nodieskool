@@ -30,7 +30,6 @@ interface PostCardProps {
     name: string;
     username: string;
     avatar?: string | null;
-    level: number;
   };
   content: string;
   imageUrl?: string | null;
