@@ -50,6 +50,7 @@ function CommunityFeedContent() {
               likesCount={post.likes_count}
               commentsCount={post.comments_count}
               createdAt={post.created_at}
+              isCommunityAdmin={isCommunityAdmin}
               onDelete={() => deletePost.mutate(post.id)}
               onTogglePin={() => togglePin.mutate({ postId: post.id, isPinned: post.is_pinned })}
             />

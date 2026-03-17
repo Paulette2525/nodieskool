@@ -91,7 +91,7 @@ export function PostCard({
     } catch { toast.error("Erreur lors de la copie"); }
   };
 
-  const canManage = isAdmin;
+  const canManage = isAdmin || isCommunityAdmin;
 
   return (
     <Card className="p-6 rounded-2xl border-border/50 shadow-card hover:shadow-card-hover transition-all duration-200 animate-fade-in">
