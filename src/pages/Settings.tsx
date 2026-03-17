@@ -223,7 +223,7 @@ export default function Settings() {
                 <Switch
                   checked={isSubscribed}
                   onCheckedChange={handleTogglePush}
-                  disabled={!isSupported || isPushLoading || isTogglingPush}
+                  disabled={isPushLoading || isTogglingPush}
                 />
               </div>
             </CardContent>
