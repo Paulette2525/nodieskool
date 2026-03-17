@@ -91,11 +91,11 @@
              </TableHeader>
              <TableBody>
                {filteredUsers.length === 0 ? (
-                 <TableRow>
-                   <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                     Aucun utilisateur trouvé
-                   </TableCell>
-                 </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      Aucun utilisateur trouvé
+                    </TableCell>
+                  </TableRow>
                ) : (
                  filteredUsers.map((user) => (
                    <TableRow key={user.id}>
