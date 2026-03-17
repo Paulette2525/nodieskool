@@ -29,6 +29,8 @@ interface CommunityContextType {
   isMember: boolean;
   loading: boolean;
   memberCount: number;
+  adminCount: number;
+  ownerName: string | null;
   refetch: () => void;
 }
 
@@ -41,6 +43,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<CommunityRole>(null);
   const [loading, setLoading] = useState(true);
   const [memberCount, setMemberCount] = useState(0);
+  const [adminCount, setAdminCount] = useState(0);
+  const [ownerName, setOwnerName] = useState<string | null>(null);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   const refetch = () => setRefetchTrigger(prev => prev + 1);
@@ -51,18 +55,16 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         setCommunity(null);
         setRole(null);
         setMemberCount(0);
+        setAdminCount(0);
+        setOwnerName(null);
         setLoading(false);
         return;
       }
 
-      // Wait for auth to settle before checking membership
-      if (authLoading) {
-        return;
-      }
+      if (authLoading) return;
 
       setLoading(true);
       try {
-        // Fetch community by slug
         const { data: communityData, error: communityError } = await supabase
           .from("communities")
           .select("*")
@@ -70,14 +72,46 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (communityError || !communityData) {
+          // Try public view for non-members
+          const { data: publicData } = await supabase
+            .from("communities_public")
+            .select("*")
+            .eq("slug", slug)
+            .single();
+
+          if (publicData) {
+            setCommunity(publicData as unknown as Community);
+            // Fetch owner name
+            if (publicData.id) {
+              // We can't get owner from public view, set defaults
+              setOwnerName(null);
+              // Fetch member count from public perspective - won't work without membership
+              setMemberCount(0);
+              setAdminCount(0);
+            }
+            setRole(null);
+            setLoading(false);
+            return;
+          }
           setCommunity(null);
           setRole(null);
           setMemberCount(0);
+          setAdminCount(0);
+          setOwnerName(null);
           setLoading(false);
           return;
         }
 
         setCommunity(communityData as Community);
+
+        // Fetch owner profile name
+        const { data: ownerProfile } = await supabase
+          .from("profiles")
+          .select("full_name, username")
+          .eq("id", communityData.owner_id)
+          .single();
+
+        setOwnerName(ownerProfile?.full_name || ownerProfile?.username || null);
 
         // Fetch member count
         const { count } = await supabase
@@ -88,6 +122,16 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
         setMemberCount(count || 0);
 
+        // Fetch admin count
+        const { count: admins } = await supabase
+          .from("community_members")
+          .select("*", { count: "exact", head: true })
+          .eq("community_id", communityData.id)
+          .eq("is_approved", true)
+          .in("role", ["owner", "admin"]);
+
+        setAdminCount(admins || 0);
+
         // Fetch user role if authenticated
         if (profile) {
           const { data: memberData } = await supabase
@@ -97,7 +141,6 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
             .eq("user_id", profile.id)
             .maybeSingle();
 
-          // Only set role if the member is approved
           if (memberData?.is_approved) {
             setRole((memberData?.role as CommunityRole) || null);
           } else {
@@ -111,6 +154,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         setCommunity(null);
         setRole(null);
         setMemberCount(0);
+        setAdminCount(0);
+        setOwnerName(null);
       }
       setLoading(false);
     }
@@ -135,6 +180,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         isMember,
         loading,
         memberCount,
+        adminCount,
+        ownerName,
         refetch,
       }}
     >
