@@ -2,7 +2,7 @@
  import { Card } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
- import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink } from "lucide-react";
+ import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight } from "lucide-react";
  import { cn } from "@/lib/utils";
  import {
    DropdownMenu,
@@ -236,17 +236,20 @@
            )}
  
            {/* Footer */}
-           <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-             {memberCount !== undefined && (
-               <span className="flex items-center gap-1">
-                 <Users className="h-3 w-3" />
-                 {memberCount} membres
-               </span>
-             )}
-             <Badge variant={isPublic ? "secondary" : "outline"} className="text-xs">
-               {isPublic ? "Public" : "Privé"}
-             </Badge>
-           </div>
+            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+              {memberCount !== undefined && (
+                <span className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {memberCount} membres
+                </span>
+              )}
+              <Badge variant={isPublic ? "secondary" : "outline"} className="text-xs">
+                {isPublic ? "Public" : "Privé"}
+              </Badge>
+              <Button size="sm" className="ml-auto rounded-xl text-xs h-7 px-3">
+                Entrer <ArrowRight className="h-3 w-3" />
+              </Button>
+            </div>
          </Link>
        </Card>
 
