@@ -1,88 +1,95 @@
 
-Objectif
-- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
 
-Constat (important)
-- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
-- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
+# Plan : Suppression du classement, des points et du calendrier
 
-Plan d’action (définitif, avec preuves à chaque étape)
+## Résumé
+Supprimer définitivement trois fonctionnalités : le **classement** (leaderboard), le **système de points/niveaux**, et le **calendrier** (événements). Cela inclut le frontend, les triggers de points côté base de données, et les routes.
 
-1) Vérifier si la production embarque bien la nouvelle version
-- Télécharger la page publiée `/admin` et ses assets JS (bundle).
-- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
-  - la chaîne `AdminPinEntry`
-  - la chaîne `verify-admin-code`
-  - la chaîne `admin_unlocked`
-- Interprétation :
-  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
-  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
+## Changements
 
-2) Publier la version actuelle (si la prod est en retard)
-- Déclencher la publication de la version Test actuelle vers l’URL publiée.
-- Après publication, retester `https://nodieskool.lovable.app/admin` :
-  - en navigation normale
-  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
-- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
+### 1. Supprimer les routes (App.tsx)
+- Retirer les imports : `Leaderboard`, `Calendar`, `CommunityLeaderboard`, `CommunityCalendar`
+- Retirer les routes : `/leaderboard`, `/calendar`, `/c/:slug/leaderboard`, `/c/:slug/calendar`
 
-3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
-On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
+### 2. Supprimer les liens de navigation
+- **`CommunitySidebar.tsx`** : retirer les entrées "Classement" et "Calendrier" du tableau `navigation`, retirer les imports `Trophy` et `Calendar`
+- **`Sidebar.tsx`** : idem
 
-3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
-- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
-- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
+### 3. Supprimer les pages
+- Supprimer `src/pages/Leaderboard.tsx`
+- Supprimer `src/pages/Calendar.tsx`
+- Supprimer `src/pages/community/CommunityLeaderboard.tsx`
+- Supprimer `src/pages/community/CommunityCalendar.tsx`
 
-3.2) Logs ciblés (temporairement) pour capturer la redirection
-- Ajouter des `console.log()` au tout début du composant Admin (montage) :
-  - `location.href`
-  - valeur de `sessionStorage.admin_unlocked`
-- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
-  - `location.href`
-  - si un mécanisme de “redirectUrl” est en train de forcer une destination
-- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
+### 4. Supprimer les hooks liés
+- Supprimer `src/hooks/useLeaderboard.ts`
+- Nettoyer `src/hooks/useEvents.ts` — supprimer les fonctions liées aux événements (ou supprimer le fichier si entièrement dédié au calendrier)
 
-3.3) Vérification des gardes de routes / layouts
-- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
-  - des wrappers “RequireAuth”
-  - des `useEffect(() => navigate('/auth'))`
-  - des `<Navigate to="/auth" />` conditionnels
-- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
+### 5. Supprimer les composants liés
+- Supprimer `src/components/leaderboard/LeaderboardCard.tsx`
+- Supprimer `src/components/calendar/EventCard.tsx`
 
-4) Corriger la cause (selon le diagnostic)
-Cas A — Publication en retard (le plus probable)
-- Correction : publier (étape 2). Aucun changement de code nécessaire.
+### 6. Nettoyer le Dashboard (Dashboard.tsx)
+- Retirer la carte "Points" (lignes 94-102) et la carte "Niveau" (lignes 85-93) du dashboard
+- Retirer les imports `Trophy`
 
-Cas B — Cache navigateur / service worker
-- Solution robuste :
-  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
-  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
-  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
-  - ensuite retirer les logs.
+### 7. Nettoyer l'admin communauté (CommunityAdmin.tsx)
+- Retirer l'onglet "Événements" et le composant `CommunityAdminEventsTab`
+- Retirer l'import `Calendar` et le TabsTrigger/TabsContent associé
 
-Cas C — Une autre redirection vers /auth persiste
-- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
-- Exemple typique :
-  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
-  - ou une logique globale qui redirige les routes non publiques vers `/auth`
-- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
+### 8. Nettoyer les colonnes points/niveau dans les vues membres
+- **`CommunityAdminMembersTab.tsx`** : retirer les colonnes "Niveau" et "Points" du tableau
+- **`AdminMembersTab.tsx`** : retirer le système d'attribution de points (dialog, bouton "Award Points")
 
-5) Validation end-to-end (critère “définitif”)
-- Tester sur l’URL publiée :
-  - accéder à `/admin` en non-connecté
-  - entrer un code faux → erreur “Code incorrect”
-  - entrer le bon code → accès au super admin
-  - refresh de la page → reste accessible (sessionStorage) pendant la session
-  - nouvelle fenêtre / navigation privée → redemande le PIN
-- Une fois validé, retirer les logs et le label de version.
+### 9. Nettoyer useAdmin.ts
+- Retirer la mutation `awardPoints` et les imports/invalidations liés au leaderboard
 
-Livrables (ce qui sera modifié si nécessaire)
-- Publication (si c’est la cause).
-- Sinon, modifications minimales et ciblées dans :
-  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
-  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
-  - éventuellement un layout global si un guard impose l’auth partout.
+### 10. Migration SQL — Désactiver les triggers de points
+Supprimer les triggers qui attribuent automatiquement des points :
+- `award_post_points` (trigger sur `posts`)
+- `award_lesson_completion_points` (trigger sur `lesson_progress`)
+- Points dans `update_post_likes_count` (trigger sur `post_likes`)
+- Points dans `update_post_comments_count` (trigger sur `post_comments`)
 
-Pourquoi ce plan règle “définitivement”
-- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
-- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
-- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.
+```sql
+-- Supprimer les triggers d'attribution de points
+DROP TRIGGER IF EXISTS award_post_points_trigger ON public.posts;
+DROP TRIGGER IF EXISTS award_lesson_completion_points_trigger ON public.lesson_progress;
+
+-- Recréer les triggers likes/comments SANS attribution de points
+CREATE OR REPLACE FUNCTION public.update_post_likes_count() ...  -- sans appel à update_user_points
+CREATE OR REPLACE FUNCTION public.update_post_comments_count() ... -- sans appel à update_user_points
+```
+
+### 11. Nettoyer le certificat edge function
+- `supabase/functions/generate-certificate/index.ts` : retirer l'appel à `update_user_points`
+
+### 12. Nettoyer useQuizzes.ts
+- Retirer l'appel à `supabase.rpc("update_user_points", ...)` après réussite du quiz
+
+## Fichiers modifiés/supprimés
+
+| Fichier | Action |
+|---------|--------|
+| `src/App.tsx` | Retirer routes + imports |
+| `src/components/layout/Sidebar.tsx` | Retirer nav Classement + Calendrier |
+| `src/components/layout/CommunitySidebar.tsx` | Idem |
+| `src/pages/Leaderboard.tsx` | Supprimer |
+| `src/pages/Calendar.tsx` | Supprimer |
+| `src/pages/community/CommunityLeaderboard.tsx` | Supprimer |
+| `src/pages/community/CommunityCalendar.tsx` | Supprimer |
+| `src/hooks/useLeaderboard.ts` | Supprimer |
+| `src/components/leaderboard/LeaderboardCard.tsx` | Supprimer |
+| `src/components/calendar/EventCard.tsx` | Supprimer |
+| `src/pages/Dashboard.tsx` | Retirer cartes Points/Niveau |
+| `src/pages/community/CommunityAdmin.tsx` | Retirer onglet Événements |
+| `src/components/community-admin/CommunityAdminEventsTab.tsx` | Supprimer |
+| `src/components/community-admin/CommunityAdminMembersTab.tsx` | Retirer colonnes points/niveau |
+| `src/components/admin/AdminMembersTab.tsx` | Retirer attribution de points |
+| `src/hooks/useAdmin.ts` | Retirer `awardPoints` |
+| `src/hooks/useQuizzes.ts` | Retirer appel `update_user_points` |
+| `supabase/functions/generate-certificate/index.ts` | Retirer appel `update_user_points` |
+| Migration SQL | Désactiver triggers de points |
+
+Les tables (`events`, `event_attendees`, `points_log`, `profiles.points/level`) restent en base mais ne sont plus utilisées. Aucune suppression de table pour éviter de casser des données.
+
