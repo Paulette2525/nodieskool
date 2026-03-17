@@ -12,18 +12,14 @@ import Settings from "./pages/Settings";
 import Community from "./pages/Community";
 import Classroom from "./pages/Classroom";
 import CourseDetail from "./pages/CourseDetail";
-import Leaderboard from "./pages/Leaderboard";
-import Calendar from "./pages/Calendar";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
- import Landing from "./pages/Landing";
- import Dashboard from "./pages/Dashboard";
- import CreateCommunity from "./pages/CreateCommunity";
- import Pricing from "./pages/Pricing";
- import CommunityFeed from "./pages/community/CommunityFeed";
- import CommunityClassroom from "./pages/community/CommunityClassroom";
- import CommunityLeaderboard from "./pages/community/CommunityLeaderboard";
- import CommunityCalendar from "./pages/community/CommunityCalendar";
+import Landing from "./pages/Landing";
+import Dashboard from "./pages/Dashboard";
+import CreateCommunity from "./pages/CreateCommunity";
+import Pricing from "./pages/Pricing";
+import CommunityFeed from "./pages/community/CommunityFeed";
+import CommunityClassroom from "./pages/community/CommunityClassroom";
 import CommunityAdmin from "./pages/community/CommunityAdmin";
 import CommunityClassroomDetail from "./pages/community/CommunityClassroomDetail";
 import Discover from "./pages/Discover";
@@ -39,38 +35,33 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-             <Route path="/" element={<Landing />} />
-             <Route path="/dashboard" element={<Dashboard />} />
-             <Route path="/create-community" element={<CreateCommunity />} />
-             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/create-community" element={<CreateCommunity />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/contact" element={<Contact />} />
-             
-             {/* Community-scoped routes */}
-             <Route path="/c/:slug" element={<CommunityFeed />} />
-             <Route path="/c/:slug/community" element={<CommunityFeed />} />
-             <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
-             <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
-             <Route path="/c/:slug/leaderboard" element={<CommunityLeaderboard />} />
-             <Route path="/c/:slug/calendar" element={<CommunityCalendar />} />
-              <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
-             
-             {/* Auth and user routes */}
+            
+            {/* Community-scoped routes */}
+            <Route path="/c/:slug" element={<CommunityFeed />} />
+            <Route path="/c/:slug/community" element={<CommunityFeed />} />
+            <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
+            <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
+            <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
+            
+            {/* Auth and user routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
-             
-             {/* Legacy routes - keep for backward compatibility */}
+            
+            {/* Legacy routes */}
             <Route path="/community" element={<Community />} />
             <Route path="/classroom" element={<Classroom />} />
             <Route path="/classroom/:id" element={<CourseDetail />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/calendar" element={<Calendar />} />
             <Route path="/admin" element={<Admin />} />
-             
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
