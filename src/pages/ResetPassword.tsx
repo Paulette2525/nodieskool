@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
