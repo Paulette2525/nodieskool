@@ -84,8 +84,8 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
             setOwnerName(null);
             // Fetch member count via RPC (bypasses RLS)
             if (publicData.id) {
-              const { data: countData } = await supabase.rpc('get_community_member_count', { _community_id: publicData.id });
-              setMemberCount(countData || 0);
+              const { data: countData } = await supabase.rpc('get_community_member_count' as any, { _community_id: publicData.id });
+              setMemberCount(typeof countData === 'number' ? countData : 0);
             } else {
               setMemberCount(0);
             }
