@@ -8,8 +8,6 @@
    username: string;
    full_name: string | null;
    avatar_url: string | null;
-   points: number;
-   level: number;
    created_at: string;
    platform_role: string | null;
    communities_count: number;
