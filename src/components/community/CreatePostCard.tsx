@@ -20,7 +20,18 @@ export function CreatePostCard({ userAvatar, userName, onPost }: CreatePostCardP
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { uploadPostImage, uploading } = useStorage();
+
+  const autoResize = useCallback(() => {
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+    }
+  }, []);
+
+  useEffect(() => { autoResize(); }, [content, autoResize]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
