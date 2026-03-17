@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Sparkles, Send, Mail, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, Mail, MessageSquare } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
