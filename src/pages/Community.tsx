@@ -67,6 +67,8 @@ export default function Community() {
                 createdAt={post.created_at}
                 onDelete={() => deletePost.mutate(post.id)}
                 onTogglePin={() => togglePin.mutate({ postId: post.id, isPinned: post.is_pinned })}
+                onEdit={(postId, content) => updatePost.mutate({ postId, content })}
+                isEditPending={updatePost.isPending}
               />
             ))
           )}
