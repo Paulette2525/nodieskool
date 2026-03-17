@@ -66,7 +66,7 @@ export function InstallBanner() {
       <div className="mx-3 mt-3 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-lg shadow-lg p-3 flex items-center gap-3">
         <img
           src="/pwa-192x192.png"
-          alt="NodieSkool"
+          alt="Tribbue"
           className="w-10 h-10 rounded-xl shrink-0"
         />
 
