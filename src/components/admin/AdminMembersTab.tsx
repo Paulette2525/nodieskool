@@ -2,23 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -35,7 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Award,
   Shield,
   ShieldCheck,
   Crown,
@@ -43,7 +27,6 @@ import {
   MoreHorizontal,
   UserX,
   Edit,
-  History,
 } from "lucide-react";
 import { format } from "date-fns";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -72,16 +55,11 @@ interface Member {
 
 interface AdminMembersTabProps {
   members: Member[];
-  awardPoints: UseMutationResult<void, Error, { userId: string; points: number; reason: string }>;
   updateUserRole: UseMutationResult<void, Error, { userId: string; role: "admin" | "moderator" | "member"; action: "add" | "remove" }>;
   deleteUser: UseMutationResult<void, Error, string>;
 }
 
-export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUser }: AdminMembersTabProps) {
-  const [selectedMember, setSelectedMember] = useState<string | null>(null);
-  const [pointsAmount, setPointsAmount] = useState("");
-  const [pointsReason, setPointsReason] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+export function AdminMembersTab({ members, updateUserRole, deleteUser }: AdminMembersTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
@@ -94,26 +72,6 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUs
         setMemberToDelete(null);
       },
     });
-  };
-
-  const handleAwardPoints = () => {
-    if (!selectedMember || !pointsAmount || !pointsReason) return;
-
-    awardPoints.mutate(
-      {
-        userId: selectedMember,
-        points: parseInt(pointsAmount),
-        reason: pointsReason,
-      },
-      {
-        onSuccess: () => {
-          setDialogOpen(false);
-          setPointsAmount("");
-          setPointsReason("");
-          setSelectedMember(null);
-        },
-      }
-    );
   };
 
   const getRoleBadge = (role: string) => {
@@ -152,71 +110,12 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUs
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <CardTitle>Gestion des Membres ({members.length})</CardTitle>
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Rechercher..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-64"
-          />
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
-                <Award className="h-4 w-4" />
-                Attribuer Points
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Attribuer des Points</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Sélectionner un membre</Label>
-                  <Select value={selectedMember ?? ""} onValueChange={setSelectedMember}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir un membre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {members.map((member) => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.full_name || member.username}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Points</Label>
-                  <Input
-                    type="number"
-                    placeholder="100"
-                    value={pointsAmount}
-                    onChange={(e) => setPointsAmount(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Raison</Label>
-                  <Input
-                    placeholder="Récompense spéciale"
-                    value={pointsReason}
-                    onChange={(e) => setPointsReason(e.target.value)}
-                  />
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={handleAwardPoints}
-                  disabled={awardPoints.isPending}
-                >
-                  {awardPoints.isPending && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Attribuer Points
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Input
+          placeholder="Rechercher..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-64"
+        />
       </CardHeader>
       <CardContent>
         <Table>
@@ -224,8 +123,6 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUs
             <TableRow>
               <TableHead>Membre</TableHead>
               <TableHead>Rôles</TableHead>
-              <TableHead>Niveau</TableHead>
-              <TableHead>Points</TableHead>
               <TableHead>Inscrit le</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -257,10 +154,6 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUs
                     ))}
                   </div>
                 </TableCell>
-                <TableCell>
-                  <Badge variant="outline">Lvl {member.level}</Badge>
-                </TableCell>
-                <TableCell className="font-medium">{member.points}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {format(new Date(member.created_at), "dd/MM/yyyy")}
                 </TableCell>
@@ -272,20 +165,9 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUs
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => {
-                        setSelectedMember(member.id);
-                        setDialogOpen(true);
-                      }}>
-                        <Award className="mr-2 h-4 w-4" />
-                        Attribuer des points
-                      </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Edit className="mr-2 h-4 w-4" />
                         Modifier le profil
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <History className="mr-2 h-4 w-4" />
-                        Historique des points
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {!member.roles.includes("admin") && (
@@ -336,7 +218,6 @@ export function AdminMembersTab({ members, awardPoints, updateUserRole, deleteUs
         </Table>
       </CardContent>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

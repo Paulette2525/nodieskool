@@ -136,21 +136,6 @@ interface SidebarProps {
 
         {/* User section */}
         <div className="border-t border-sidebar-border p-3 overflow-y-auto flex-shrink-0 max-h-[40vh]">
-          {/* Level & Points */}
-          {profile && (
-            <div className="mb-3 rounded-lg bg-sidebar-accent p-3">
-              <div className="flex items-center justify-between text-xs text-sidebar-foreground">
-                <span className="font-medium">Niveau {profile.level}</span>
-                <span className="text-accent font-semibold">{profile.points} pts</span>
-              </div>
-              <div className="mt-2 h-1.5 rounded-full bg-sidebar-border">
-                <div 
-                  className="h-full rounded-full bg-primary transition-all"
-                  style={{ width: `${Math.min(100, (profile.points % 100))}%` }}
-                />
-              </div>
-            </div>
-          )}
 
           {/* User info */}
           {user && profile && (

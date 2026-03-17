@@ -140,7 +140,6 @@ export function useAdmin() {
     members: membersQuery.data ?? [],
     stats: statsQuery.data,
     isLoading: membersQuery.isLoading,
-    awardPoints,
     updateUserRole,
     deletePost,
     deleteUser,
