@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Share, Plus, Check, Smartphone, Monitor } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
