@@ -62,8 +62,8 @@ export function InstallBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom animate-in slide-in-from-bottom duration-300">
-      <div className="mx-3 mb-3 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-lg shadow-lg p-3 flex items-center gap-3">
+    <div className="fixed top-0 left-0 right-0 z-50 safe-area-top animate-in slide-in-from-top duration-300">
+      <div className="mx-3 mt-3 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-lg shadow-lg p-3 flex items-center gap-3">
         <img
           src="/pwa-192x192.png"
           alt="NodieSkool"
