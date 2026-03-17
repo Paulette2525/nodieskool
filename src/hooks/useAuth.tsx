@@ -171,6 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { lovable } = await import("@/integrations/lovable/index");
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
+      extraParams: {
+        prompt: "select_account",
+      },
     });
     if (result.error) throw result.error;
   };

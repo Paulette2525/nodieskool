@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Navigate, Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, RefreshCw } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
-  const { user, loading, signIn, signUp, signInWithGoogle } = useAuth();
+  const { user, profile, loading, signIn, signUp, signInWithGoogle, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,7 +27,70 @@ export default function Auth() {
   const [signupFullName, setSignupFullName] = useState("");
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
-  if (user) { const r = getAndClearRedirectUrl(); return <Navigate to={r || "/dashboard"} replace />; }
+
+  // Already logged in: show options instead of auto-redirecting
+  if (user) {
+    const redirectUrl = getAndClearRedirectUrl();
+
+    const handleGoToDashboard = () => {
+      navigate(redirectUrl || "/dashboard");
+    };
+
+    const handleSignOut = async () => {
+      try {
+        await signOut();
+        toast.success("Déconnecté avec succès");
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    };
+
+    const handleSwitchAccount = async () => {
+      setIsGoogleLoading(true);
+      try {
+        await signOut();
+        await signInWithGoogle();
+      } catch (error: any) {
+        toast.error(error.message || "Erreur lors du changement de compte");
+      } finally {
+        setIsGoogleLoading(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+        </div>
+        <Card className="w-full max-w-sm rounded-2xl border-border/50 shadow-lg relative">
+          <CardHeader className="text-center pb-4">
+            <div className="flex items-center justify-center mb-3">
+              <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
+            </div>
+            <CardTitle className="text-lg">Vous êtes déjà connecté</CardTitle>
+            <CardDescription className="text-xs">
+              Connecté en tant que {profile?.full_name || user.email}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button onClick={handleGoToDashboard} className="w-full rounded-xl h-10 text-sm font-medium">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Aller au dashboard
+            </Button>
+            <Button variant="outline" onClick={handleSwitchAccount} className="w-full rounded-xl h-10 text-sm font-medium" disabled={isGoogleLoading}>
+              {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+              Se connecter avec un autre compte
+            </Button>
+            <Button variant="ghost" onClick={handleSignOut} className="w-full rounded-xl h-10 text-sm font-medium text-muted-foreground">
+              <LogOut className="mr-2 h-4 w-4" />
+              Se déconnecter
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); setIsLoading(true);
@@ -56,7 +119,6 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      {/* Subtle background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
