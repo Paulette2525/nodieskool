@@ -2,7 +2,8 @@
  import { Button } from "@/components/ui/button";
  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
- import { Check, Sparkles, ArrowLeft } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
+import tribbueLogoImg from "@/assets/tribbue-logo.png";
  import { useAuth } from "@/hooks/useAuth";
  import { useSubscription } from "@/hooks/useSubscription";
  
