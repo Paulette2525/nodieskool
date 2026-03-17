@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, BookOpen, MessageSquare, Calendar, ArrowRight, Check, Globe, Zap, Shield, Star, Play } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
+import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 const features = [
