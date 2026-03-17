@@ -100,16 +100,6 @@ export function PostCard({
     }
   };
 
-  const getLevelBadge = (level: number) => {
-    const colors = [
-      "bg-gray-100 text-gray-600",
-      "bg-emerald-100 text-emerald-700",
-      "bg-blue-100 text-blue-700",
-      "bg-purple-100 text-purple-700",
-      "bg-amber-100 text-amber-700",
-    ];
-    return colors[Math.min(level - 1, colors.length - 1)] || colors[0];
-  };
 
   // Only admins can manage posts (delete, pin)
   const canManage = isAdmin;
