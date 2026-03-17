@@ -74,12 +74,10 @@ import tribbueLogoImg from "@/assets/tribbue-logo.png";
                <ArrowLeft className="h-5 w-5" />
              </Link>
            </Button>
-           <Link to="/" className="flex items-center gap-2">
-             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-               <Sparkles className="h-5 w-5 text-primary-foreground" />
-             </div>
-             <span className="font-bold">Tarifs</span>
-           </Link>
+            <Link to="/" className="flex items-center gap-2">
+              <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
+              <span className="font-bold">Tarifs</span>
+            </Link>
          </div>
        </header>
  
