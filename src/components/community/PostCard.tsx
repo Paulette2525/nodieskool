@@ -37,6 +37,7 @@ interface PostCardProps {
   likesCount: number;
   commentsCount: number;
   createdAt: string;
+  isCommunityAdmin?: boolean;
   onDelete?: () => void;
   onTogglePin?: () => void;
 }
