@@ -32,6 +32,7 @@ const CommunityClassroomDetail = lazy(() => import("./pages/community/CommunityC
 const Discover = lazy(() => import("./pages/Discover"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Install = lazy(() => import("./pages/Install"));
+const IconPreview = lazy(() => import("./pages/IconPreview"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/discover" element={<Discover />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/install" element={<Install />} />
+              <Route path="/icon-preview" element={<IconPreview />} />
               
               {/* Community-scoped routes */}
               <Route path="/c/:slug" element={<CommunityFeed />} />
