@@ -13,9 +13,9 @@ function CommunityHeader() {
   if (!community) return null;
 
   return (
-    <div className="mb-6 -mx-6 -mt-6">
+    <div className="mb-6">
       {/* Cover */}
-      <div className="relative h-32 md:h-44 overflow-hidden rounded-t-lg">
+      <div className="relative h-28 md:h-36 overflow-hidden rounded-xl">
         {community.cover_url ? (
           <img
             src={community.cover_url}
@@ -26,47 +26,37 @@ function CommunityHeader() {
           <div
             className="w-full h-full"
             style={{
-              background: `linear-gradient(135deg, ${community.primary_color || 'hsl(var(--primary))'} 0%, ${community.primary_color || 'hsl(var(--primary))'}66 100%)`,
+              background: `linear-gradient(135deg, ${community.primary_color || 'hsl(var(--primary))'} 0%, ${community.primary_color || 'hsl(var(--primary))'}55 100%)`,
             }}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
       </div>
 
-      {/* Info bar */}
-      <div className="px-6 -mt-8 relative z-10">
-        <div className="flex items-end gap-4">
-          <Avatar className="h-16 w-16 border-3 border-background shadow-lg">
-            {community.logo_url ? (
-              <AvatarImage src={community.logo_url} alt={community.name} />
-            ) : (
-              <AvatarFallback
-                className="text-xl font-bold"
-                style={{
-                  backgroundColor: community.primary_color || 'hsl(var(--primary))',
-                  color: 'white',
-                }}
-              >
-                {community.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          <div className="flex-1 min-w-0 pb-1">
-            <h1 className="text-xl font-bold text-foreground truncate">{community.name}</h1>
-            <div className="flex items-center gap-3 mt-0.5">
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Users className="h-3 w-3" />
-                {memberCount} membre{memberCount !== 1 ? "s" : ""}
-              </span>
-            </div>
-          </div>
+      {/* Info */}
+      <div className="flex items-center gap-3 -mt-6 px-4 relative z-10">
+        <Avatar className="h-12 w-12 border-2 border-background shadow-md">
+          {community.logo_url ? (
+            <AvatarImage src={community.logo_url} alt={community.name} />
+          ) : (
+            <AvatarFallback
+              className="text-lg font-bold"
+              style={{
+                backgroundColor: community.primary_color || 'hsl(var(--primary))',
+                color: 'white',
+              }}
+            >
+              {community.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          )}
+        </Avatar>
+        <div className="pt-6">
+          <h1 className="text-lg font-bold text-foreground leading-tight">{community.name}</h1>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="h-3 w-3" />
+            {memberCount} membre{memberCount !== 1 ? "s" : ""}
+          </span>
         </div>
-        {community.description && (
-          <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-            {community.description}
-          </p>
-        )}
-        <div className="border-b mt-4" />
       </div>
     </div>
   );
@@ -81,7 +71,7 @@ function CommunityFeedContent() {
     <div className="max-w-4xl mx-auto p-6">
       <CommunityHeader />
 
-      <div className="space-y-4 mt-6">
+      <div className="space-y-4">
         {profile && (
           <CreatePostCard 
             userName={profile.full_name || profile.username}
