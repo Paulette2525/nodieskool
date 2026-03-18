@@ -1,41 +1,39 @@
 import { MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useContactAdmin } from "@/hooks/useMessages";
-import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
+import { toast } from "sonner";
 
 export function ContactAdminButton() {
-  const { slug } = useParams<{ slug: string }>();
   const { profile } = useAuth();
   const { community, isOwner } = useCommunityContext();
   const { startConversation } = useContactAdmin();
-  const navigate = useNavigate();
 
   if (!profile || isOwner || !community) return null;
 
   const handleContact = () => {
     startConversation.mutate(undefined, {
-      onSuccess: (conversationId) => {
-        navigate(`/c/${slug}/messages?conv=${conversationId}`);
+      onSuccess: () => {
+        toast.success("Conversation créée avec l'administrateur !");
       },
     });
   };
 
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="sm"
       onClick={handleContact}
       disabled={startConversation.isPending}
-      className="w-full justify-start text-sidebar-foreground text-xs h-8 rounded-lg"
+      className="w-full justify-start gap-2.5 text-[13px] font-medium h-9 rounded-xl border-primary/20 text-primary hover:bg-primary/10 hover:text-primary"
     >
       {startConversation.isPending ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0" />
+        <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
       ) : (
-        <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
+        <MessageSquare className="h-4 w-4 flex-shrink-0" />
       )}
-      <span className="ml-2">Contacter l'admin</span>
+      Contacter l'admin
     </Button>
   );
 }

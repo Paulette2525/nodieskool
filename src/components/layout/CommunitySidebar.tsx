@@ -1,8 +1,9 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar, MessageSquare } from "lucide-react";
+import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
@@ -13,13 +14,12 @@ export function CommunitySidebar() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
-  const { community, isAdmin } = useCommunityContext();
+  const { community, isAdmin, isOwner } = useCommunityContext();
 
   const navigation = [
     { name: "Communauté", href: `/c/${slug}/community`, icon: Users },
     { name: "Formations", href: `/c/${slug}/classroom`, icon: BookOpen },
     { name: "Événements", href: `/c/${slug}/events`, icon: Calendar },
-    { name: "Messages", href: `/c/${slug}/messages`, icon: MessageSquare },
   ];
 
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
@@ -80,12 +80,20 @@ export function CommunitySidebar() {
               <span>Admin</span>
             </Link>
           )}
+
+          {/* Contact admin - visible only for non-owners */}
+          {user && !isOwner && (
+            <>
+              <Separator className="my-2" />
+              <ContactAdminButton />
+            </>
+          )}
         </nav>
 
-        {/* User */}
+        {/* User footer */}
         <div className="border-t border-sidebar-border p-2 flex-shrink-0">
           {user && profile && (
-            <>
+            <div className="space-y-1">
               <Link to="/profile" className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-sidebar-accent/60 transition-colors">
                 <Avatar className="h-7 w-7 flex-shrink-0">
                   <AvatarImage src={profile.avatar_url ?? undefined} />
@@ -93,23 +101,22 @@ export function CommunitySidebar() {
                     {(profile.full_name || profile.username).split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-sidebar-foreground truncate">{profile.full_name || profile.username}</p>
-                </div>
+                <p className="text-xs font-medium text-sidebar-foreground truncate flex-1">{profile.full_name || profile.username}</p>
               </Link>
-              <ContactAdminButton />
-              <div className="mt-1 space-y-0.5">
-                <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground text-xs h-8 rounded-lg" asChild>
+
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="flex-1 justify-start text-sidebar-foreground text-xs h-8 rounded-lg" asChild>
                   <Link to="/dashboard"><LayoutDashboard className="h-3.5 w-3.5 flex-shrink-0" /><span className="ml-2">Dashboard</span></Link>
                 </Button>
-                <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground text-xs h-8 rounded-lg" asChild>
-                  <Link to="/settings"><Settings className="h-3.5 w-3.5 flex-shrink-0" /><span className="ml-2">Paramètres</span></Link>
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => signOut()} className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-8 rounded-lg">
-                  <LogOut className="h-3.5 w-3.5 flex-shrink-0" /><span className="ml-2">Déconnexion</span>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-sidebar-foreground rounded-lg" asChild>
+                  <Link to="/settings"><Settings className="h-3.5 w-3.5" /></Link>
                 </Button>
               </div>
-            </>
+
+              <Button variant="ghost" size="sm" onClick={() => signOut()} className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-8 rounded-lg">
+                <LogOut className="h-3.5 w-3.5 flex-shrink-0" /><span className="ml-2">Déconnexion</span>
+              </Button>
+            </div>
           )}
           {!user && <Link to="/auth"><Button className="w-full rounded-xl text-xs h-9">Se connecter</Button></Link>}
         </div>
