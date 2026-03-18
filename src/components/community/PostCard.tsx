@@ -25,8 +25,6 @@ import {
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { usePostLikes } from "@/hooks/usePosts";
-import { usePostBookmark } from "@/hooks/useBookmarks";
 import { useAuth } from "@/hooks/useAuth";
 import { CommentSection } from "./CommentSection";
 import { toast } from "sonner";
@@ -47,9 +45,13 @@ interface PostCardProps {
   commentsCount: number;
   createdAt: string;
   isCommunityAdmin?: boolean;
+  isLiked?: boolean;
+  isBookmarked?: boolean;
   onDelete?: () => void;
   onTogglePin?: () => void;
   onEdit?: (postId: string, content: string) => void;
+  onToggleLike?: () => void;
+  onToggleBookmark?: () => void;
   isEditPending?: boolean;
 }
 
@@ -63,16 +65,18 @@ export function PostCard({
   commentsCount,
   createdAt,
   isCommunityAdmin,
+  isLiked = false,
+  isBookmarked = false,
   onDelete,
   onTogglePin,
   onEdit,
+  onToggleLike,
+  onToggleBookmark,
   isEditPending,
 }: PostCardProps) {
   const { profile, isAdmin } = useAuth();
-  const { isLiked, toggleLike } = usePostLikes(id);
-  const { isBookmarked, toggleBookmark } = usePostBookmark(id);
   const [optimisticLikes, setOptimisticLikes] = useState(likesCount);
-  const [optimisticIsLiked, setOptimisticIsLiked] = useState(false);
+  const [optimisticIsLiked, setOptimisticIsLiked] = useState(isLiked);
   const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -82,19 +86,23 @@ export function PostCard({
   const [isTruncated, setIsTruncated] = useState(false);
 
   useEffect(() => {
+    setOptimisticIsLiked(isLiked);
+    setOptimisticLikes(likesCount);
+  }, [isLiked, likesCount]);
+
+  useEffect(() => {
     const el = contentRef.current;
     if (el) {
-      // Check if content overflows 7 lines (~7 * lineHeight)
       setIsTruncated(el.scrollHeight > el.clientHeight + 2);
     }
   }, [content]);
 
   const handleLike = () => {
     if (!profile) return;
-    const newIsLiked = !isLiked;
+    const newIsLiked = !optimisticIsLiked;
     setOptimisticIsLiked(newIsLiked);
     setOptimisticLikes(newIsLiked ? likesCount + 1 : likesCount);
-    toggleLike.mutate();
+    onToggleLike?.();
   };
 
   const handleShare = async () => {
@@ -196,27 +204,17 @@ export function PostCard({
             {content}
           </p>
           {isTruncated && !expanded && (
-            <button
-              onClick={() => setExpanded(true)}
-              className="text-sm font-medium text-primary hover:underline mt-1"
-            >
+            <button onClick={() => setExpanded(true)} className="text-sm font-medium text-primary hover:underline mt-1">
               Voir plus
             </button>
           )}
           {expanded && isTruncated && (
-            <button
-              onClick={() => setExpanded(false)}
-              className="text-sm font-medium text-primary hover:underline mt-1"
-            >
+            <button onClick={() => setExpanded(false)} className="text-sm font-medium text-primary hover:underline mt-1">
               Voir moins
             </button>
           )}
           {imageUrl && (
-            <img 
-              src={imageUrl} 
-              alt="Post image" 
-              className="mt-3 rounded-xl w-full object-cover max-h-80"
-            />
+            <img src={imageUrl} alt="Post image" className="mt-3 rounded-xl w-full object-cover max-h-80" />
           )}
         </div>
 
@@ -229,11 +227,11 @@ export function PostCard({
             disabled={!profile}
             className={cn(
               "gap-1.5 text-muted-foreground hover:text-foreground rounded-xl h-8 px-3 text-xs",
-              (isLiked || optimisticIsLiked) && "text-red-500 hover:text-red-600"
+              optimisticIsLiked && "text-red-500 hover:text-red-600"
             )}
           >
-            <Heart className={cn("h-3.5 w-3.5", (isLiked || optimisticIsLiked) && "fill-current")} />
-            <span>{isLiked ? likesCount : optimisticLikes}</span>
+            <Heart className={cn("h-3.5 w-3.5", optimisticIsLiked && "fill-current")} />
+            <span>{optimisticLikes}</span>
           </Button>
           <Collapsible open={showComments} onOpenChange={setShowComments}>
             <CollapsibleTrigger asChild>
@@ -248,8 +246,7 @@ export function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => toggleBookmark.mutate()}
-              disabled={toggleBookmark.isPending}
+              onClick={() => onToggleBookmark?.()}
               className={cn(
                 "gap-1.5 text-muted-foreground hover:text-foreground rounded-xl h-8 px-3 text-xs",
                 isBookmarked && "text-amber-500 hover:text-amber-600"

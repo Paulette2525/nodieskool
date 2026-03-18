@@ -3,13 +3,14 @@ import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { useCommunityAdmin } from "@/hooks/useCommunityAdmin";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users, BookOpen, FileText, Settings } from "lucide-react";
+import { Loader2, Users, BookOpen, FileText, Settings, Calendar } from "lucide-react";
 
 import { CommunityAdminStats } from "@/components/community-admin/CommunityAdminStats";
 import { CommunityAdminMembersTab } from "@/components/community-admin/CommunityAdminMembersTab";
 import { CommunityAdminCoursesTab } from "@/components/community-admin/CommunityAdminCoursesTab";
 import { CommunityAdminPostsTab } from "@/components/community-admin/CommunityAdminPostsTab";
 import { CommunityAdminSettingsTab } from "@/components/community-admin/CommunityAdminSettingsTab";
+import { CommunityAdminEventsTab } from "@/components/community-admin/CommunityAdminEventsTab";
 
 function CommunityAdminContent() {
   const { community, isAdmin, loading: contextLoading } = useCommunityContext();
@@ -64,6 +65,10 @@ function CommunityAdminContent() {
             <FileText className="h-4 w-4" />
             Posts
           </TabsTrigger>
+          <TabsTrigger value="events" className="gap-2">
+            <Calendar className="h-4 w-4" />
+            Événements
+          </TabsTrigger>
           <TabsTrigger value="settings" className="gap-2">
             <Settings className="h-4 w-4" />
             Paramètres
@@ -84,6 +89,10 @@ function CommunityAdminContent() {
 
         <TabsContent value="posts">
           <CommunityAdminPostsTab posts={posts} deletePost={deletePost} />
+        </TabsContent>
+
+        <TabsContent value="events">
+          <CommunityAdminEventsTab />
         </TabsContent>
 
         <TabsContent value="settings">

@@ -105,43 +105,22 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
 
         setCommunity(communityData as Community);
 
-        // Fetch owner profile name
-        const { data: ownerProfile } = await supabase
-          .from("profiles")
-          .select("full_name, username")
-          .eq("id", communityData.owner_id)
-          .single();
+        // Parallel fetch: owner profile, member count, admin count, user role
+        const [ownerRes, countRes, adminRes, memberRes] = await Promise.all([
+          supabase.from("profiles").select("full_name, username").eq("id", communityData.owner_id).single(),
+          supabase.rpc('get_community_member_count' as any, { _community_id: communityData.id }),
+          supabase.from("community_members").select("*", { count: "exact", head: true }).eq("community_id", communityData.id).eq("is_approved", true).in("role", ["owner", "admin"]),
+          profile
+            ? supabase.from("community_members").select("role, is_approved").eq("community_id", communityData.id).eq("user_id", profile.id).maybeSingle()
+            : Promise.resolve({ data: null }),
+        ]);
 
-        setOwnerName(ownerProfile?.full_name || ownerProfile?.username || null);
+        setOwnerName(ownerRes.data?.full_name || ownerRes.data?.username || null);
+        setMemberCount(typeof countRes.data === 'number' ? countRes.data : 0);
+        setAdminCount(adminRes.count || 0);
 
-        // Fetch member count via RPC (works for all users)
-        const { data: countData } = await supabase.rpc('get_community_member_count' as any, { _community_id: communityData.id });
-        setMemberCount(typeof countData === 'number' ? countData : 0);
-
-        // Fetch admin count
-        const { count: admins } = await supabase
-          .from("community_members")
-          .select("*", { count: "exact", head: true })
-          .eq("community_id", communityData.id)
-          .eq("is_approved", true)
-          .in("role", ["owner", "admin"]);
-
-        setAdminCount(admins || 0);
-
-        // Fetch user role if authenticated
-        if (profile) {
-          const { data: memberData } = await supabase
-            .from("community_members")
-            .select("role, is_approved")
-            .eq("community_id", communityData.id)
-            .eq("user_id", profile.id)
-            .maybeSingle();
-
-          if (memberData?.is_approved) {
-            setRole((memberData?.role as CommunityRole) || null);
-          } else {
-            setRole(null);
-          }
+        if (profile && memberRes.data?.is_approved) {
+          setRole((memberRes.data?.role as CommunityRole) || null);
         } else {
           setRole(null);
         }

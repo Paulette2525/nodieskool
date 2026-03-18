@@ -1,11 +1,12 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft } from "lucide-react";
+import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
+import { ContactAdminButton } from "@/components/community/ContactAdminButton";
 
 export function CommunitySidebar() {
   const { slug } = useParams<{ slug: string }>();
@@ -17,6 +18,8 @@ export function CommunitySidebar() {
   const navigation = [
     { name: "Communauté", href: `/c/${slug}/community`, icon: Users },
     { name: "Formations", href: `/c/${slug}/classroom`, icon: BookOpen },
+    { name: "Événements", href: `/c/${slug}/events`, icon: Calendar },
+    { name: "Messages", href: `/c/${slug}/messages`, icon: MessageSquare },
   ];
 
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
@@ -94,6 +97,7 @@ export function CommunitySidebar() {
                   <p className="text-xs font-medium text-sidebar-foreground truncate">{profile.full_name || profile.username}</p>
                 </div>
               </Link>
+              <ContactAdminButton />
               <div className="mt-1 space-y-0.5">
                 <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground text-xs h-8 rounded-lg" asChild>
                   <Link to="/dashboard"><LayoutDashboard className="h-3.5 w-3.5 flex-shrink-0" /><span className="ml-2">Dashboard</span></Link>
