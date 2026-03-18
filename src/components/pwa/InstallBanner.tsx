@@ -10,7 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = "pwa_banner_dismissed_at";
-const DISMISS_DAYS = 7;
+const DISMISS_DAYS = 3;
 
 export function InstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
