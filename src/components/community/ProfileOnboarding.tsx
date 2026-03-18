@@ -11,12 +11,6 @@ import { useStorage } from "@/hooks/useStorage";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 
-const SKIP_KEY = "profile_onboarding_skipped";
-
-export function hasSkippedOnboarding(): boolean {
-  return localStorage.getItem(SKIP_KEY) === "true";
-}
-
 export function ProfileOnboarding() {
   const { profile, updateProfile } = useProfile();
   const { refreshProfile } = useAuth();
