@@ -1,5 +1,4 @@
-// Auth context and provider for user authentication and role management
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,75 +38,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isModerator, setIsModerator] = useState(false);
   const [loading, setLoading] = useState(true);
   const [rolesLoaded, setRolesLoaded] = useState(false);
+  const fetchingRef = useRef<string | null>(null);
 
-  const withTimeout = async <T,>(promise: PromiseLike<T>, ms: number, label: string): Promise<T> => {
-    let timeoutId: number | undefined;
-    const timeout = new Promise<never>((_, reject) => {
-      timeoutId = window.setTimeout(() => reject(new Error(`${label} timed out`)), ms);
-    });
-
-    // Wrap PromiseLike into a real Promise to ensure proper awaiting.
-    const p = new Promise<T>((resolve, reject) => {
-      (promise as any).then(resolve, reject);
-    });
-
-    try {
-      return await Promise.race([p, timeout]);
-    } finally {
-      if (timeoutId) window.clearTimeout(timeoutId);
-    }
-  };
-
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = useCallback(async (userId: string) => {
+    // Prevent duplicate fetches for same user
+    if (fetchingRef.current === userId) return;
+    fetchingRef.current = userId;
     setRolesLoaded(false);
+
     try {
-      const profileRes = await withTimeout(
+      // Parallel fetch: profile + roles
+      const [profileRes, rolesRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", userId).single(),
-        8000,
-        "fetchProfile(profiles)"
-      );
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+      ]);
 
-      const profileData = (profileRes as any)?.data as Profile | null | undefined;
-
-      if (profileData) {
-        setProfile(profileData);
+      if (profileRes.data) {
+        setProfile(profileRes.data as Profile);
       }
 
-      // Check roles
-      const rolesRes = await withTimeout(
-        supabase.from("user_roles").select("role").eq("user_id", userId),
-        8000,
-        "fetchProfile(user_roles)"
-      );
-
-      const roles = (rolesRes as any)?.data as Array<{ role: string }> | null | undefined;
-
+      const roles = rolesRes.data as Array<{ role: string }> | null;
       if (roles && roles.length > 0) {
-        const hasAdmin = roles.some((r) => r.role === "admin");
-        const hasMod = roles.some((r) => r.role === "moderator" || r.role === "admin");
-        setIsAdmin(hasAdmin);
-        setIsModerator(hasMod);
+        setIsAdmin(roles.some((r) => r.role === "admin"));
+        setIsModerator(roles.some((r) => r.role === "moderator" || r.role === "admin"));
       } else {
         setIsAdmin(false);
         setIsModerator(false);
       }
-      setRolesLoaded(true);
     } catch (error) {
       console.error("Error fetching profile/roles:", error);
-      setRolesLoaded(true);
     }
-  };
+    setRolesLoaded(true);
+    fetchingRef.current = null;
+  }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let mounted = true;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
+        if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Do not block rendering on profile/role fetch
-          void fetchProfile(session.user.id);
+          // Use setTimeout to avoid blocking the auth state change
+          setTimeout(() => {
+            if (mounted) fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
           setIsAdmin(false);
@@ -118,47 +96,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        void fetchProfile(session.user.id);
+        fetchProfile(session.user.id);
       } else {
         setRolesLoaded(true);
       }
       setLoading(false);
-    }).catch((err) => {
-      console.error("Error getting session:", err);
+    }).catch(() => {
+      if (!mounted) return;
       setRolesLoaded(true);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchProfile]);
 
   const signUp = async (email: string, password: string, username: string, fullName: string) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: {
-          username,
-          full_name: fullName,
-        },
+        data: { username, full_name: fullName },
       },
     });
-
     if (error) throw error;
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
 
@@ -172,9 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { lovable } = await import("@/integrations/lovable/index");
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin + '/auth',
-      extraParams: {
-        prompt: "select_account",
-      },
+      extraParams: { prompt: "select_account" },
     });
     if (result.error) {
       localStorage.removeItem('oauth_pending');
@@ -184,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
+      fetchingRef.current = null; // Reset to allow re-fetch
       await fetchProfile(user.id);
     }
   };
@@ -191,18 +163,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
-        session,
-        profile,
-        isAdmin,
-        isModerator,
-        loading,
-        rolesLoaded,
-        signUp,
-        signIn,
-        signOut,
-        signInWithGoogle,
-        refreshProfile,
+        user, session, profile, isAdmin, isModerator, loading, rolesLoaded,
+        signUp, signIn, signOut, signInWithGoogle, refreshProfile,
       }}
     >
       {children}
