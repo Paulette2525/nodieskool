@@ -1,5 +1,5 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar } from "lucide-react";
+import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
