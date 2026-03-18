@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
+import { ContactAdminButton } from "@/components/community/ContactAdminButton";
 
 export function CommunitySidebar() {
   const { slug } = useParams<{ slug: string }>();
