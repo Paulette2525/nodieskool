@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, MessageSquare, Calendar, ArrowRight, Check, Globe, Zap, Shield, Star, Play } from "lucide-react";
+import { Users, BookOpen, MessageSquare, Calendar, ArrowRight, Check, Globe, Zap, Shield, Star, Play, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
 import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
