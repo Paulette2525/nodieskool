@@ -13,7 +13,7 @@ import { useEvents, type CommunityEvent } from "@/hooks/useEvents";
 export function CommunityAdminEventsTab() {
   const { upcomingEvents, pastEvents, isLoading, createEvent, deleteEvent } = useEvents();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", event_type: "live", start_time: "", end_time: "", meeting_url: "" });
+  const [form, setForm] = useState({ title: "", description: "", event_type: "live", event_date: "", event_time: "", meeting_url: "" });
 
   const handleSubmit = () => {
     if (!form.title || !form.start_time || !form.end_time) return;
