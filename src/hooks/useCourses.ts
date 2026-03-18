@@ -96,10 +96,10 @@ export function useCourses() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lesson-progress"] });
       queryClient.invalidateQueries({ queryKey: ["profiles"] });
-      toast.success("Lesson completed! +10 points");
+      toast.success("Leçon terminée ! +10 points");
     },
     onError: (error) => {
-      toast.error("Failed to complete lesson: " + error.message);
+      toast.error("Erreur : " + error.message);
     },
   });
 
@@ -118,10 +118,10 @@ export function useCourses() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success("Course created!");
+      toast.success("Formation créée !");
     },
     onError: (error) => {
-      toast.error("Failed to create course: " + error.message);
+      toast.error("Erreur : " + error.message);
     },
   });
 
