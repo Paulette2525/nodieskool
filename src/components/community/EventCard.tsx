@@ -63,7 +63,7 @@ export function EventCard({ event, isRegistered, onToggleRegistration, isPast }:
               {isRegistered ? "Se désinscrire" : "S'inscrire"}
             </Button>
           )}
-          {event.meeting_url && isRegistered && !isPast && (
+          {event.meeting_url && !isPast && (
             <Button size="sm" variant="ghost" asChild className="rounded-xl text-xs">
               <a href={event.meeting_url} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-3 w-3 mr-1" />

@@ -3,11 +3,11 @@ import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboar
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
-import { ContactAdminButton } from "@/components/community/ContactAdminButton";
+
 
 export function CommunitySidebar() {
   const { slug } = useParams<{ slug: string }>();
@@ -81,13 +81,6 @@ export function CommunitySidebar() {
             </Link>
           )}
 
-          {/* Contact admin - visible only for non-owners */}
-          {user && !isOwner && (
-            <>
-              <Separator className="my-2" />
-              <ContactAdminButton />
-            </>
-          )}
         </nav>
 
         {/* User footer */}
