@@ -1455,6 +1455,10 @@ export type Database = {
         Returns: number
       }
       get_current_profile_id: { Args: never; Returns: string }
+      get_or_create_admin_conversation: {
+        Args: { _community_id: string }
+        Returns: string
+      }
       get_user_max_communities: { Args: never; Returns: number }
       grade_quiz_answer: {
         Args: { _question_id: string; _selected_index: number }
