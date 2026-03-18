@@ -43,7 +43,10 @@ export default function Landing() {
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone;
     setIsStandalone(!!standalone);
-  }, []);
+    if (standalone && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [user, navigate]);
   // Fallback: if user lands here after OAuth, redirect to dashboard
   useEffect(() => {
     if (user) {
