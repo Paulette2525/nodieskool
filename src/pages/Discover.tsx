@@ -19,14 +19,31 @@ export default function Discover() {
   const { data: communities, isLoading } = useQuery({
     queryKey: ["public-communities"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("communities_public").select("id, name, slug, description, logo_url, cover_url, is_public").eq("is_public", true).eq("is_active", true).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("communities_public")
+        .select("id, name, slug, description, logo_url, cover_url, is_public")
+        .eq("is_public", true)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      const result = await Promise.all((data || []).map(async (c) => {
-        const { count } = await supabase.from("community_members").select("*", { count: "exact", head: true }).eq("community_id", c.id).eq("is_approved", true);
-        return { ...c, member_count: count || 0 };
-      }));
-      return result as PublicCommunity[];
+      if (!data?.length) return [] as PublicCommunity[];
+
+      // Batch: get all member counts in one RPC call per community
+      // Use Promise.all but with the RPC function (no N+1 on community_members table)
+      const counts = await Promise.all(
+        data.map(c =>
+          supabase.rpc('get_community_member_count', { _community_id: c.id! })
+            .then(r => ({ id: c.id, count: r.data ?? 0 }))
+        )
+      );
+      const countMap = Object.fromEntries(counts.map(c => [c.id, c.count]));
+
+      return data.map(c => ({
+        ...c,
+        member_count: countMap[c.id!] || 0,
+      })) as PublicCommunity[];
     },
+    staleTime: 2 * 60 * 1000,
   });
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -38,7 +55,7 @@ export default function Discover() {
           <div className="flex items-center gap-3">
             {user && <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-lg"><Link to="/dashboard"><ArrowLeft className="h-4 w-4" /></Link></Button>}
             <Link to="/" className="flex items-center gap-2">
-              <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
+              <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" loading="lazy" />
             </Link>
           </div>
           {!user && <Button asChild size="sm" className="rounded-xl text-xs h-9"><Link to="/auth">Se connecter</Link></Button>}
@@ -66,7 +83,7 @@ export default function Discover() {
               <Link key={community.id} to={`/c/${community.slug}/community`} className="block">
                 <Card className="overflow-hidden hover:shadow-card-hover transition-all duration-200 h-full rounded-2xl border-border/50 shadow-card">
                   <div className="h-20 bg-gradient-to-r from-primary/15 to-primary/5 relative">
-                    {community.cover_url && <img src={community.cover_url} alt="" className="w-full h-full object-cover" />}
+                    {community.cover_url && <img src={community.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" />}
                     <div className="absolute -bottom-5 left-3.5">
                       <Avatar className="h-10 w-10 border-2 border-background">
                         {community.logo_url ? <AvatarImage src={community.logo_url} alt={community.name} /> : <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">{community.name.charAt(0).toUpperCase()}</AvatarFallback>}

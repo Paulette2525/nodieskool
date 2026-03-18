@@ -456,9 +456,5 @@ function CommunityClassroomDetailContent() {
 }
 
 export default function CommunityClassroomDetail() {
-  return (
-    <CommunityLayout>
-      <CommunityClassroomDetailContent />
-    </CommunityLayout>
-  );
+  return <CommunityClassroomDetailContent />;
 }
