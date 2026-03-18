@@ -21,8 +21,16 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/~oauth/],
+        navigateFallbackDenylist: [/^\/~oauth/, /\/auth\/v1\//],
         importScripts: ["/custom-sw.js"],
+        skipWaiting: true,
+        clientsClaim: true,
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.hostname.includes("supabase.co"),
+            handler: "NetworkOnly",
+          },
+        ],
       },
       manifest: {
         name: "Tribbue",
