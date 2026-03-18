@@ -38,7 +38,12 @@ export default function Landing() {
   const { user } = useAuth();
   const { publicCommunities } = useCommunities();
   const navigate = useNavigate();
+  const [isStandalone, setIsStandalone] = useState(true);
 
+  useEffect(() => {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone;
+    setIsStandalone(!!standalone);
+  }, []);
   // Fallback: if user lands here after OAuth, redirect to dashboard
   useEffect(() => {
     if (user) {
