@@ -49,12 +49,6 @@ export function ProfileOnboarding() {
     await refreshProfile();
   };
 
-  const handleSkip = () => {
-    localStorage.setItem(SKIP_KEY, "true");
-    window.dispatchEvent(new Event("storage"));
-    // Force re-render by refreshing profile
-    refreshProfile();
-  };
 
   const saving = updateProfile.isPending || uploading;
 
