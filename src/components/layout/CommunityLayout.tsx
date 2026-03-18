@@ -19,13 +19,6 @@ function isProfileIncomplete(profile: any): boolean {
 function CommunityLayoutInner({ children }: CommunityLayoutProps) {
   const { community, loading, isMember } = useCommunityContext();
   const { user, profile, loading: authLoading } = useAuth();
-  const [skipped, setSkipped] = useState(hasSkippedOnboarding());
-
-  useEffect(() => {
-    const handler = () => setSkipped(hasSkippedOnboarding());
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
 
   if (loading || authLoading) {
     return (
