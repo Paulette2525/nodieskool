@@ -41,8 +41,10 @@ export default function Landing() {
 
   // Fallback: if user lands here after OAuth, redirect to dashboard
   useEffect(() => {
-    if (user && localStorage.getItem('oauth_pending')) {
-      localStorage.removeItem('oauth_pending');
+    if (user) {
+      if (localStorage.getItem('oauth_pending')) {
+        localStorage.removeItem('oauth_pending');
+      }
       const redirectUrl = getAndClearRedirectUrl();
       navigate(redirectUrl || "/dashboard", { replace: true });
     }
