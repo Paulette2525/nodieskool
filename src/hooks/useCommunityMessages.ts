@@ -79,7 +79,7 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
       const { data: allParticipants } = await supabase
         .from("conversation_participants")
         .select("conversation_id, user_id")
-        .in("conversation_id", convIds)
+        .in("conversation_id", activeConvIds)
         .neq("user_id", profile.id);
 
       const otherUserIds = [...new Set((allParticipants || []).map(p => p.user_id))];
