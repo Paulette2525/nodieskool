@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { CourseCard } from "@/components/classroom/CourseCard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -314,9 +313,5 @@ function CommunityClassroomContent() {
 }
 
 export default function CommunityClassroom() {
-  return (
-    <CommunityLayout>
-      <CommunityClassroomContent />
-    </CommunityLayout>
-  );
+  return <CommunityClassroomContent />;
 }

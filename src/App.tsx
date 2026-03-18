@@ -3,17 +3,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { InstallBanner } from "./components/pwa/InstallBanner";
+import { CommunityProvider } from "@/contexts/CommunityContext";
+import { CommunityLayout } from "@/components/layout/CommunityLayout";
 
-// Eagerly loaded (critical path)
-import Dashboard from "./pages/Dashboard";
-import Auth from "./pages/Auth";
-
-// Lazy loaded
+// All pages lazy loaded
 const Landing = lazy(() => import("./pages/Landing"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Auth = lazy(() => import("./pages/Auth"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -35,13 +35,24 @@ const Install = lazy(() => import("./pages/Install"));
 const CommunityEvents = lazy(() => import("./pages/community/CommunityEvents"));
 const CommunityMessages = lazy(() => import("./pages/community/CommunityMessages"));
 
-
-
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <Loader2 className="h-6 w-6 animate-spin text-primary" />
   </div>
 );
+
+// Wrapper that provides CommunityProvider + CommunityLayout once for all /c/:slug/* routes
+function CommunityShell() {
+  return (
+    <CommunityProvider>
+      <CommunityLayout>
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
+      </CommunityLayout>
+    </CommunityProvider>
+  );
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,16 +83,16 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/install" element={<Install />} />
               
-              
-              {/* Community-scoped routes */}
-              <Route path="/c/:slug" element={<CommunityFeed />} />
-              <Route path="/c/:slug/community" element={<CommunityFeed />} />
-              <Route path="/c/:slug/classroom" element={<CommunityClassroom />} />
-              <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
-              <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
-              <Route path="/c/:slug/events" element={<CommunityEvents />} />
-              <Route path="/c/:slug/messages" element={<CommunityMessages />} />
-              
+              {/* Community-scoped routes — single CommunityProvider */}
+              <Route path="/c/:slug" element={<CommunityShell />}>
+                <Route index element={<CommunityFeed />} />
+                <Route path="community" element={<CommunityFeed />} />
+                <Route path="classroom" element={<CommunityClassroom />} />
+                <Route path="classroom/:id" element={<CommunityClassroomDetail />} />
+                <Route path="admin" element={<CommunityAdmin />} />
+                <Route path="events" element={<CommunityEvents />} />
+                <Route path="messages" element={<CommunityMessages />} />
+              </Route>
               
               {/* Auth and user routes */}
               <Route path="/auth" element={<Auth />} />
