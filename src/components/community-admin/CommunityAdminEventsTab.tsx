@@ -16,18 +16,20 @@ export function CommunityAdminEventsTab() {
   const [form, setForm] = useState({ title: "", description: "", event_type: "live", event_date: "", event_time: "", meeting_url: "" });
 
   const handleSubmit = () => {
-    if (!form.title || !form.start_time || !form.end_time) return;
+    if (!form.title || !form.event_date || !form.event_time) return;
+    const startDate = new Date(`${form.event_date}T${form.event_time}`);
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
     createEvent.mutate({
       title: form.title,
       description: form.description || undefined,
       event_type: form.event_type,
-      start_time: new Date(form.start_time).toISOString(),
-      end_time: new Date(form.end_time).toISOString(),
+      start_time: startDate.toISOString(),
+      end_time: endDate.toISOString(),
       meeting_url: form.meeting_url || undefined,
     }, {
       onSuccess: () => {
         setDialogOpen(false);
-        setForm({ title: "", description: "", event_type: "live", start_time: "", end_time: "", meeting_url: "" });
+        setForm({ title: "", description: "", event_type: "live", event_date: "", event_time: "", meeting_url: "" });
       },
     });
   };
