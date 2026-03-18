@@ -65,6 +65,10 @@ function CommunityAdminContent() {
             <FileText className="h-4 w-4" />
             Posts
           </TabsTrigger>
+          <TabsTrigger value="events" className="gap-2">
+            <Calendar className="h-4 w-4" />
+            Événements
+          </TabsTrigger>
           <TabsTrigger value="settings" className="gap-2">
             <Settings className="h-4 w-4" />
             Paramètres
