@@ -73,7 +73,7 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
         return;
       }
 
-      const convIds = convs.map(c => c.id);
+      const activeConvIds = convs.map(c => c.id);
 
       // Batch: get all participants for all conversations at once
       const { data: allParticipants } = await supabase
