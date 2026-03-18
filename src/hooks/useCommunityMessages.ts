@@ -73,52 +73,80 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
         return;
       }
 
-      const enriched: Conversation[] = await Promise.all(
-        convs.map(async (conv) => {
-          const { data: participants } = await supabase
-            .from("conversation_participants")
-            .select("user_id")
-            .eq("conversation_id", conv.id)
-            .neq("user_id", profile.id);
+      const convIds = convs.map(c => c.id);
 
-          const otherId = participants?.[0]?.user_id;
-          let otherUser = { id: "", username: "Utilisateur", full_name: null as string | null, avatar_url: null as string | null };
+      // Batch: get all participants for all conversations at once
+      const { data: allParticipants } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id, user_id")
+        .in("conversation_id", convIds)
+        .neq("user_id", profile.id);
 
-          if (otherId) {
-            const { data: p } = await supabase
-              .from("profiles")
-              .select("id, username, full_name, avatar_url")
-              .eq("id", otherId)
-              .single();
-            if (p) otherUser = p;
-          }
+      const otherUserIds = [...new Set((allParticipants || []).map(p => p.user_id))];
 
-          const { data: lastMsg } = await supabase
-            .from("messages")
-            .select("content, created_at, sender_id")
-            .eq("conversation_id", conv.id)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .single();
+      // Batch: get all other user profiles at once
+      let profilesMap: Record<string, { id: string; username: string; full_name: string | null; avatar_url: string | null }> = {};
+      if (otherUserIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, username, full_name, avatar_url")
+          .in("id", otherUserIds);
+        for (const p of profiles || []) {
+          profilesMap[p.id] = p;
+        }
+      }
 
-          const { count } = await supabase
-            .from("messages")
-            .select("*", { count: "exact", head: true })
-            .eq("conversation_id", conv.id)
-            .eq("is_read", false)
-            .neq("sender_id", profile.id);
+      // Batch: get last message + unread count for all conversations
+      const [lastMsgsResult, unreadResult] = await Promise.all([
+        supabase
+          .from("messages")
+          .select("conversation_id, content, created_at, sender_id")
+          .in("conversation_id", convIds)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("messages")
+          .select("conversation_id", { count: "exact" })
+          .in("conversation_id", convIds)
+          .eq("is_read", false)
+          .neq("sender_id", profile.id),
+      ]);
 
-          return {
-            id: conv.id,
-            community_id: communityId,
-            created_at: conv.created_at || "",
-            updated_at: conv.updated_at || "",
-            other_user: otherUser,
-            last_message: lastMsg || undefined,
-            unread_count: count || 0,
-          };
-        })
-      );
+      // Build last message map (first occurrence per conversation_id = most recent)
+      const lastMsgMap: Record<string, { content: string; created_at: string; sender_id: string }> = {};
+      for (const msg of lastMsgsResult.data || []) {
+        if (!lastMsgMap[msg.conversation_id]) {
+          lastMsgMap[msg.conversation_id] = msg;
+        }
+      }
+
+      // Build unread count map
+      const unreadMap: Record<string, number> = {};
+      for (const msg of unreadResult.data || []) {
+        unreadMap[msg.conversation_id] = (unreadMap[msg.conversation_id] || 0) + 1;
+      }
+
+      // Build participant map: conversation_id -> other user id
+      const participantMap: Record<string, string> = {};
+      for (const p of allParticipants || []) {
+        participantMap[p.conversation_id] = p.user_id;
+      }
+
+      const enriched: Conversation[] = convs.map((conv) => {
+        const otherId = participantMap[conv.id];
+        const otherUser = otherId && profilesMap[otherId]
+          ? profilesMap[otherId]
+          : { id: "", username: "Utilisateur", full_name: null, avatar_url: null };
+
+        return {
+          id: conv.id,
+          community_id: communityId!,
+          created_at: conv.created_at || "",
+          updated_at: conv.updated_at || "",
+          other_user: otherUser,
+          last_message: lastMsgMap[conv.id] || undefined,
+          unread_count: unreadMap[conv.id] || 0,
+        };
+      });
 
       setConversations(enriched);
     } catch (e) {

@@ -118,10 +118,10 @@ export function useCourses() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success("Course created!");
+      toast.success("Formation créée !");
     },
     onError: (error) => {
-      toast.error("Failed to create course: " + error.message);
+      toast.error("Erreur : " + error.message);
     },
   });
 

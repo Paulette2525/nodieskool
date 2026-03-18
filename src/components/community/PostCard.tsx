@@ -214,7 +214,7 @@ export function PostCard({
             </button>
           )}
           {imageUrl && (
-            <img src={imageUrl} alt="Post image" className="mt-3 rounded-xl w-full object-cover max-h-80" />
+            <img src={imageUrl} alt="Post image" loading="lazy" className="mt-3 rounded-xl w-full object-cover max-h-80" />
           )}
         </div>
 
