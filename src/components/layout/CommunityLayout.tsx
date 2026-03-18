@@ -48,6 +48,10 @@ function CommunityLayoutInner({ children }: CommunityLayoutProps) {
 
   if (!isMember) return <CommunityPreview />;
 
+  if (isMember && isProfileIncomplete(profile) && !skipped) {
+    return <ProfileOnboarding />;
+  }
+
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
       <CommunitySidebar />
