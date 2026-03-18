@@ -1,88 +1,35 @@
 
-Objectif
-- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
 
-Constat (important)
-- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
-- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
+## Plan : Onboarding profil à la première connexion dans une communauté
 
-Plan d’action (définitif, avec preuves à chaque étape)
+### Concept
 
-1) Vérifier si la production embarque bien la nouvelle version
-- Télécharger la page publiée `/admin` et ses assets JS (bundle).
-- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
-  - la chaîne `AdminPinEntry`
-  - la chaîne `verify-admin-code`
-  - la chaîne `admin_unlocked`
-- Interprétation :
-  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
-  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
+Après qu'un utilisateur rejoigne une communauté (ou qu'un admin accède pour la première fois), vérifier si son profil est incomplet (pas d'avatar ou pas de bio). Si oui, afficher un écran/modal d'onboarding pour compléter le profil avant d'entrer dans la communauté.
 
-2) Publier la version actuelle (si la prod est en retard)
-- Déclencher la publication de la version Test actuelle vers l’URL publiée.
-- Après publication, retester `https://nodieskool.lovable.app/admin` :
-  - en navigation normale
-  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
-- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
+### Détection "profil incomplet"
 
-3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
-On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
+Un profil est considéré incomplet si `!profile.avatar_url || !profile.bio`. Le username et full_name sont déjà remplis à l'inscription.
 
-3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
-- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
-- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
+### Changements
 
-3.2) Logs ciblés (temporairement) pour capturer la redirection
-- Ajouter des `console.log()` au tout début du composant Admin (montage) :
-  - `location.href`
-  - valeur de `sessionStorage.admin_unlocked`
-- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
-  - `location.href`
-  - si un mécanisme de “redirectUrl” est en train de forcer une destination
-- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
+| Fichier | Modification |
+|---------|-------------|
+| `src/components/community/ProfileOnboarding.tsx` | **Nouveau** — Modal/page d'onboarding avec formulaire (nom d'utilisateur, photo de profil avec upload, bio). Utilise `useProfile` et `useStorage` existants. Appelle `refreshProfile()` après enregistrement. |
+| `src/components/layout/CommunityLayout.tsx` | Après le check `isMember`, vérifier `!profile?.avatar_url || !profile?.bio`. Si incomplet, afficher `<ProfileOnboarding />` au lieu du contenu de la communauté. |
+| `src/pages/community/CommunityPreview.tsx` | Dans `handleJoinCommunity`, après le `refetch()`, le CommunityLayout prendra le relais automatiquement (l'utilisateur devient membre → le check d'onboarding s'active). |
 
-3.3) Vérification des gardes de routes / layouts
-- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
-  - des wrappers “RequireAuth”
-  - des `useEffect(() => navigate('/auth'))`
-  - des `<Navigate to="/auth" />` conditionnels
-- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
+### Composant ProfileOnboarding
 
-4) Corriger la cause (selon le diagnostic)
-Cas A — Publication en retard (le plus probable)
-- Correction : publier (étape 2). Aucun changement de code nécessaire.
+- Écran centré avec le logo de la communauté
+- Message de bienvenue "Complétez votre profil pour commencer"
+- Champs : avatar (upload avec `useStorage.uploadAvatar`), nom d'utilisateur (pré-rempli), bio (textarea)
+- Bouton "Continuer" qui appelle `updateProfile` puis `refreshProfile`
+- Bouton "Passer" discret pour ignorer (stocke un flag `localStorage` pour ne plus afficher)
 
-Cas B — Cache navigateur / service worker
-- Solution robuste :
-  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
-  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
-  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
-  - ensuite retirer les logs.
+### Flux
 
-Cas C — Une autre redirection vers /auth persiste
-- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
-- Exemple typique :
-  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
-  - ou une logique globale qui redirige les routes non publiques vers `/auth`
-- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
+1. Utilisateur rejoint la communauté → `isMember` devient `true`
+2. `CommunityLayout` vérifie le profil → incomplet → affiche `ProfileOnboarding`
+3. L'utilisateur complète ou passe → le contenu de la communauté s'affiche
+4. Les visites suivantes ne montrent plus l'onboarding (profil complet ou flag "passé")
 
-5) Validation end-to-end (critère “définitif”)
-- Tester sur l’URL publiée :
-  - accéder à `/admin` en non-connecté
-  - entrer un code faux → erreur “Code incorrect”
-  - entrer le bon code → accès au super admin
-  - refresh de la page → reste accessible (sessionStorage) pendant la session
-  - nouvelle fenêtre / navigation privée → redemande le PIN
-- Une fois validé, retirer les logs et le label de version.
-
-Livrables (ce qui sera modifié si nécessaire)
-- Publication (si c’est la cause).
-- Sinon, modifications minimales et ciblées dans :
-  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
-  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
-  - éventuellement un layout global si un guard impose l’auth partout.
-
-Pourquoi ce plan règle “définitivement”
-- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
-- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
-- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.
