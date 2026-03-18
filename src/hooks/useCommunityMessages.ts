@@ -101,7 +101,7 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
         supabase
           .from("messages")
           .select("conversation_id, content, created_at, sender_id")
-          .in("conversation_id", convIds)
+          .in("conversation_id", activeConvIds)
           .order("created_at", { ascending: false }),
         supabase
           .from("messages")
