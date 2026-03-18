@@ -10,6 +10,20 @@ import { useCommentLikes } from "@/hooks/useCommentLikes";
 import { useAuth } from "@/hooks/useAuth";
 import type { Comment } from "@/hooks/useComments";
 
+function renderContentWithMentions(content: string) {
+  const mentionRegex = /^(@\w+)/;
+  const match = content.match(mentionRegex);
+  if (!match) return <>{content}</>;
+  const mention = match[1];
+  const rest = content.slice(mention.length);
+  return (
+    <>
+      <span className="font-semibold text-primary">{mention}</span>
+      {rest}
+    </>
+  );
+}
+
 interface CommentItemProps {
   comment: Comment;
   canDelete: boolean;
@@ -32,6 +46,13 @@ export function CommentItem({
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleShowReply = () => {
+    if (!showReplyInput) {
+      setReplyContent(`@${comment.profiles.username} `);
+    }
+    setShowReplyInput(!showReplyInput);
+  };
 
   const handleSubmitReply = async () => {
     if (!replyContent.trim() || !onReply) return;
@@ -66,7 +87,7 @@ export function CommentItem({
               {comment.profiles.full_name || comment.profiles.username}
             </span>
           </div>
-          <p className="text-sm mt-1 whitespace-pre-wrap">{comment.content}</p>
+          <p className="text-sm mt-1 whitespace-pre-wrap">{renderContentWithMentions(comment.content)}</p>
         </div>
         
         <div className="flex items-center gap-3 mt-1 ml-1">
@@ -95,7 +116,7 @@ export function CommentItem({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowReplyInput(!showReplyInput)}
+              onClick={handleShowReply}
               className="h-6 px-2 gap-1 text-xs text-muted-foreground hover:text-primary"
             >
               <MessageCircle className="h-3 w-3" />

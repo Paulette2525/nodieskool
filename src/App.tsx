@@ -79,7 +79,7 @@ const App = () => (
               <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
               <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
               <Route path="/c/:slug/events" element={<CommunityEvents />} />
-              <Route path="/c/:slug/messages" element={<CommunityMessages />} />
+              
               
               {/* Auth and user routes */}
               <Route path="/auth" element={<Auth />} />
