@@ -313,9 +313,5 @@ function CommunityClassroomContent() {
 }
 
 export default function CommunityClassroom() {
-  return (
-    <CommunityLayout>
-      <CommunityClassroomContent />
-    </CommunityLayout>
-  );
+  return <CommunityClassroomContent />;
 }

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { useCoursesWithCommunity, Module, Lesson } from "@/hooks/useCourses";
 import { Card } from "@/components/ui/card";
