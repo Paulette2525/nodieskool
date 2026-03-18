@@ -13,21 +13,23 @@ import { useEvents, type CommunityEvent } from "@/hooks/useEvents";
 export function CommunityAdminEventsTab() {
   const { upcomingEvents, pastEvents, isLoading, createEvent, deleteEvent } = useEvents();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", event_type: "live", start_time: "", end_time: "", meeting_url: "" });
+  const [form, setForm] = useState({ title: "", description: "", event_type: "live", event_date: "", event_time: "", meeting_url: "" });
 
   const handleSubmit = () => {
-    if (!form.title || !form.start_time || !form.end_time) return;
+    if (!form.title || !form.event_date || !form.event_time) return;
+    const startDate = new Date(`${form.event_date}T${form.event_time}`);
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
     createEvent.mutate({
       title: form.title,
       description: form.description || undefined,
       event_type: form.event_type,
-      start_time: new Date(form.start_time).toISOString(),
-      end_time: new Date(form.end_time).toISOString(),
+      start_time: startDate.toISOString(),
+      end_time: endDate.toISOString(),
       meeting_url: form.meeting_url || undefined,
     }, {
       onSuccess: () => {
         setDialogOpen(false);
-        setForm({ title: "", description: "", event_type: "live", start_time: "", end_time: "", meeting_url: "" });
+        setForm({ title: "", description: "", event_type: "live", event_date: "", event_time: "", meeting_url: "" });
       },
     });
   };
@@ -85,19 +87,19 @@ export function CommunityAdminEventsTab() {
             </Select>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Début</label>
-                <Input type="datetime-local" value={form.start_time} onChange={e => setForm(f => ({ ...f, start_time: e.target.value }))} />
+                <label className="text-xs text-muted-foreground mb-1 block">Date de l'événement</label>
+                <Input type="date" value={form.event_date} onChange={e => setForm(f => ({ ...f, event_date: e.target.value }))} />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Fin</label>
-                <Input type="datetime-local" value={form.end_time} onChange={e => setForm(f => ({ ...f, end_time: e.target.value }))} />
+                <label className="text-xs text-muted-foreground mb-1 block">Heure de l'événement</label>
+                <Input type="time" value={form.event_time} onChange={e => setForm(f => ({ ...f, event_time: e.target.value }))} />
               </div>
             </div>
             <Input placeholder="Lien de la réunion (optionnel)" value={form.meeting_url} onChange={e => setForm(f => ({ ...f, meeting_url: e.target.value }))} />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSubmit} disabled={!form.title || !form.start_time || !form.end_time || createEvent.isPending}>
+            <Button onClick={handleSubmit} disabled={!form.title || !form.event_date || !form.event_time || createEvent.isPending}>
               {createEvent.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Créer
             </Button>
