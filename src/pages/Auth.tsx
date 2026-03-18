@@ -193,7 +193,12 @@ export default function Auth() {
                     <Label htmlFor="login-password" className="text-xs">Mot de passe</Label>
                     <Link to="/forgot-password" className="text-[11px] text-primary hover:underline">Oublié ?</Link>
                   </div>
-                  <Input id="login-password" type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className="rounded-xl h-9 text-sm" />
+                  <div className="relative">
+                    <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className="rounded-xl h-9 text-sm pr-10" />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-9 w-9 px-2" onClick={() => setShowLoginPassword(!showLoginPassword)}>
+                      {showLoginPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                    </Button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full rounded-xl h-9 text-sm" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}Se connecter
