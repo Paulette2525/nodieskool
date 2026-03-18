@@ -222,7 +222,12 @@ export default function Auth() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="signup-password" className="text-xs">Mot de passe</Label>
-                  <Input id="signup-password" type="password" placeholder="••••••••" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={6} className="rounded-xl h-9 text-sm" />
+                  <div className="relative">
+                    <Input id="signup-password" type={showSignupPassword ? "text" : "password"} placeholder="••••••••" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={6} className="rounded-xl h-9 text-sm pr-10" />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-9 w-9 px-2" onClick={() => setShowSignupPassword(!showSignupPassword)}>
+                      {showSignupPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+                    </Button>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full rounded-xl h-9 text-sm" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}Créer mon compte
