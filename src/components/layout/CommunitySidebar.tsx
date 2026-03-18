@@ -81,13 +81,6 @@ export function CommunitySidebar() {
             </Link>
           )}
 
-          {/* Contact admin - visible only for non-owners */}
-          {user && !isOwner && (
-            <>
-              <Separator className="my-2" />
-              <ContactAdminButton />
-            </>
-          )}
         </nav>
 
         {/* User footer */}
