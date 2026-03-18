@@ -41,7 +41,7 @@ function CommunityLayoutInner({ children }: CommunityLayoutProps) {
 
   if (!isMember) return <CommunityPreview />;
 
-  if (isMember && isProfileIncomplete(profile) && !skipped) {
+  if (isMember && isProfileIncomplete(profile)) {
     return <ProfileOnboarding />;
   }
 

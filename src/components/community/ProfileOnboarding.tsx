@@ -155,13 +155,6 @@ export function ProfileOnboarding() {
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Continuer
           </Button>
-          <Button
-            onClick={handleSkip}
-            variant="ghost"
-            className="w-full text-xs text-muted-foreground"
-          >
-            Passer pour l'instant
-          </Button>
         </div>
       </Card>
     </div>
