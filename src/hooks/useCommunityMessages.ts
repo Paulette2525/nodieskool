@@ -106,7 +106,7 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
         supabase
           .from("messages")
           .select("conversation_id", { count: "exact" })
-          .in("conversation_id", convIds)
+          .in("conversation_id", activeConvIds)
           .eq("is_read", false)
           .neq("sender_id", profile.id),
       ]);
