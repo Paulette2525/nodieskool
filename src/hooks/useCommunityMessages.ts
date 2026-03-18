@@ -37,16 +37,16 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isOwner = profile?.id === ownerId;
 
-  // Fetch all conversations for this community (admin sees all, member sees own)
+  // Fetch all conversations for this community
   const fetchConversations = useCallback(async () => {
     if (!communityId || !profile) return;
     setLoading(true);
 
     try {
-      // Get conversations for this community where current user is a participant
       const { data: participations } = await supabase
         .from("conversation_participants")
         .select("conversation_id")
@@ -73,10 +73,8 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
         return;
       }
 
-      // For each conversation, get the other participant's profile and last message
       const enriched: Conversation[] = await Promise.all(
         convs.map(async (conv) => {
-          // Get other participant
           const { data: participants } = await supabase
             .from("conversation_participants")
             .select("user_id")
@@ -95,7 +93,6 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
             if (p) otherUser = p;
           }
 
-          // Get last message
           const { data: lastMsg } = await supabase
             .from("messages")
             .select("content, created_at, sender_id")
@@ -104,7 +101,6 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
             .limit(1)
             .single();
 
-          // Count unread
           const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
@@ -160,78 +156,53 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
     await fetchMessages(conversationId);
   }, [fetchMessages]);
 
-  // Create or find existing conversation between member and owner
+  // Create or find existing conversation via backend RPC
   const getOrCreateConversation = useCallback(async (): Promise<string | null> => {
-    if (!communityId || !profile || !ownerId) return null;
+    if (!communityId || !profile) return null;
+    setError(null);
 
-    // Find existing conversation in this community between these two users
-    const { data: myParticipations } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", profile.id);
+    try {
+      const { data, error: rpcError } = await supabase
+        .rpc("get_or_create_admin_conversation", { _community_id: communityId });
 
-    if (myParticipations?.length) {
-      const convIds = myParticipations.map(p => p.conversation_id);
-
-      const { data: communityConvs } = await supabase
-        .from("conversations")
-        .select("id")
-        .in("id", convIds)
-        .eq("community_id", communityId);
-
-      if (communityConvs?.length) {
-        for (const conv of communityConvs) {
-          const { data: otherParticipant } = await supabase
-            .from("conversation_participants")
-            .select("user_id")
-            .eq("conversation_id", conv.id)
-            .eq("user_id", ownerId)
-            .single();
-
-          if (otherParticipant) return conv.id;
-        }
+      if (rpcError) {
+        console.error("RPC error:", rpcError);
+        setError("Impossible de démarrer la conversation.");
+        return null;
       }
+
+      return data as string;
+    } catch (e) {
+      console.error("Error creating conversation:", e);
+      setError("Impossible de démarrer la conversation.");
+      return null;
     }
-
-    // Create new conversation
-    const { data: newConv, error } = await supabase
-      .from("conversations")
-      .insert({ community_id: communityId })
-      .select()
-      .single();
-
-    if (error || !newConv) return null;
-
-    // Add both participants
-    await supabase.from("conversation_participants").insert([
-      { conversation_id: newConv.id, user_id: profile.id },
-      { conversation_id: newConv.id, user_id: ownerId },
-    ]);
-
-    return newConv.id;
-  }, [communityId, profile?.id, ownerId]);
+  }, [communityId, profile?.id]);
 
   // Send a message
-  const sendMessage = useCallback(async (content: string) => {
-    if (!activeConversationId || !profile || !content.trim()) return;
+  const sendMessage = useCallback(async (content: string): Promise<boolean> => {
+    if (!activeConversationId || !profile || !content.trim()) return false;
 
-    const { data } = await supabase
+    const { error: sendError } = await supabase
       .from("messages")
       .insert({
         conversation_id: activeConversationId,
         sender_id: profile.id,
         content: content.trim(),
-      })
-      .select()
-      .single();
+      });
 
-    if (data) {
-      // Update conversation timestamp
-      await supabase
-        .from("conversations")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", activeConversationId);
+    if (sendError) {
+      console.error("Send error:", sendError);
+      return false;
     }
+
+    // Update conversation timestamp
+    await supabase
+      .from("conversations")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", activeConversationId);
+
+    return true;
   }, [activeConversationId, profile?.id]);
 
   // Realtime subscription for messages
@@ -268,6 +239,30 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
     };
   }, [activeConversationId, profile?.id]);
 
+  // Realtime for new conversations (admin inbox refresh)
+  useEffect(() => {
+    if (!communityId || !profile || !isOwner) return;
+
+    const channel = supabase
+      .channel(`conv-participants-${communityId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "conversation_participants",
+        },
+        () => {
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [communityId, profile?.id, isOwner, fetchConversations]);
+
   // Initial load
   useEffect(() => {
     if (communityId && profile) {
@@ -281,6 +276,7 @@ export function useCommunityMessages(communityId: string | null, ownerId: string
     activeConversationId,
     loading,
     messagesLoading,
+    error,
     isOwner,
     openConversation,
     getOrCreateConversation,

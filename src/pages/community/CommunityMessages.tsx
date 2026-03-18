@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { useCommunityContext } from "@/contexts/CommunityContext";
-import { useCommunityMessages, Conversation } from "@/hooks/useCommunityMessages";
+import { useCommunityMessages } from "@/hooks/useCommunityMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft, MessageCircle, Loader2 } from "lucide-react";
+import { Send, ArrowLeft, MessageCircle, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -20,7 +20,7 @@ function CommunityMessagesContent() {
     activeConversationId,
     loading,
     messagesLoading,
-    isOwner,
+    error,
     openConversation,
     getOrCreateConversation,
     sendMessage,
@@ -29,6 +29,7 @@ function CommunityMessagesContent() {
 
   const [input, setInput] = useState("");
   const [initializing, setInitializing] = useState(false);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -49,10 +50,14 @@ function CommunityMessagesContent() {
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !activeConversationId || sending) return;
     const msg = input;
-    setInput("");
-    await sendMessage(msg);
+    setSending(true);
+    const success = await sendMessage(msg);
+    setSending(false);
+    if (success) {
+      setInput("");
+    }
     inputRef.current?.focus();
   };
 
@@ -60,8 +65,18 @@ function CommunityMessagesContent() {
 
   if (loading || initializing) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center gap-2">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        {initializing && <p className="text-xs text-muted-foreground">Initialisation de la conversation…</p>}
+      </div>
+    );
+  }
+
+  if (error && !isAdmin) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+        <AlertCircle className="h-6 w-6" />
+        <p className="text-sm">{error}</p>
       </div>
     );
   }
@@ -88,6 +103,7 @@ function CommunityMessagesContent() {
           setInput={setInput}
           handleSend={handleSend}
           inputRef={inputRef}
+          disabled={!activeConversationId || sending}
         />
       </div>
     );
@@ -96,7 +112,6 @@ function CommunityMessagesContent() {
   // Admin view: inbox + chat
   return (
     <div className="flex h-full">
-      {/* Conversation list */}
       <div className={cn(
         "border-r border-border flex flex-col flex-shrink-0",
         activeConversationId ? "hidden md:flex w-72" : "w-full md:w-72"
@@ -151,7 +166,6 @@ function CommunityMessagesContent() {
         </div>
       </div>
 
-      {/* Chat area */}
       <div className={cn(
         "flex-1 flex flex-col",
         !activeConversationId && "hidden md:flex"
@@ -188,6 +202,7 @@ function CommunityMessagesContent() {
               setInput={setInput}
               handleSend={handleSend}
               inputRef={inputRef}
+              disabled={sending}
             />
           </>
         ) : (
@@ -259,11 +274,13 @@ function ChatInput({
   setInput,
   handleSend,
   inputRef,
+  disabled,
 }: {
   input: string;
   setInput: (v: string) => void;
   handleSend: () => void;
   inputRef: React.RefObject<HTMLInputElement>;
+  disabled?: boolean;
 }) {
   return (
     <div className="border-t border-border p-3 flex items-center gap-2 flex-shrink-0">
@@ -274,11 +291,12 @@ function ChatInput({
         onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
         placeholder="Écrire un message..."
         className="flex-1 rounded-xl"
+        disabled={disabled}
       />
       <Button
         size="icon"
         onClick={handleSend}
-        disabled={!input.trim()}
+        disabled={!input.trim() || disabled}
         className="rounded-xl h-10 w-10 flex-shrink-0"
       >
         <Send className="h-4 w-4" />
