@@ -1,88 +1,110 @@
 
-Objectif
-- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
+Objectif: rendre la plateforme réellement rapide sur mobile, web et PWA, et la préparer à une montée en charge importante. Mon diagnostic confirme que le problème n’est pas “un seul bug”, mais un ensemble de choix de chargement qui sont encore trop coûteux même avec peu de données.
 
-Constat (important)
-- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
-- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
+Diagnostic confirmé
+- Le démarrage est trop lourd: profil navigateur relevé à environ FCP 4.6s / load 4.65s sur `/dashboard`, avec ~85 scripts et ~810KB de JS.
+- Il y a un bloqueur build séparé: `@vitejs/plugin-react-swc` échoue car `@swc/core` n’est pas trouvé.
+- Le contexte communauté est recréé à chaque changement d’onglet (`/community`, `/messages`, `/admin`, etc.), donc les mêmes données sont refetchées.
+- Plusieurs écrans ne sont pas dimensionnés pour 30.000 membres:
+  - `useCommunityAdmin` charge toute la liste des membres d’un coup
+  - `useCommunityMessages` charge toute la boîte de réception d’un coup
+  - `useCoursesWithCommunity` charge cours + modules + leçons en une seule requête
+  - `Discover` fait un N+1 pour compter les membres
+- Le shell charge trop tôt des éléments non essentiels: recherche globale, notifications, abonnements, rôles, etc.
+- Les images ne sont pas encore assez optimisées partout.
 
-Plan d’action (définitif, avec preuves à chaque étape)
+Ce qu’il faut pour viser 30.000 membres / communauté
+1. Pagination partout sur les grosses listes
+2. Requêtes indexées côté base
+3. Ne jamais charger un arbre complet si l’utilisateur n’affiche qu’une liste
+4. Réduire fortement le coût du premier rendu
+5. Garder les données en cache entre navigations
+6. Mesurer puis valider sur mobile et desktop
 
-1) Vérifier si la production embarque bien la nouvelle version
-- Télécharger la page publiée `/admin` et ses assets JS (bundle).
-- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
-  - la chaîne `AdminPinEntry`
-  - la chaîne `verify-admin-code`
-  - la chaîne `admin_unlocked`
-- Interprétation :
-  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
-  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
+Plan d’implémentation
 
-2) Publier la version actuelle (si la prod est en retard)
-- Déclencher la publication de la version Test actuelle vers l’URL publiée.
-- Après publication, retester `https://nodieskool.lovable.app/admin` :
-  - en navigation normale
-  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
-- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
+Phase 1 — Corriger les fondations bloquantes
+- Remplacer le plugin Vite SWC par `@vitejs/plugin-react` dans `vite.config.ts` pour supprimer la panne `@swc/core`.
+- Rendre `Dashboard` et `Auth` lazy comme les autres pages dans `src/App.tsx`.
+- Éviter les doubles chargements de session/profil dans `src/hooks/useAuth.tsx`:
+  - paralléliser profil + rôles
+  - empêcher les refetchs inutiles au boot
+  - garder un état de session plus stable
 
-3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
-On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
+Phase 2 — Réduire le coût de navigation dans les communautés
+- Refactorer le routing pour monter `CommunityProvider` une seule fois pour toutes les routes `/c/:slug/*`, au lieu d’un `CommunityLayout` recréé par page.
+- Conséquence: navigation beaucoup plus fluide entre Communauté / Formations / Événements / Messages / Admin.
+- Fichiers concernés:
+  - `src/App.tsx`
+  - `src/components/layout/CommunityLayout.tsx`
+  - pages `src/pages/community/*`
 
-3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
-- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
-- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
+Phase 3 — Rendre les écrans scalables
+- Messagerie:
+  - paginer la liste des conversations admin
+  - charger les messages par pages
+  - éviter tout chargement complet de boîte de réception
+  - idéalement utiliser un RPC/vue résumé pour inbox
+- Admin membres:
+  - remplacer le fetch complet par pagination + recherche + filtres
+  - ajouter compte total séparé
+- Formations:
+  - sur la page liste, ne charger que les métadonnées des cours
+  - charger modules/leçons seulement dans le détail
+- Découverte:
+  - supprimer le N+1 des counts via vue/RPC/compteur agrégé
+- Fichiers principaux:
+  - `src/hooks/useCommunityMessages.ts`
+  - `src/hooks/useCommunityAdmin.ts`
+  - `src/hooks/useCourses.ts`
+  - `src/pages/Discover.tsx`
 
-3.2) Logs ciblés (temporairement) pour capturer la redirection
-- Ajouter des `console.log()` au tout début du composant Admin (montage) :
-  - `location.href`
-  - valeur de `sessionStorage.admin_unlocked`
-- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
-  - `location.href`
-  - si un mécanisme de “redirectUrl” est en train de forcer une destination
-- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
+Phase 4 — Optimiser le shell mobile/web
+- Charger `GlobalSearch` et `NotificationBell` seulement quand utiles, surtout pas comme coût fixe de chaque page.
+- Réduire les imports lourds réellement inutilisés au runtime.
+- Ajouter lazy loading systématique, `decoding="async"` et dimensions cohérentes sur images communautaires/cartes/couvertures.
+- Vérifier les composants qui utilisent `date-fns` partout; limiter les recalculs ou mutualiser si nécessaire.
+- Fichiers probables:
+  - `src/components/layout/CommunityLayout.tsx`
+  - `src/components/community/CommunityCard.tsx`
+  - `src/pages/Discover.tsx`
+  - `src/components/community/PostCard.tsx`
 
-3.3) Vérification des gardes de routes / layouts
-- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
-  - des wrappers “RequireAuth”
-  - des `useEffect(() => navigate('/auth'))`
-  - des `<Navigate to="/auth" />` conditionnels
-- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
+Phase 5 — Base de données et montée en charge
+- Ajouter/valider les index pour les accès critiques:
+  - `community_members(community_id, is_approved, role, joined_at)`
+  - `community_members(user_id, is_approved)`
+  - `posts(community_id, is_pinned, created_at desc)`
+  - `conversations(community_id, updated_at desc)`
+  - `conversation_participants(user_id, conversation_id)`
+  - `messages(conversation_id, created_at)`
+  - `notifications(user_id, created_at desc, is_read)`
+  - `courses(community_id, is_published, order_index)`
+  - `events(community_id, start_time)`
+- Si besoin, créer des compteurs agrégés/RPC pour éviter les `count exact` répétés sur gros volumes.
 
-4) Corriger la cause (selon le diagnostic)
-Cas A — Publication en retard (le plus probable)
-- Correction : publier (étape 2). Aucun changement de code nécessaire.
+Phase 6 — Validation réelle de performance
+Après implémentation, je ferai une vraie passe de vérification:
+- temps d’ouverture dashboard
+- navigation entre onglets communauté
+- ouverture admin avec beaucoup de membres
+- messagerie membre/admin
+- test mobile + desktop
+- contrôle réseau/console/performance
 
-Cas B — Cache navigateur / service worker
-- Solution robuste :
-  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
-  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
-  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
-  - ensuite retirer les logs.
+Résultat attendu
+- ouverture initiale nettement plus rapide
+- navigation intra-communauté quasi instantanée
+- pages capables de rester fluides même avec beaucoup de membres, messages et contenus
+- base prête pour grossir sans s’effondrer dès les premiers milliers d’utilisateurs
 
-Cas C — Une autre redirection vers /auth persiste
-- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
-- Exemple typique :
-  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
-  - ou une logique globale qui redirige les routes non publiques vers `/auth`
-- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
+Note importante
+Je peux améliorer fortement la plateforme, mais pour être honnête: on ne prépare pas 30.000 membres par communauté uniquement avec du “frontend plus léger”. Il faut combiner:
+- optimisation du bundle
+- cache/navigation
+- pagination stricte
+- requêtes base bien pensées
+- index backend
+- validation réelle sur parcours clés
 
-5) Validation end-to-end (critère “définitif”)
-- Tester sur l’URL publiée :
-  - accéder à `/admin` en non-connecté
-  - entrer un code faux → erreur “Code incorrect”
-  - entrer le bon code → accès au super admin
-  - refresh de la page → reste accessible (sessionStorage) pendant la session
-  - nouvelle fenêtre / navigation privée → redemande le PIN
-- Une fois validé, retirer les logs et le label de version.
-
-Livrables (ce qui sera modifié si nécessaire)
-- Publication (si c’est la cause).
-- Sinon, modifications minimales et ciblées dans :
-  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
-  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
-  - éventuellement un layout global si un guard impose l’auth partout.
-
-Pourquoi ce plan règle “définitivement”
-- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
-- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
-- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.
+Si j’implémente ce plan, ce sera la première vraie étape sérieuse pour rendre la plateforme rapide et scalable, sur web, mobile et PWA.
