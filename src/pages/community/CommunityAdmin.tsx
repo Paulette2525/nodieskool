@@ -10,6 +10,7 @@ import { CommunityAdminMembersTab } from "@/components/community-admin/Community
 import { CommunityAdminCoursesTab } from "@/components/community-admin/CommunityAdminCoursesTab";
 import { CommunityAdminPostsTab } from "@/components/community-admin/CommunityAdminPostsTab";
 import { CommunityAdminSettingsTab } from "@/components/community-admin/CommunityAdminSettingsTab";
+import { CommunityAdminEventsTab } from "@/components/community-admin/CommunityAdminEventsTab";
 
 function CommunityAdminContent() {
   const { community, isAdmin, loading: contextLoading } = useCommunityContext();
