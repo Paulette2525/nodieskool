@@ -17,7 +17,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
-  const defaultTab = useMemo(() => (hasRedirectUrl() ? "signup" : "login"), []);
+  const defaultTab = useMemo(() => "login" as const, []);
 
   // Auto-redirect after OAuth completion on mobile
   useEffect(() => {
