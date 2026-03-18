@@ -91,6 +91,10 @@ function CommunityAdminContent() {
           <CommunityAdminPostsTab posts={posts} deletePost={deletePost} />
         </TabsContent>
 
+        <TabsContent value="events">
+          <CommunityAdminEventsTab />
+        </TabsContent>
+
         <TabsContent value="settings">
           <CommunityAdminSettingsTab />
         </TabsContent>

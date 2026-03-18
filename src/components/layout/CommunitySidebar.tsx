@@ -97,6 +97,7 @@ export function CommunitySidebar() {
                   <p className="text-xs font-medium text-sidebar-foreground truncate">{profile.full_name || profile.username}</p>
                 </div>
               </Link>
+              <ContactAdminButton />
               <div className="mt-1 space-y-0.5">
                 <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground text-xs h-8 rounded-lg" asChild>
                   <Link to="/dashboard"><LayoutDashboard className="h-3.5 w-3.5 flex-shrink-0" /><span className="ml-2">Dashboard</span></Link>
