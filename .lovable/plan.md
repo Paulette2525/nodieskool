@@ -1,39 +1,46 @@
 
 
-# Page de consentement Google OAuth
+## Problem
 
-## Contexte
+The current PWA icon (`tribbue-logo.png`) is a **landscape wordmark** (full "tribbue" text) used for all icon sizes. When displayed as a square app icon on mobile home screens, the text becomes tiny and illegible — as visible in your screenshot.
 
-La page que vous voyez (capture d'ecran) est la page de consentement OAuth geree par Lovable Cloud. Elle est hebergee sur `oauth.lovable.app` et affiche le nom "Community Builder Hub" avec le logo Lovable. Cette page est **obligatoire** selon les regles de Google — elle ne peut pas etre supprimee. Elle apparait uniquement la premiere fois qu'un utilisateur autorise l'application.
+Per the branding guidelines, mobile icons should use a **square icon with only the blue infinity symbol on white background**, not the full wordmark.
 
-## Le probleme
+## Plan
 
-Cette page est geree par l'infrastructure Lovable Cloud. On ne peut **pas la modifier via le code du projet**. Le nom "Community Builder Hub" et le logo Lovable sont configures dans les identifiants OAuth geres par Lovable.
+### 1. Generate proper square PWA icons using AI
 
-## Solution : Utiliser vos propres identifiants Google OAuth
+Use the existing `generate-icon` edge function (or a similar approach) to create a clean square icon:
+- **512x512** icon: blue infinity symbol centered on white background
+- **192x192** icon: same design, smaller size
+- **Maskable variant**: same icon with extra padding (safe zone) for Android adaptive icons
 
-Pour personnaliser cette page avec le nom "Tribbue", votre logo, et des informations en francais, vous devez creer vos propres identifiants Google OAuth :
+The infinity symbol should be extracted from the "bb" ligature in the Tribbue logo — thick, modern, rounded, blue (#2563EB) on pure white.
 
-1. **Google Cloud Console** (`console.cloud.google.com`) :
-   - Creer un projet nomme "Tribbue"
-   - Configurer l'ecran de consentement OAuth avec :
-     - Nom de l'application : "Tribbue"
-     - Logo : votre logo Tribbue
-     - Langue : francais
-   - Creer des identifiants OAuth (Client ID + Secret)
-   - Ajouter l'URL de callback fournie par Lovable Cloud dans les "Authorized redirect URIs"
+### 2. Update PWA manifest in `vite.config.ts`
 
-2. **Dans Lovable Cloud** :
-   - Aller dans les parametres d'authentification (Cloud → Users → Authentication Settings → Sign In Methods → Google)
-   - Entrer votre Client ID et Client Secret personnalises
+Update the manifest icons array to reference properly sized and named files:
+- `pwa-192x192.png` — 192x192 standard icon
+- `pwa-512x512.png` — 512x512 standard icon  
+- `pwa-512x512-maskable.png` — 512x512 maskable icon (with `purpose: "maskable"`)
 
-Cela remplacera la page "Community Builder Hub / Lovable" par une page personnalisee "Tribbue" avec votre branding.
+Currently all three entries point to `tribbue-logo.png`. They need to point to the new square icons.
 
-## Ce qui ne change pas cote code
+### 3. Update `index.html` references
 
-Aucune modification du code n'est necessaire. Le `lovable.auth.signInWithOAuth("google", ...)` existant fonctionnera automatiquement avec les nouveaux identifiants.
+- `apple-touch-icon` → point to the new 192x192 square icon
+- `favicon` → point to the new square icon
 
-## Limitation
+### 4. Keep full wordmark for in-app use
 
-La langue de la page de consentement Google depend des parametres de langue du compte Google de l'utilisateur, pas de l'application. On ne peut pas forcer le francais — mais le nom et le logo seront bien ceux de Tribbue.
+`tribbue-logo.png` and `src/assets/tribbue-logo.png` remain unchanged for in-app header/sidebar branding.
+
+### Summary of files changed
+
+| File | Change |
+|------|--------|
+| `public/pwa-192x192.png` | Replace with square infinity icon |
+| `public/pwa-512x512.png` | Replace with square infinity icon |
+| `vite.config.ts` | Update manifest icon paths and sizes |
+| `index.html` | Update favicon and apple-touch-icon to use square icon |
 
