@@ -1,88 +1,60 @@
 
-Objectif
-- Faire en sorte que l’URL publiée `https://nodieskool.lovable.app/admin` affiche toujours l’écran PIN (5 chiffres) et ne redirige plus vers `/auth`.
+Objectif: corriger la messagerie privée membre → administrateur car aujourd’hui aucun message n’est réellement créé ni visible.
 
-Constat (important)
-- Dans l’environnement Preview/Test, `/admin` affiche bien l’écran PIN (je l’ai vérifié).
-- Sur l’URL publiée, `/admin` affiche encore la page d’authentification. Ça indique presque toujours que la version publiée n’embarque pas les derniers changements (ou qu’un cache/service worker sert un ancien bundle).
+Diagnostic
+- Les tables `conversations`, `conversation_participants` et `messages` sont vides pour la communauté concernée: le flux casse avant même l’envoi du premier message.
+- Le point le plus probable est dans `getOrCreateConversation()`:
+  - le code fait `insert(...).select().single()` sur `conversations`
+  - or la policy `SELECT` sur `conversations` n’autorise la lecture qu’aux participants
+  - au moment exact de l’insert, aucun participant n’a encore été ajouté
+  - résultat: la conversation n’est pas récupérable côté client, donc l’ajout des participants ne se fait pas, donc `activeConversationId` reste nul.
+- Ensuite, `handleSend()` vide quand même le champ, mais `sendMessage()` sort immédiatement si `activeConversationId` est nul. Pour l’utilisateur, le message “semble envoyé” alors qu’aucune ligne n’est insérée.
+- Problème secondaire: `fetchMessages()` tente de marquer comme lus les messages reçus, mais la policy actuelle de `messages` n’autorise que l’auteur à faire un `UPDATE`. Donc les accusés de lecture / non-lus sont aussi cassés.
 
-Plan d’action (définitif, avec preuves à chaque étape)
+Plan de correction
+1. Remplacer la création client-side de conversation par une fonction backend atomique
+- Créer une fonction SQL sécurisée du type `get_or_create_admin_conversation(_community_id uuid)`.
+- Cette fonction devra:
+  - vérifier que l’utilisateur courant est bien membre de la communauté
+  - récupérer le propriétaire de la communauté
+  - retrouver une conversation existante entre ce membre et ce propriétaire dans cette communauté
+  - sinon créer la conversation + insérer les 2 participants dans la même opération
+  - retourner l’`id` de la conversation
+- Avantage: on évite le problème RLS du `insert().select()` et on garantit une conversation cohérente.
 
-1) Vérifier si la production embarque bien la nouvelle version
-- Télécharger la page publiée `/admin` et ses assets JS (bundle).
-- Rechercher dans le bundle publié des signatures de la nouvelle implémentation :
-  - la chaîne `AdminPinEntry`
-  - la chaîne `verify-admin-code`
-  - la chaîne `admin_unlocked`
-- Interprétation :
-  - Si ces chaînes n’existent pas dans les assets publiés, la prod tourne sur un ancien build → il faut publier.
-  - Si elles existent, la prod a le code mais quelque chose force quand même la navigation vers `/auth` → on passe à l’étape 3.
+2. Corriger les règles d’accès de la messagerie
+- Restreindre la création de conversations au flux membre→owner de la communauté, au lieu des policies très larges actuelles.
+- Ajouter/ajuster la possibilité pour un destinataire de marquer comme lu un message reçu.
+- Vérifier que l’owner peut voir toutes les conversations où il est participant, et que les membres ne voient que leur propre conversation.
 
-2) Publier la version actuelle (si la prod est en retard)
-- Déclencher la publication de la version Test actuelle vers l’URL publiée.
-- Après publication, retester `https://nodieskool.lovable.app/admin` :
-  - en navigation normale
-  - et en “hard refresh” (Ctrl+Shift+R) / fenêtre privée
-- Résultat attendu : l’écran PIN s’affiche, identique au Preview.
+3. Adapter `useCommunityMessages`
+- Remplacer la logique actuelle de `getOrCreateConversation()` par un appel RPC à la nouvelle fonction backend.
+- Ajouter une vraie gestion d’erreurs sur:
+  - récupération/création de conversation
+  - chargement des messages
+  - envoi d’un message
+- Après envoi réussi:
+  - soit ajouter le message localement de façon optimiste
+  - soit relancer `fetchMessages(activeConversationId)`
+  - puis rafraîchir la liste des conversations côté admin pour afficher le dernier message.
 
-3) Si la prod a bien le code mais redirige encore : identifier qui déclenche `/auth`
-On va isoler la source exacte de la redirection côté client, en instrumentant légèrement (sans changer la logique fonctionnelle) :
+4. Sécuriser l’UI pour éviter les faux envois
+- Dans `CommunityMessages.tsx`, désactiver le champ et le bouton “Envoyer” tant que la conversation n’est pas prête.
+- Afficher un état clair:
+  - “Initialisation de la conversation…”
+  - ou “Impossible de démarrer la conversation”
+- Ne plus vider le champ si l’envoi a échoué.
 
-3.1) Ajout d’un marquage visible de version (anti-ambiguïté)
-- Dans `src/pages/Admin.tsx`, afficher temporairement un petit label “Admin build: <timestamp/commit>” sur l’écran PIN.
-- But : prouver visuellement que la prod sert la bonne version, sans dépendre du cache.
+5. Vérifier la réception côté admin
+- S’assurer que la boîte de réception admin recharge les conversations après création du premier message.
+- Garder le filtre Realtime par `conversation_id` pour le chat actif, puis ajouter au besoin un rafraîchissement de la liste des conversations afin que le propriétaire voie immédiatement le nouveau fil.
 
-3.2) Logs ciblés (temporairement) pour capturer la redirection
-- Ajouter des `console.log()` au tout début du composant Admin (montage) :
-  - `location.href`
-  - valeur de `sessionStorage.admin_unlocked`
-- Ajouter un log dans la page Auth (si on y arrive) pour imprimer :
-  - `location.href`
-  - si un mécanisme de “redirectUrl” est en train de forcer une destination
-- Objectif : savoir “qui a poussé vers /auth” (Admin lui-même, un layout, un guard, ou un composant global).
+Fichiers à modifier
+- `src/hooks/useCommunityMessages.ts`
+- `src/pages/community/CommunityMessages.tsx`
+- nouvelle migration SQL dans `supabase/migrations/...`
 
-3.3) Vérification des gardes de routes / layouts
-- Inspecter `src/components/layout/*` et `src/pages/*` pour repérer :
-  - des wrappers “RequireAuth”
-  - des `useEffect(() => navigate('/auth'))`
-  - des `<Navigate to="/auth" />` conditionnels
-- Et confirmer que `/admin` n’est pas rendu à l’intérieur d’un layout qui impose `user` (par exemple un layout global utilisé dans App routing).
-
-4) Corriger la cause (selon le diagnostic)
-Cas A — Publication en retard (le plus probable)
-- Correction : publier (étape 2). Aucun changement de code nécessaire.
-
-Cas B — Cache navigateur / service worker
-- Solution robuste :
-  - s’assurer qu’aucun service worker n’est actif (Vite PWA ou code custom).
-  - si un SW existe : le désactiver ou forcer une stratégie “network-first” pour les assets.
-  - ajouter un “cache-busting” visible (étape 3.1) le temps de valider.
-  - ensuite retirer les logs.
-
-Cas C — Une autre redirection vers /auth persiste
-- Correction : enlever/ajuster le guard responsable UNIQUEMENT pour `/admin` (puisqu’on a validé “Code seul, sans compte”).
-- Exemple typique :
-  - un layout qui fait `if (!user) return <Navigate to="/auth" />`
-  - ou une logique globale qui redirige les routes non publiques vers `/auth`
-- Solution : rendre `/admin` explicitement public au niveau du routing/guard (tout en gardant le PIN).
-
-5) Validation end-to-end (critère “définitif”)
-- Tester sur l’URL publiée :
-  - accéder à `/admin` en non-connecté
-  - entrer un code faux → erreur “Code incorrect”
-  - entrer le bon code → accès au super admin
-  - refresh de la page → reste accessible (sessionStorage) pendant la session
-  - nouvelle fenêtre / navigation privée → redemande le PIN
-- Une fois validé, retirer les logs et le label de version.
-
-Livrables (ce qui sera modifié si nécessaire)
-- Publication (si c’est la cause).
-- Sinon, modifications minimales et ciblées dans :
-  - `src/pages/Admin.tsx` (marquage + logs temporaires + éventuel ajustement de guard si encore présent ailleurs)
-  - `src/pages/Auth.tsx` (log temporaire pour confirmer l’origine de la redirection)
-  - éventuellement un layout global si un guard impose l’auth partout.
-
-Pourquoi ce plan règle “définitivement”
-- Il élimine l’ambiguïté “prod pas à jour vs bug de code” en prouvant ce que la prod exécute réellement.
-- Il identifie de manière certaine la source de la redirection au lieu d’essayer au hasard.
-- Il aboutit soit à une simple publication (cas fréquent), soit à une correction isolée du seul guard responsable, sans régression sur le reste de la plateforme.
+Détail technique
+- Le bug n’est pas dans l’affichage du composant de chat lui-même.
+- Le vrai blocage est en amont: aucune conversation valide n’est créée, donc aucun `conversation_id` exploitable n’existe au moment de l’insert dans `messages`.
+- Le correctif le plus robuste est une fonction backend “get or create” plutôt qu’une chaîne de requêtes client séparées soumises aux policies RLS.
