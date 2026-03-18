@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, LogOut, LayoutDashboard, RefreshCw } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, RefreshCw, Eye, EyeOff } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
