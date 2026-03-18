@@ -367,21 +367,39 @@ export type Database = {
       }
       conversations: {
         Row: {
+          community_id: string | null
           created_at: string | null
           id: string
           updated_at: string | null
         }
         Insert: {
+          community_id?: string | null
           created_at?: string | null
           id?: string
           updated_at?: string | null
         }
         Update: {
+          community_id?: string | null
           created_at?: string | null
           id?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       courses: {
         Row: {

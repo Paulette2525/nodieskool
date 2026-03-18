@@ -33,6 +33,7 @@ const Discover = lazy(() => import("./pages/Discover"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Install = lazy(() => import("./pages/Install"));
 const CommunityEvents = lazy(() => import("./pages/community/CommunityEvents"));
+const CommunityMessages = lazy(() => import("./pages/community/CommunityMessages"));
 
 
 
@@ -79,6 +80,7 @@ const App = () => (
               <Route path="/c/:slug/classroom/:id" element={<CommunityClassroomDetail />} />
               <Route path="/c/:slug/admin" element={<CommunityAdmin />} />
               <Route path="/c/:slug/events" element={<CommunityEvents />} />
+              <Route path="/c/:slug/messages" element={<CommunityMessages />} />
               
               
               {/* Auth and user routes */}
