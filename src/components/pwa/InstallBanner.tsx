@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Download, Share, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Button } from "@/components/ui/button";
 
@@ -9,7 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISS_KEY = "pwa_banner_dismissed_at";
-const DISMISS_DAYS = 7;
+const DISMISS_DAYS = 3;
 
 export function InstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -82,10 +83,20 @@ export function InstallBanner() {
           )}
         </div>
 
-        {!isIOS && (
-          <Button size="sm" onClick={handleInstall} className="rounded-xl gap-1.5 shrink-0">
-            <Download className="w-4 h-4" />
-            Installer
+        {!isIOS ? (
+          deferredPrompt ? (
+            <Button size="sm" onClick={handleInstall} className="rounded-xl gap-1.5 shrink-0">
+              <Download className="w-4 h-4" />
+              Installer
+            </Button>
+          ) : (
+            <Button size="sm" asChild className="rounded-xl gap-1.5 shrink-0">
+              <Link to="/install">En savoir plus</Link>
+            </Button>
+          )
+        ) : (
+          <Button size="sm" variant="outline" asChild className="rounded-xl gap-1.5 shrink-0">
+            <Link to="/install">Guide</Link>
           </Button>
         )}
 
