@@ -101,6 +101,11 @@ export default function Landing() {
             <Button size="lg" variant="outline" className="text-sm px-6 py-5 group rounded-xl" asChild>
               <Link to="/pricing"><Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />Voir la démo</Link>
             </Button>
+            {!isStandalone && (
+              <Button size="lg" variant="ghost" className="text-sm px-6 py-5 rounded-xl" asChild>
+                <Link to="/install"><Download className="h-4 w-4 mr-2" />Installer l'app</Link>
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">

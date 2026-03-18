@@ -83,10 +83,20 @@ export function InstallBanner() {
           )}
         </div>
 
-        {!isIOS && (
-          <Button size="sm" onClick={handleInstall} className="rounded-xl gap-1.5 shrink-0">
-            <Download className="w-4 h-4" />
-            Installer
+        {!isIOS ? (
+          deferredPrompt ? (
+            <Button size="sm" onClick={handleInstall} className="rounded-xl gap-1.5 shrink-0">
+              <Download className="w-4 h-4" />
+              Installer
+            </Button>
+          ) : (
+            <Button size="sm" asChild className="rounded-xl gap-1.5 shrink-0">
+              <Link to="/install">En savoir plus</Link>
+            </Button>
+          )
+        ) : (
+          <Button size="sm" variant="outline" asChild className="rounded-xl gap-1.5 shrink-0">
+            <Link to="/install">Guide</Link>
           </Button>
         )}
 
