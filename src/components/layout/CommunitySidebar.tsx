@@ -20,6 +20,7 @@ export function CommunitySidebar() {
     { name: "Communauté", href: `/c/${slug}/community`, icon: Users },
     { name: "Formations", href: `/c/${slug}/classroom`, icon: BookOpen },
     { name: "Événements", href: `/c/${slug}/events`, icon: Calendar },
+    { name: "Messages", href: `/c/${slug}/messages`, icon: MessageCircle },
   ];
 
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
