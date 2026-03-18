@@ -1,4 +1,3 @@
-import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { CreatePostCard } from "@/components/community/CreatePostCard";
 import { PostCard } from "@/components/community/PostCard";
 import { Card } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePostsWithCommunity } from "@/hooks/usePosts";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 
-function CommunityFeedContent() {
+export default function CommunityFeed() {
   const { profile } = useAuth();
   const { community, isAdmin: isCommunityAdmin } = useCommunityContext();
   const {
@@ -84,13 +83,5 @@ function CommunityFeedContent() {
         )}
       </div>
     </div>
-  );
-}
-
-export default function CommunityFeed() {
-  return (
-    <CommunityLayout>
-      <CommunityFeedContent />
-    </CommunityLayout>
   );
 }

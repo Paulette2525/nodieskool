@@ -1,10 +1,9 @@
-import { CommunityLayout } from "@/components/layout/CommunityLayout";
 import { EventCard } from "@/components/community/EventCard";
 import { Card } from "@/components/ui/card";
 import { Loader2, Calendar } from "lucide-react";
 import { useEvents } from "@/hooks/useEvents";
 
-function CommunityEventsContent() {
+export default function CommunityEvents() {
   const { upcomingEvents, pastEvents, isLoading, registeredEventIds, toggleRegistration } = useEvents();
 
   if (isLoading) {
@@ -30,12 +29,7 @@ function CommunityEventsContent() {
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">À venir</h2>
               {upcomingEvents.map(event => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  isRegistered={registeredEventIds.has(event.id)}
-                  onToggleRegistration={() => toggleRegistration.mutate(event.id)}
-                />
+                <EventCard key={event.id} event={event} isRegistered={registeredEventIds.has(event.id)} onToggleRegistration={() => toggleRegistration.mutate(event.id)} />
               ))}
             </div>
           )}
@@ -43,26 +37,12 @@ function CommunityEventsContent() {
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Passés</h2>
               {pastEvents.map(event => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  isRegistered={registeredEventIds.has(event.id)}
-                  onToggleRegistration={() => toggleRegistration.mutate(event.id)}
-                  isPast
-                />
+                <EventCard key={event.id} event={event} isRegistered={registeredEventIds.has(event.id)} onToggleRegistration={() => toggleRegistration.mutate(event.id)} isPast />
               ))}
             </div>
           )}
         </div>
       )}
     </div>
-  );
-}
-
-export default function CommunityEvents() {
-  return (
-    <CommunityLayout>
-      <CommunityEventsContent />
-    </CommunityLayout>
   );
 }
