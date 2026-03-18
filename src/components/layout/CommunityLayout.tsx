@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode } from "react";
 import { Loader2 } from "lucide-react";
 import { CommunityProvider, useCommunityContext } from "@/contexts/CommunityContext";
 import { CommunitySidebar } from "./CommunitySidebar";
@@ -6,7 +6,7 @@ import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { CommunityPreview } from "@/pages/community/CommunityPreview";
-import { ProfileOnboarding, hasSkippedOnboarding } from "@/components/community/ProfileOnboarding";
+import { ProfileOnboarding } from "@/components/community/ProfileOnboarding";
 
 interface CommunityLayoutProps {
   children: ReactNode;
@@ -19,13 +19,6 @@ function isProfileIncomplete(profile: any): boolean {
 function CommunityLayoutInner({ children }: CommunityLayoutProps) {
   const { community, loading, isMember } = useCommunityContext();
   const { user, profile, loading: authLoading } = useAuth();
-  const [skipped, setSkipped] = useState(hasSkippedOnboarding());
-
-  useEffect(() => {
-    const handler = () => setSkipped(hasSkippedOnboarding());
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
 
   if (loading || authLoading) {
     return (
@@ -48,7 +41,7 @@ function CommunityLayoutInner({ children }: CommunityLayoutProps) {
 
   if (!isMember) return <CommunityPreview />;
 
-  if (isMember && isProfileIncomplete(profile) && !skipped) {
+  if (isMember && isProfileIncomplete(profile)) {
     return <ProfileOnboarding />;
   }
 

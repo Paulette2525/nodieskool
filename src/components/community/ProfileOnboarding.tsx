@@ -11,12 +11,6 @@ import { useStorage } from "@/hooks/useStorage";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 
-const SKIP_KEY = "profile_onboarding_skipped";
-
-export function hasSkippedOnboarding(): boolean {
-  return localStorage.getItem(SKIP_KEY) === "true";
-}
-
 export function ProfileOnboarding() {
   const { profile, updateProfile } = useProfile();
   const { refreshProfile } = useAuth();
@@ -55,12 +49,6 @@ export function ProfileOnboarding() {
     await refreshProfile();
   };
 
-  const handleSkip = () => {
-    localStorage.setItem(SKIP_KEY, "true");
-    window.dispatchEvent(new Event("storage"));
-    // Force re-render by refreshing profile
-    refreshProfile();
-  };
 
   const saving = updateProfile.isPending || uploading;
 
@@ -166,13 +154,6 @@ export function ProfileOnboarding() {
           >
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Continuer
-          </Button>
-          <Button
-            onClick={handleSkip}
-            variant="ghost"
-            className="w-full text-xs text-muted-foreground"
-          >
-            Passer pour l'instant
           </Button>
         </div>
       </Card>
