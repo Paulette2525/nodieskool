@@ -37,7 +37,6 @@
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useStorage } from "@/hooks/useStorage";
-import { Camera } from "lucide-react";
  import { supabase } from "@/integrations/supabase/client";
  import { useQueryClient } from "@tanstack/react-query";
  
