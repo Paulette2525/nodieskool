@@ -80,17 +80,17 @@ export default function Landing() {
           </nav>
           <div className="flex items-center gap-2">
             {user ? (
-              <LiquidButton asChild size="sm">
-                <Link to="/dashboard">Dashboard</Link>
-              </LiquidButton>
+              <Link to="/dashboard">
+                <LiquidButton size="sm">Dashboard</LiquidButton>
+              </Link>
             ) : (
               <>
                 <Button variant="ghost" asChild className="hidden sm:inline-flex text-xs h-9">
                   <Link to="/auth">Se connecter</Link>
                 </Button>
-                <LiquidButton asChild size="sm">
-                  <Link to="/auth">Commencer</Link>
-                </LiquidButton>
+                <Link to="/auth">
+                  <LiquidButton size="sm">Commencer</LiquidButton>
+                </Link>
               </>
             )}
           </div>
