@@ -75,18 +75,22 @@ import { Camera } from "lucide-react";
    memberCount,
    showActions = true,
  }: CommunityCardProps) {
-   const roleInfo = role ? roleConfig[role] : null;
-   const navigate = useNavigate();
-   const queryClient = useQueryClient();
-   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-   const [showEditDialog, setShowEditDialog] = useState(false);
-   const [isDeleting, setIsDeleting] = useState(false);
-   const [isSaving, setIsSaving] = useState(false);
-   const [editForm, setEditForm] = useState({
-     name: name,
-     description: description || "",
-     is_public: isPublic,
-   });
+    const roleInfo = role ? roleConfig[role] : null;
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { uploadFile } = useStorage();
+    const coverInputRef = useRef<HTMLInputElement>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
+    const [pendingCoverFile, setPendingCoverFile] = useState<File | null>(null);
+    const [editForm, setEditForm] = useState({
+      name: name,
+      description: description || "",
+      is_public: isPublic,
+    });
 
    const isOwner = role === "owner";
    const communityUrl = `${window.location.origin}/c/${slug}/community`;
