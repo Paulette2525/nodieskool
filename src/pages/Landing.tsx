@@ -120,12 +120,12 @@ export default function Landing() {
             <Link to={user ? "/dashboard" : "/auth"}>
               <ShinyButton>Créer ma communauté</ShinyButton>
             </Link>
-            <LiquidButton asChild size="lg" variant="outline">
-              <Link to="/pricing">
+            <Link to="/pricing">
+              <LiquidButton size="lg" variant="outline">
                 <Play className="h-4 w-4" />
                 Voir la démo
-              </Link>
-            </LiquidButton>
+              </LiquidButton>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
