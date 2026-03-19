@@ -311,8 +311,38 @@ import { Camera } from "lucide-react";
                Modifiez les informations de votre communauté
              </DialogDescription>
            </DialogHeader>
-           <div className="space-y-4 py-4">
-             <div className="space-y-2">
+            <div className="space-y-4 py-4">
+              {/* Banner upload zone */}
+              <div className="space-y-2">
+                <Label>Bannière de couverture</Label>
+                <div
+                  className="relative h-28 rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden cursor-pointer group/cover hover:border-primary/50 transition-colors"
+                  onClick={() => coverInputRef.current?.click()}
+                >
+                  {(coverPreview || coverUrl) ? (
+                    <img
+                      src={coverPreview || coverUrl || ""}
+                      alt="Bannière"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <p className="text-sm text-muted-foreground">Cliquez pour ajouter une bannière</p>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Camera className="h-6 w-6 text-white" />
+                  </div>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverChange}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
                <Label htmlFor="edit-name">Nom de la communauté</Label>
                <Input
                  id="edit-name"
