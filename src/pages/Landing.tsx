@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, MessageSquare, Calendar, Check, Globe, Zap, Shield, Star, Play, Download, ArrowRight, TrendingUp } from "lucide-react";
+import { Users, BookOpen, MessageSquare, Calendar, Check, Globe, Zap, Shield, Star, Play, ArrowRight, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
 import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
@@ -259,15 +259,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Install Banner (mobile only) */}
-      {!isStandalone && (
-        <section className="px-4 pb-8 md:hidden">
-          <Link to="/install" className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/15 transition-colors">
-            <Download className="h-4 w-4" />
-            Installer l'application Tribbue
-          </Link>
-        </section>
-      )}
+      {/* Install Banner (mobile only) - handled by InstallBanner component */}
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 px-4 bg-muted/20">
