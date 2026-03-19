@@ -76,7 +76,7 @@ export function InstallBanner() {
 
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">Tribbue</p>
-            <p className="text-xs text-muted-foreground">Installez l'app sur votre téléphone</p>
+            <p className="text-xs text-muted-foreground">Installez l'app sur votre appareil</p>
           </div>
 
           <Button size="sm" onClick={handleInstall} className="rounded-xl gap-1.5 shrink-0">
