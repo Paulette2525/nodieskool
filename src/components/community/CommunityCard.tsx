@@ -2,7 +2,7 @@
  import { Card } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
- import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight } from "lucide-react";
+ import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight, Camera } from "lucide-react";
  import { cn } from "@/lib/utils";
  import {
    DropdownMenu,
@@ -34,8 +34,9 @@
  import { Label } from "@/components/ui/label";
  import { Textarea } from "@/components/ui/textarea";
  import { Switch } from "@/components/ui/switch";
- import { useState } from "react";
- import { toast } from "sonner";
+import { useState, useRef } from "react";
+import { toast } from "sonner";
+import { useStorage } from "@/hooks/useStorage";
  import { supabase } from "@/integrations/supabase/client";
  import { useQueryClient } from "@tanstack/react-query";
  
@@ -73,18 +74,22 @@
    memberCount,
    showActions = true,
  }: CommunityCardProps) {
-   const roleInfo = role ? roleConfig[role] : null;
-   const navigate = useNavigate();
-   const queryClient = useQueryClient();
-   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-   const [showEditDialog, setShowEditDialog] = useState(false);
-   const [isDeleting, setIsDeleting] = useState(false);
-   const [isSaving, setIsSaving] = useState(false);
-   const [editForm, setEditForm] = useState({
-     name: name,
-     description: description || "",
-     is_public: isPublic,
-   });
+    const roleInfo = role ? roleConfig[role] : null;
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { uploadFile } = useStorage();
+    const coverInputRef = useRef<HTMLInputElement>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [coverPreview, setCoverPreview] = useState<string | null>(null);
+    const [pendingCoverFile, setPendingCoverFile] = useState<File | null>(null);
+    const [editForm, setEditForm] = useState({
+      name: name,
+      description: description || "",
+      is_public: isPublic,
+    });
 
    const isOwner = role === "owner";
    const communityUrl = `${window.location.origin}/c/${slug}/community`;
@@ -123,29 +128,50 @@
      }
    };
 
-   const handleSaveEdit = async () => {
-     setIsSaving(true);
-     try {
-       const { error } = await supabase
-         .from("communities")
-         .update({
-           name: editForm.name,
-           description: editForm.description || null,
-           is_public: editForm.is_public,
-         })
-         .eq("id", id);
+    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setPendingCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    };
 
-       if (error) throw error;
+    const handleSaveEdit = async () => {
+      setIsSaving(true);
+      try {
+        let newCoverUrl: string | undefined;
+        if (pendingCoverFile) {
+          const url = await uploadFile("community-assets", pendingCoverFile, "covers");
+          if (!url) throw new Error("Échec de l'upload de la bannière");
+          newCoverUrl = url;
+        }
 
-       toast.success("Communauté mise à jour avec succès");
-       queryClient.invalidateQueries({ queryKey: ["my-communities"] });
-       setShowEditDialog(false);
-     } catch (error: any) {
-       toast.error("Erreur lors de la mise à jour: " + error.message);
-     } finally {
-       setIsSaving(false);
-     }
-   };
+        const updateData: Record<string, unknown> = {
+          name: editForm.name,
+          description: editForm.description || null,
+          is_public: editForm.is_public,
+        };
+        if (newCoverUrl) updateData.cover_url = newCoverUrl;
+
+        const { error } = await supabase
+          .from("communities")
+          .update(updateData)
+          .eq("id", id);
+
+        if (error) throw error;
+
+        toast.success("Communauté mise à jour avec succès");
+        queryClient.invalidateQueries({ queryKey: ["my-communities"] });
+        setCoverPreview(null);
+        setPendingCoverFile(null);
+        setShowEditDialog(false);
+      } catch (error: any) {
+        toast.error("Erreur lors de la mise à jour: " + error.message);
+      } finally {
+        setIsSaving(false);
+      }
+    };
  
    return (
      <>
@@ -284,8 +310,38 @@
                Modifiez les informations de votre communauté
              </DialogDescription>
            </DialogHeader>
-           <div className="space-y-4 py-4">
-             <div className="space-y-2">
+            <div className="space-y-4 py-4">
+              {/* Banner upload zone */}
+              <div className="space-y-2">
+                <Label>Bannière de couverture</Label>
+                <div
+                  className="relative h-28 rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden cursor-pointer group/cover hover:border-primary/50 transition-colors"
+                  onClick={() => coverInputRef.current?.click()}
+                >
+                  {(coverPreview || coverUrl) ? (
+                    <img
+                      src={coverPreview || coverUrl || ""}
+                      alt="Bannière"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <p className="text-sm text-muted-foreground">Cliquez pour ajouter une bannière</p>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Camera className="h-6 w-6 text-white" />
+                  </div>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverChange}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
                <Label htmlFor="edit-name">Nom de la communauté</Label>
                <Input
                  id="edit-name"
