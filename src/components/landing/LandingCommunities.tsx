@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
 
 interface Community {
@@ -10,6 +9,8 @@ interface Community {
 }
 
 export default function LandingCommunities({ communities }: { communities: Community[] }) {
+  const navigate = useNavigate();
+
   return (
     <section className="py-16 px-4 bg-muted/30">
       <div className="max-w-5xl mx-auto">
@@ -34,8 +35,8 @@ export default function LandingCommunities({ communities }: { communities: Commu
           ))}
         </div>
         <div className="text-center mt-6">
-          <LiquidButton asChild size="sm" variant="default">
-            <Link to="/discover">Voir toutes</Link>
+          <LiquidButton size="sm" variant="default" onClick={() => navigate("/discover")}>
+            Voir toutes
           </LiquidButton>
         </div>
       </div>

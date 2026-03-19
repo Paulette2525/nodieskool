@@ -1,5 +1,4 @@
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
@@ -30,42 +29,19 @@ const liquidbuttonVariants = cva(
   }
 )
 
-function GlassFilter() {
-  return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-      <defs>
-        <filter id="glass-distortion" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="1" result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="1" result="blurredNoise" />
-          <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="8" xChannelSelector="R" yChannelSelector="G" result="displaced" />
-          <feGaussianBlur in="displaced" stdDeviation="0.5" result="finalBlur" />
-          <feMerge>
-            <feMergeNode in="finalBlur" />
-          </feMerge>
-        </filter>
-      </defs>
-    </svg>
-  )
-}
-
 export interface LiquidButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof liquidbuttonVariants> {
-  asChild?: boolean
-}
+    VariantProps<typeof liquidbuttonVariants> {}
 
 function LiquidButton({
   className,
   variant,
   size,
-  asChild = false,
   children,
   ...props
 }: LiquidButtonProps) {
-  const Comp = asChild ? Slot : "button"
-
   return (
-    <Comp
+    <button
       className={cn(
         liquidbuttonVariants({ variant, size }),
         "relative overflow-hidden rounded-2xl",
@@ -73,22 +49,8 @@ function LiquidButton({
       )}
       {...props}
     >
-      <GlassFilter />
-      
-      {/* Glass gradient overlay */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-white/5 pointer-events-none" style={{ zIndex: 1 }} />
-      
-      {/* Subtle border glow */}
-      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 pointer-events-none" style={{ zIndex: 2 }} />
-
-      {/* Content */}
-      <span className="relative" style={{ zIndex: 3 }}>
-        {children}
-      </span>
-
-      {/* Bottom shine */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
-    </Comp>
+      <span className="relative z-10">{children}</span>
+    </button>
   )
 }
 
