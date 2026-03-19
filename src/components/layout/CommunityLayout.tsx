@@ -1,10 +1,12 @@
 import { ReactNode, lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { CommunitySidebar } from "./CommunitySidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { CommunityPreview } from "@/pages/community/CommunityPreview";
 import { ProfileOnboarding } from "@/components/community/ProfileOnboarding";
+import { Button } from "@/components/ui/button";
 
 const GlobalSearch = lazy(() => import("@/components/search/GlobalSearch").then(m => ({ default: m.GlobalSearch })));
 const NotificationBell = lazy(() => import("@/components/notifications/NotificationBell").then(m => ({ default: m.NotificationBell })));
