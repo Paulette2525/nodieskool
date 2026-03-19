@@ -1,17 +1,4 @@
-// Custom Service Worker for Push Notifications + iOS cache fix
-
-// Force cache invalidation on activation
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          return caches.delete(cacheName);
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
-});
+// Custom Service Worker for Push Notifications
 
 self.addEventListener('push', (event) => {
   let data = { title: 'Tribbue', body: 'Nouvelle notification', icon: '/tribbue-logo.png' };

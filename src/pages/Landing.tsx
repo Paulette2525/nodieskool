@@ -76,17 +76,13 @@ export default function Landing() {
           </nav>
           <div className="flex items-center gap-2">
             {user ? (
-              <Link to="/dashboard">
-                <LiquidButton size="sm">Dashboard</LiquidButton>
-              </Link>
+              <LiquidButton size="sm" href="/dashboard">Dashboard</LiquidButton>
             ) : (
               <>
                 <Button variant="ghost" asChild className="hidden sm:inline-flex text-xs h-9 hover:bg-primary/5 hover:text-primary">
                   <Link to="/auth">Se connecter</Link>
                 </Button>
-                <Link to="/auth">
-                  <LiquidButton size="sm">Commencer</LiquidButton>
-                </Link>
+                <LiquidButton size="sm" href="/auth">Commencer</LiquidButton>
               </>
             )}
           </div>
@@ -112,12 +108,10 @@ export default function Landing() {
             <Link to={user ? "/dashboard" : "/auth"}>
               <ShinyButton>Créer ma communauté</ShinyButton>
             </Link>
-            <Link to="/pricing">
-              <LiquidButton size="lg" variant="outline">
+            <LiquidButton size="lg" variant="outline" href="/pricing">
                 <Play className="h-4 w-4" />
                 Voir la démo
               </LiquidButton>
-            </Link>
           </div>
         </div>
       </AuroraBackground>
@@ -188,9 +182,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Link to="/pricing">
-                <LiquidButton size="sm">Voir les tarifs</LiquidButton>
-              </Link>
+              <LiquidButton size="sm" href="/pricing">Voir les tarifs</LiquidButton>
             </div>
             <div className="relative group">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-primary/3 border border-border/50 shadow-lg flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:border-primary/20">
@@ -235,9 +227,7 @@ export default function Landing() {
               ))}
             </div>
             <div className="text-center mt-6">
-              <Link to="/discover">
-                <LiquidButton size="sm" variant="outline">Voir toutes</LiquidButton>
-              </Link>
+              <LiquidButton size="sm" variant="outline" href="/discover">Voir toutes</LiquidButton>
             </div>
           </div>
         </section>

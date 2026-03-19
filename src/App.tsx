@@ -10,10 +10,13 @@ import { InstallBanner } from "./components/pwa/InstallBanner";
 import { CommunityProvider } from "@/contexts/CommunityContext";
 import { CommunityLayout } from "@/components/layout/CommunityLayout";
 
-// All pages lazy loaded
-const Landing = lazy(() => import("./pages/Landing"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Auth = lazy(() => import("./pages/Auth"));
+// Critical routes — eager loaded for Safari/iOS reliability
+import Landing from "./pages/Landing";
+import Dashboard from "./pages/Dashboard";
+import Auth from "./pages/Auth";
+import Install from "./pages/Install";
+
+// Secondary pages — lazy loaded
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -31,7 +34,6 @@ const CommunityAdmin = lazy(() => import("./pages/community/CommunityAdmin"));
 const CommunityClassroomDetail = lazy(() => import("./pages/community/CommunityClassroomDetail"));
 const Discover = lazy(() => import("./pages/Discover"));
 const Contact = lazy(() => import("./pages/Contact"));
-const Install = lazy(() => import("./pages/Install"));
 const CommunityEvents = lazy(() => import("./pages/community/CommunityEvents"));
 const CommunityMessages = lazy(() => import("./pages/community/CommunityMessages"));
 
@@ -71,8 +73,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <InstallBanner />
         <BrowserRouter>
+          <InstallBanner />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Landing />} />
