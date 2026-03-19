@@ -108,12 +108,10 @@ export default function Landing() {
             <Link to={user ? "/dashboard" : "/auth"}>
               <ShinyButton>Créer ma communauté</ShinyButton>
             </Link>
-            <Link to="/pricing">
-              <LiquidButton size="lg" variant="outline">
+            <LiquidButton size="lg" variant="outline" href="/pricing">
                 <Play className="h-4 w-4" />
                 Voir la démo
               </LiquidButton>
-            </Link>
           </div>
         </div>
       </AuroraBackground>
