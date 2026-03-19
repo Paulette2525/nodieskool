@@ -62,33 +62,32 @@ function LiquidButton({
   children,
   ...props
 }: LiquidButtonProps) {
-  const Comp = asChild ? Slot : "button"
+  const classes = cn(
+    liquidbuttonVariants({ variant, size }),
+    "relative overflow-hidden rounded-2xl",
+    className
+  )
+
+  const inner = (
+    <>
+      <GlassFilter />
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-white/5 pointer-events-none" style={{ zIndex: 1 }} />
+      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 pointer-events-none" style={{ zIndex: 2 }} />
+      <span className="relative" style={{ zIndex: 3 }}>{children}</span>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
+    </>
+  )
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      className: cn((children as React.ReactElement<any>).props.className, classes),
+    })
+  }
 
   return (
-    <Comp
-      className={cn(
-        liquidbuttonVariants({ variant, size }),
-        "relative overflow-hidden rounded-2xl",
-        className
-      )}
-      {...props}
-    >
-      <GlassFilter />
-      
-      {/* Glass gradient overlay */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-white/5 pointer-events-none" style={{ zIndex: 1 }} />
-      
-      {/* Subtle border glow */}
-      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 pointer-events-none" style={{ zIndex: 2 }} />
-
-      {/* Content */}
-      <span className="relative" style={{ zIndex: 3 }}>
-        {children}
-      </span>
-
-      {/* Bottom shine */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" style={{ zIndex: 2 }} />
-    </Comp>
+    <button className={classes} {...props}>
+      {inner}
+    </button>
   )
 }
 
