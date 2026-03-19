@@ -8,6 +8,7 @@
 
 @layer base {
   :root {
+    --transparent: transparent;
     --background: 0 0% 97.5%;
     --foreground: 224 24% 12%;
 

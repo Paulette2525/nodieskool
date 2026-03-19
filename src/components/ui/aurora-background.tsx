@@ -17,17 +17,18 @@ export const AuroraBackground = ({
     <div>
       <div
         className={cn(
-          "relative flex flex-col min-h-screen min-h-[100dvh] items-center justify-center bg-background text-foreground transition-bg",
+          "relative flex flex-col min-h-[100dvh] items-center justify-center bg-background text-foreground transition-bg",
           className
         )}
         {...props}
       >
         <div className="absolute inset-0 overflow-hidden">
           <div
+            style={{ transform: "translateZ(0)" }}
             className={cn(
               `
-            [--white-gradient:repeating-linear-gradient(100deg,hsl(var(--background))_0%,hsl(var(--background))_7%,var(--transparent)_10%,var(--transparent)_12%,hsl(var(--background))_16%)]
-            [--dark-gradient:repeating-linear-gradient(100deg,hsl(var(--foreground)/0.05)_0%,hsl(var(--foreground)/0.05)_7%,var(--transparent)_10%,var(--transparent)_12%,hsl(var(--foreground)/0.05)_16%)]
+            [--white-gradient:repeating-linear-gradient(100deg,hsl(var(--background))_0%,hsl(var(--background))_7%,transparent_10%,transparent_12%,hsl(var(--background))_16%)]
+            [--dark-gradient:repeating-linear-gradient(100deg,hsl(var(--foreground)/0.05)_0%,hsl(var(--foreground)/0.05)_7%,transparent_10%,transparent_12%,hsl(var(--foreground)/0.05)_16%)]
             [--aurora:repeating-linear-gradient(100deg,hsl(var(--primary))_10%,hsl(var(--primary)/0.6)_15%,hsl(var(--primary)/0.3)_20%,hsl(var(--primary)/0.5)_25%,hsl(var(--primary)/0.2)_30%)]
             [background-image:var(--white-gradient),var(--aurora)]
             dark:[background-image:var(--dark-gradient),var(--aurora)]
@@ -37,11 +38,11 @@ export const AuroraBackground = ({
             after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
             after:dark:[background-image:var(--dark-gradient),var(--aurora)]
             after:[background-size:200%,_100%] 
-            after:animate-aurora after:[background-attachment:fixed] after:[-webkit-mix-blend-mode:difference] after:mix-blend-difference
+            after:animate-aurora after:[mix-blend-mode:difference]
             pointer-events-none
             absolute -inset-[10px] opacity-40 will-change-transform`,
               showRadialGradient &&
-                `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)] [-webkit-mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
+                `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,transparent_70%)] [-webkit-mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,transparent_70%)]`
             )}
           ></div>
         </div>
