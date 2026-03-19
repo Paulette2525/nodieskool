@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Check, Globe } from "lucide-react";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
@@ -14,6 +14,8 @@ const benefits = [
 ];
 
 export default function LandingBenefits({ user }: { user: User | null }) {
+  const navigate = useNavigate();
+
   return (
     <section className="py-20 px-4">
       <div className="max-w-5xl mx-auto">
@@ -32,17 +34,15 @@ export default function LandingBenefits({ user }: { user: User | null }) {
                 </li>
               ))}
             </ul>
-            <LiquidButton asChild size="sm" variant="default">
-              <Link to="/pricing">Voir les tarifs</Link>
+            <LiquidButton size="sm" variant="default" onClick={() => navigate("/pricing")}>
+              Voir les tarifs
             </LiquidButton>
           </div>
 
           <div className="relative">
             <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/12 via-primary/6 to-accent/8 border border-border/30 shadow-lg flex items-center justify-center overflow-hidden">
-              {/* Glass-like layered effect */}
               <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-white/5" />
               <div className="absolute inset-4 rounded-2xl border border-white/10 bg-white/3 backdrop-blur-sm" />
-              
               <div className="relative text-center p-8">
                 <div className="h-16 w-16 rounded-2xl bg-primary mx-auto mb-3 flex items-center justify-center shadow-md ring-4 ring-primary/20">
                   <Globe className="h-8 w-8 text-primary-foreground" />
