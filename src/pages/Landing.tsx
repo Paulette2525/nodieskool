@@ -80,17 +80,17 @@ export default function Landing() {
           </nav>
           <div className="flex items-center gap-2">
             {user ? (
-              <LiquidButton asChild size="sm">
-                <Link to="/dashboard">Dashboard</Link>
-              </LiquidButton>
+              <Link to="/dashboard">
+                <LiquidButton size="sm">Dashboard</LiquidButton>
+              </Link>
             ) : (
               <>
                 <Button variant="ghost" asChild className="hidden sm:inline-flex text-xs h-9">
                   <Link to="/auth">Se connecter</Link>
                 </Button>
-                <LiquidButton asChild size="sm">
-                  <Link to="/auth">Commencer</Link>
-                </LiquidButton>
+                <Link to="/auth">
+                  <LiquidButton size="sm">Commencer</LiquidButton>
+                </Link>
               </>
             )}
           </div>
@@ -120,12 +120,12 @@ export default function Landing() {
             <Link to={user ? "/dashboard" : "/auth"}>
               <ShinyButton>Créer ma communauté</ShinyButton>
             </Link>
-            <LiquidButton asChild size="lg" variant="outline">
-              <Link to="/pricing">
+            <Link to="/pricing">
+              <LiquidButton size="lg" variant="outline">
                 <Play className="h-4 w-4" />
                 Voir la démo
-              </Link>
-            </LiquidButton>
+              </LiquidButton>
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
@@ -177,9 +177,9 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <LiquidButton asChild size="sm">
-                <Link to="/pricing">Voir les tarifs</Link>
-              </LiquidButton>
+              <Link to="/pricing">
+                <LiquidButton size="sm">Voir les tarifs</LiquidButton>
+              </Link>
             </div>
             <div className="relative">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/15 via-primary/8 to-accent/8 border border-border/50 shadow-lg flex items-center justify-center overflow-hidden">
@@ -215,9 +215,9 @@ export default function Landing() {
               ))}
             </div>
             <div className="text-center mt-6">
-              <LiquidButton asChild size="sm" variant="outline">
-                <Link to="/discover">Voir toutes</Link>
-              </LiquidButton>
+              <Link to="/discover">
+                <LiquidButton size="sm" variant="outline">Voir toutes</LiquidButton>
+              </Link>
             </div>
           </div>
         </section>
