@@ -18,12 +18,7 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
           --shiny-cta-fg: #ffffff;
           --shiny-cta-highlight: hsl(235 56% 52%);
           --shiny-cta-highlight-subtle: hsl(235 56% 68%);
-          --gradient-angle: 0deg;
-          --gradient-angle-offset: 0deg;
-          --gradient-percent: 5%;
-          --gradient-shine: white;
           --duration: 3s;
-          --shadow-size: 2px;
           --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
           
           isolation: isolate;
@@ -36,32 +31,38 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
           font-size: 0.95rem;
           line-height: 1.2;
           font-weight: 500;
-          border: 1px solid transparent;
+          border: 1px solid var(--shiny-cta-bg-subtle);
           border-radius: 360px;
           color: var(--shiny-cta-fg);
-          background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
-            conic-gradient(
-              from var(--gradient-angle),
-              transparent,
-              var(--shiny-cta-highlight) var(--gradient-percent),
-              var(--gradient-shine) calc(var(--gradient-percent) * 2),
-              var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
-              transparent calc(var(--gradient-percent) * 4)
-            ) border-box;
+          background: var(--shiny-cta-bg);
           box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
           transition: var(--transition);
-          animation: shiny-gradient-angle var(--duration) linear infinite;
         }
 
-        .shiny-cta::before,
-        .shiny-cta::after,
-        .shiny-cta span::before {
+        .shiny-cta::before {
           content: "";
           pointer-events: none;
           position: absolute;
-          inset-inline-start: 50%;
-          inset-block-start: 50%;
-          translate: -50% -50%;
+          inset: -50%;
+          background: conic-gradient(
+            from 0deg,
+            transparent 0%,
+            var(--shiny-cta-highlight) 5%,
+            white 10%,
+            var(--shiny-cta-highlight) 15%,
+            transparent 20%,
+            transparent 100%
+          );
+          animation: shiny-rotate var(--duration) linear infinite;
+          z-index: -1;
+        }
+
+        .shiny-cta::after {
+          content: "";
+          position: absolute;
+          inset: 2px;
+          border-radius: 360px;
+          background: var(--shiny-cta-bg);
           z-index: -1;
         }
 
@@ -69,52 +70,22 @@ export function ShinyButton({ children, onClick, className = "" }: ShinyButtonPr
           translate: 0 1px;
         }
 
-        .shiny-cta::after {
-          width: 100%;
-          aspect-ratio: 1;
-          background: linear-gradient(
-            -50deg,
-            transparent,
-            var(--shiny-cta-highlight),
-            transparent
-          );
-          mask-image: radial-gradient(circle at bottom, transparent 40%, black);
-          -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, black);
-          opacity: 0.6;
-          animation: shiny-shimmer var(--duration) linear infinite;
-        }
-
         .shiny-cta span {
           z-index: 1;
-        }
-
-        .shiny-cta span::before {
-          --size: calc(100% + 1rem);
-          width: var(--size);
-          height: var(--size);
-          box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
-          opacity: 0;
-          transition: opacity var(--transition);
+          position: relative;
         }
 
         .shiny-cta:is(:hover, :focus-visible) {
-          --gradient-percent: 20%;
-          --gradient-shine: var(--shiny-cta-highlight-subtle);
+          background: var(--shiny-cta-bg-subtle);
         }
 
-        .shiny-cta:is(:hover, :focus-visible) span::before {
-          opacity: 1;
+        .shiny-cta:is(:hover, :focus-visible)::after {
+          background: var(--shiny-cta-bg-subtle);
         }
 
-        @keyframes shiny-gradient-angle {
+        @keyframes shiny-rotate {
           to {
-            --gradient-angle: 360deg;
-          }
-        }
-
-        @keyframes shiny-shimmer {
-          to {
-            rotate: 360deg;
+            transform: rotate(360deg);
           }
         }
       `}</style>

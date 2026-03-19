@@ -73,6 +73,8 @@ export default defineConfig(({ mode }) => ({
     include: ["@tanstack/react-query"],
   },
   build: {
+    target: 'es2015',
+    cssTarget: 'safari14',
     rollupOptions: {
       output: {
         manualChunks: {

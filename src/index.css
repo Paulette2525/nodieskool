@@ -8,6 +8,7 @@
 
 @layer base {
   :root {
+    --transparent: transparent;
     --background: 0 0% 97.5%;
     --foreground: 224 24% 12%;
 
@@ -68,6 +69,7 @@
   }
 
   .dark {
+    --transparent: transparent;
     --background: 224 32% 6%;
     --foreground: 210 40% 98%;
 
