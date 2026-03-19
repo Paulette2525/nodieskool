@@ -2,7 +2,7 @@
  import { Card } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
- import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight } from "lucide-react";
+ import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight, Camera } from "lucide-react";
  import { cn } from "@/lib/utils";
  import {
    DropdownMenu,
