@@ -34,8 +34,10 @@
  import { Label } from "@/components/ui/label";
  import { Textarea } from "@/components/ui/textarea";
  import { Switch } from "@/components/ui/switch";
- import { useState } from "react";
- import { toast } from "sonner";
+import { useState, useRef } from "react";
+import { toast } from "sonner";
+import { useStorage } from "@/hooks/useStorage";
+import { Camera } from "lucide-react";
  import { supabase } from "@/integrations/supabase/client";
  import { useQueryClient } from "@tanstack/react-query";
  
