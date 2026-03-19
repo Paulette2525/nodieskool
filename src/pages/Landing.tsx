@@ -182,9 +182,7 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Link to="/pricing">
-                <LiquidButton size="sm">Voir les tarifs</LiquidButton>
-              </Link>
+              <LiquidButton size="sm" href="/pricing">Voir les tarifs</LiquidButton>
             </div>
             <div className="relative group">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-primary/3 border border-border/50 shadow-lg flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:border-primary/20">
