@@ -227,9 +227,7 @@ export default function Landing() {
               ))}
             </div>
             <div className="text-center mt-6">
-              <Link to="/discover">
-                <LiquidButton size="sm" variant="outline">Voir toutes</LiquidButton>
-              </Link>
+              <LiquidButton size="sm" variant="outline" href="/discover">Voir toutes</LiquidButton>
             </div>
           </div>
         </section>
