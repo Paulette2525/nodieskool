@@ -1,10 +1,12 @@
 import { ReactNode, lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { CommunitySidebar } from "./CommunitySidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { CommunityPreview } from "@/pages/community/CommunityPreview";
 import { ProfileOnboarding } from "@/components/community/ProfileOnboarding";
+import { Button } from "@/components/ui/button";
 
 const GlobalSearch = lazy(() => import("@/components/search/GlobalSearch").then(m => ({ default: m.GlobalSearch })));
 const NotificationBell = lazy(() => import("@/components/notifications/NotificationBell").then(m => ({ default: m.NotificationBell })));
@@ -18,8 +20,9 @@ function isProfileIncomplete(profile: any): boolean {
 }
 
 export function CommunityLayout({ children }: CommunityLayoutProps) {
-  const { community, loading, isMember } = useCommunityContext();
+  const { community, loading, isMember, isAdmin } = useCommunityContext();
   const { user, profile, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading || authLoading) {
     return (
@@ -60,6 +63,44 @@ export function CommunityLayout({ children }: CommunityLayoutProps) {
             </Suspense>
           </div>
         )}
+        {/* Community Banner */}
+        <div className="relative w-full h-32 flex-shrink-0 overflow-hidden">
+          {community.cover_url ? (
+            <img
+              src={community.cover_url}
+              alt={community.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div
+              className="w-full h-full"
+              style={{
+                background: `linear-gradient(135deg, ${community.primary_color || 'hsl(var(--primary))'}, ${community.primary_color || 'hsl(var(--primary))'}88)`,
+              }}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute bottom-3 left-4 flex items-center gap-3">
+            {community.logo_url && (
+              <img
+                src={community.logo_url}
+                alt=""
+                className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
+              />
+            )}
+            <h2 className="text-white font-semibold text-lg drop-shadow-md">{community.name}</h2>
+          </div>
+          {isAdmin && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="absolute top-2 right-2 text-white/80 hover:text-white hover:bg-white/20"
+              onClick={() => navigate(`/c/${community.slug}/admin`)}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <div className="flex-1 overflow-auto">
           {children}
         </div>
