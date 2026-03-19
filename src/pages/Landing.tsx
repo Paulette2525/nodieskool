@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, MessageSquare, Calendar, Check, Globe, Zap, Shield, Star, Play, Download, ArrowRight } from "lucide-react";
+import { Users, BookOpen, MessageSquare, Calendar, Check, Globe, Zap, Shield, Star, Play, Download, ArrowRight, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
 import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
 import { ShinyButton } from "@/components/ui/shiny-button";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { FeatureCard } from "@/components/ui/feature-card";
+import { TypingAnimation } from "@/components/ui/typing-animation";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 const features = [
@@ -22,10 +23,10 @@ const features = [
 ];
 
 const stats = [
-  { value: "10k+", label: "Utilisateurs" },
-  { value: "500+", label: "Communautés" },
-  { value: "50k+", label: "Cours suivis" },
-  { value: "99.9%", label: "Disponibilité" },
+  { value: "10k+", label: "Utilisateurs", icon: <Users className="h-4 w-4" /> },
+  { value: "500+", label: "Communautés", icon: <Globe className="h-4 w-4" /> },
+  { value: "50k+", label: "Cours suivis", icon: <BookOpen className="h-4 w-4" /> },
+  { value: "99.9%", label: "Disponibilité", icon: <TrendingUp className="h-4 w-4" /> },
 ];
 
 const benefits = [
@@ -92,13 +93,9 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative py-12 md:py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/3 to-transparent pointer-events-none" />
-        <div className="absolute top-20 left-10 w-64 h-64 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="max-w-3xl mx-auto text-center relative animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Hero with Aurora */}
+      <AuroraBackground className="h-auto min-h-0 py-12 md:py-16 px-4">
+        <div className="max-w-3xl mx-auto text-center relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Badge variant="secondary" className="mb-5 px-3 py-1.5 text-xs font-medium bg-primary/8 text-primary border-none rounded-full">
             Plateforme communautaire tout-en-un
           </Badge>
@@ -122,12 +119,26 @@ export default function Landing() {
               </LiquidButton>
             </Link>
           </div>
+        </div>
+      </AuroraBackground>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center animate-in fade-in duration-500">
-                <div className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</div>
+      {/* Stats */}
+      <section className="py-12 px-4 border-b border-border/50 bg-card/50">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {stats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className="relative group p-5 rounded-2xl border border-border/50 bg-background hover:border-primary/20 transition-all duration-300 text-center"
+              >
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+                <div className="relative z-10">
+                  <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 text-primary group-hover:bg-primary/15 transition-colors">
+                    {stat.icon}
+                  </div>
+                  <div className="text-2xl md:text-3xl font-bold text-foreground mb-0.5">{stat.value}</div>
+                  <div className="text-[11px] text-muted-foreground font-medium">{stat.label}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -140,7 +151,9 @@ export default function Landing() {
           <div className="text-center mb-10">
             <Badge variant="secondary" className="mb-3 text-xs rounded-full">Fonctionnalités</Badge>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">Tout ce dont vous avez besoin</h2>
-            <p className="text-sm text-muted-foreground max-w-lg mx-auto">Une plateforme complète pour créer et développer votre communauté</p>
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+              <TypingAnimation text="Une plateforme complète pour créer et développer votre communauté" delay={300} />
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 relative">
             {features.map((feature, index) => (
@@ -163,8 +176,10 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <Badge variant="secondary" className="mb-3 text-xs rounded-full">Gratuit pour commencer</Badge>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Lancez-vous gratuitement</h2>
-              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">Commencez avec notre plan gratuit et évoluez selon vos besoins. Pas de carte bancaire requise.</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Lancez-vous gratuitement</h2>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                <TypingAnimation text="Commencez avec notre plan gratuit et évoluez selon vos besoins. Pas de carte bancaire requise." delay={500} />
+              </p>
               <ul className="space-y-2.5 mb-6">
                 {benefits.map((b) => (
                   <li key={b} className="flex items-center gap-2.5 group">
@@ -198,10 +213,12 @@ export default function Landing() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-foreground mb-2">Communautés populaires</h2>
-              <p className="text-sm text-muted-foreground">Rejoignez des communautés actives</p>
+              <p className="text-sm text-muted-foreground">
+                <TypingAnimation text="Rejoignez des communautés actives" delay={400} />
+              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {publicCommunities.slice(0, 3).map((community, index) => (
+              {publicCommunities.slice(0, 3).map((community) => (
                 <Link key={community.id} to={`/c/${community.slug}/community`}>
                   <div className="relative group/community p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/20 transition-all duration-300 cursor-pointer">
                     <div className="absolute inset-0 rounded-2xl opacity-0 group-hover/community:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
@@ -237,8 +254,10 @@ export default function Landing() {
               <div className="inline-flex items-center gap-0.5 mb-4">
                 {[...Array(5)].map((_, i) => <Star key={i} className="h-4 w-4 fill-primary text-primary" />)}
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Prêt à créer votre communauté ?</h2>
-              <p className="text-sm text-muted-foreground mb-8 max-w-lg mx-auto">Rejoignez des milliers de créateurs qui utilisent notre plateforme</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Prêt à créer votre communauté ?</h2>
+              <p className="text-sm text-muted-foreground mb-8 max-w-lg mx-auto">
+                <TypingAnimation text="Rejoignez des milliers de créateurs qui utilisent notre plateforme" delay={600} />
+              </p>
               <div className="flex justify-center">
                 <Link to={user ? "/dashboard" : "/auth"}>
                   <ShinyButton>Commencer gratuitement</ShinyButton>
@@ -250,7 +269,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Install Banner (mobile only, non-standalone) */}
+      {/* Install Banner (mobile only) */}
       {!isStandalone && (
         <section className="px-4 pb-8 md:hidden">
           <Link to="/install" className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/15 transition-colors">
