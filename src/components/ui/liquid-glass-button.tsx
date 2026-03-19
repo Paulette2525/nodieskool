@@ -9,10 +9,10 @@ const liquidbuttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "text-primary hover:scale-105 duration-300 transition",
-        outline: "border border-primary/20 text-primary hover:bg-primary/5",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20",
+        outline: "border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-primary/5 hover:text-primary",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -39,14 +39,12 @@ const LiquidButton = React.forwardRef<HTMLAnchorElement, LiquidButtonProps>(
       <a
         ref={ref}
         className={cn(
-          "relative overflow-hidden",
+          "relative overflow-hidden rounded-xl",
           liquidbuttonVariants({ variant, size }),
           className
         )}
         {...props}
       >
-        <div className="absolute inset-0 rounded-xl bg-primary/5 backdrop-blur-md border border-primary/20 pointer-events-none" />
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/10 via-transparent to-primary/5 pointer-events-none" />
         <span className="relative z-10 flex items-center gap-2">
           {children}
         </span>
