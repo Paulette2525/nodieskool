@@ -3,10 +3,9 @@ import { registerSW } from 'virtual:pwa-register';
 import App from "./App.tsx";
 import "./index.css";
 
-// Check for updates every 60 seconds and auto-reload when a new version is ready
 registerSW({
   onNeedRefresh() {
-    window.location.reload();
+    console.log('[SW] New version available – reload to update.');
   },
   onOfflineReady() {
     console.log('App ready for offline use');
