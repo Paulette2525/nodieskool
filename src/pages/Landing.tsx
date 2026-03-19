@@ -177,9 +177,9 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <LiquidButton asChild size="sm">
-                <Link to="/pricing">Voir les tarifs</Link>
-              </LiquidButton>
+              <Link to="/pricing">
+                <LiquidButton size="sm">Voir les tarifs</LiquidButton>
+              </Link>
             </div>
             <div className="relative">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/15 via-primary/8 to-accent/8 border border-border/50 shadow-lg flex items-center justify-center overflow-hidden">
