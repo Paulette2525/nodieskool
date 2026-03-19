@@ -129,29 +129,50 @@ import { Camera } from "lucide-react";
      }
    };
 
-   const handleSaveEdit = async () => {
-     setIsSaving(true);
-     try {
-       const { error } = await supabase
-         .from("communities")
-         .update({
-           name: editForm.name,
-           description: editForm.description || null,
-           is_public: editForm.is_public,
-         })
-         .eq("id", id);
+    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setPendingCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    };
 
-       if (error) throw error;
+    const handleSaveEdit = async () => {
+      setIsSaving(true);
+      try {
+        let newCoverUrl: string | undefined;
+        if (pendingCoverFile) {
+          const url = await uploadFile("community-assets", pendingCoverFile, "covers");
+          if (!url) throw new Error("Échec de l'upload de la bannière");
+          newCoverUrl = url;
+        }
 
-       toast.success("Communauté mise à jour avec succès");
-       queryClient.invalidateQueries({ queryKey: ["my-communities"] });
-       setShowEditDialog(false);
-     } catch (error: any) {
-       toast.error("Erreur lors de la mise à jour: " + error.message);
-     } finally {
-       setIsSaving(false);
-     }
-   };
+        const updateData: Record<string, unknown> = {
+          name: editForm.name,
+          description: editForm.description || null,
+          is_public: editForm.is_public,
+        };
+        if (newCoverUrl) updateData.cover_url = newCoverUrl;
+
+        const { error } = await supabase
+          .from("communities")
+          .update(updateData)
+          .eq("id", id);
+
+        if (error) throw error;
+
+        toast.success("Communauté mise à jour avec succès");
+        queryClient.invalidateQueries({ queryKey: ["my-communities"] });
+        setCoverPreview(null);
+        setPendingCoverFile(null);
+        setShowEditDialog(false);
+      } catch (error: any) {
+        toast.error("Erreur lors de la mise à jour: " + error.message);
+      } finally {
+        setIsSaving(false);
+      }
+    };
  
    return (
      <>
