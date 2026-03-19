@@ -20,8 +20,9 @@ function isProfileIncomplete(profile: any): boolean {
 }
 
 export function CommunityLayout({ children }: CommunityLayoutProps) {
-  const { community, loading, isMember } = useCommunityContext();
+  const { community, loading, isMember, isAdmin } = useCommunityContext();
   const { user, profile, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading || authLoading) {
     return (
