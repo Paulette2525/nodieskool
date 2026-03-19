@@ -69,6 +69,7 @@
   }
 
   .dark {
+    --transparent: transparent;
     --background: 224 32% 6%;
     --foreground: 210 40% 98%;
 
