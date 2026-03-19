@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, MessageSquare, Calendar, ArrowRight, Check, Globe, Zap, Shield, Star, Play, Download } from "lucide-react";
+import { Users, BookOpen, MessageSquare, Calendar, Check, Globe, Zap, Shield, Star, Play, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
 import { getAndClearRedirectUrl } from "@/hooks/useRedirectUrl";
+import { ShinyButton } from "@/components/ui/shiny-button";
+import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 
 const features = [
@@ -47,7 +49,7 @@ export default function Landing() {
       navigate("/auth", { replace: true });
     }
   }, [user, navigate]);
-  // Fallback: if user lands here after OAuth, redirect to dashboard
+
   useEffect(() => {
     if (user) {
       if (localStorage.getItem('oauth_pending')) {
@@ -69,14 +71,26 @@ export default function Landing() {
           <nav className="hidden md:flex items-center gap-5">
             <Link to="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Fonctionnalités</Link>
             <Link to="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Tarifs</Link>
+            {!isStandalone && (
+              <Link to="/install" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+                <Download className="h-3.5 w-3.5" />
+                Installer
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-2">
             {user ? (
-              <Button asChild size="sm" className="rounded-xl text-xs h-9"><Link to="/dashboard">Dashboard<ArrowRight className="h-3.5 w-3.5 ml-1.5" /></Link></Button>
+              <LiquidButton asChild size="sm">
+                <Link to="/dashboard">Dashboard</Link>
+              </LiquidButton>
             ) : (
               <>
-                <Button variant="ghost" asChild className="hidden sm:inline-flex text-xs h-9"><Link to="/auth">Se connecter</Link></Button>
-                <Button asChild size="sm" className="rounded-xl text-xs h-9 shadow-sm"><Link to="/auth">Commencer</Link></Button>
+                <Button variant="ghost" asChild className="hidden sm:inline-flex text-xs h-9">
+                  <Link to="/auth">Se connecter</Link>
+                </Button>
+                <LiquidButton asChild size="sm">
+                  <Link to="/auth">Commencer</Link>
+                </LiquidButton>
               </>
             )}
           </div>
@@ -84,7 +98,7 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <section className="relative py-20 md:py-28 px-4 overflow-hidden">
+      <section className="relative py-14 md:py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/3 to-transparent pointer-events-none" />
         <div className="absolute top-20 left-10 w-64 h-64 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-20 right-10 w-80 h-80 bg-accent/8 rounded-full blur-3xl pointer-events-none" />
@@ -102,18 +116,16 @@ export default function Landing() {
             Rassemblez votre audience, partagez vos cours et créez une communauté engagée avec une plateforme <span className="text-foreground font-medium">simple et puissante</span>.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-            <Button size="lg" className="text-sm px-6 py-5 shadow-md rounded-xl" asChild>
-              <Link to={user ? "/dashboard" : "/auth"}>Créer ma communauté<ArrowRight className="h-4 w-4 ml-2" /></Link>
-            </Button>
-            <Button size="lg" variant="outline" className="text-sm px-6 py-5 group rounded-xl" asChild>
-              <Link to="/pricing"><Play className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />Voir la démo</Link>
-            </Button>
-            {!isStandalone && (
-              <Button size="lg" variant="ghost" className="text-sm px-6 py-5 rounded-xl" asChild>
-                <Link to="/install"><Download className="h-4 w-4 mr-2" />Installer l'app</Link>
-              </Button>
-            )}
+          <div className="flex flex-col items-center gap-4 mb-10">
+            <Link to={user ? "/dashboard" : "/auth"}>
+              <ShinyButton>Créer ma communauté</ShinyButton>
+            </Link>
+            <LiquidButton asChild size="lg" variant="outline">
+              <Link to="/pricing">
+                <Play className="h-4 w-4" />
+                Voir la démo
+              </Link>
+            </LiquidButton>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto pt-8 border-t border-border/50">
@@ -165,7 +177,9 @@ export default function Landing() {
                   </li>
                 ))}
               </ul>
-              <Button size="sm" className="shadow-sm rounded-xl text-xs h-9" asChild><Link to="/pricing">Voir les tarifs<ArrowRight className="h-3.5 w-3.5 ml-1.5" /></Link></Button>
+              <LiquidButton asChild size="sm">
+                <Link to="/pricing">Voir les tarifs</Link>
+              </LiquidButton>
             </div>
             <div className="relative">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/15 via-primary/8 to-accent/8 border border-border/50 shadow-lg flex items-center justify-center overflow-hidden">
@@ -201,7 +215,9 @@ export default function Landing() {
               ))}
             </div>
             <div className="text-center mt-6">
-              <Button variant="outline" asChild size="sm" className="rounded-xl text-xs"><Link to="/discover">Voir toutes<ArrowRight className="h-3.5 w-3.5 ml-1.5" /></Link></Button>
+              <LiquidButton asChild size="sm" variant="outline">
+                <Link to="/discover">Voir toutes</Link>
+              </LiquidButton>
             </div>
           </div>
         </section>
@@ -216,13 +232,25 @@ export default function Landing() {
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Prêt à créer votre communauté ?</h2>
             <p className="text-sm text-muted-foreground mb-8 max-w-lg mx-auto">Rejoignez des milliers de créateurs qui utilisent notre plateforme</p>
-            <Button size="lg" className="text-sm px-8 py-5 shadow-md rounded-xl" asChild>
-              <Link to={user ? "/dashboard" : "/auth"}>Commencer gratuitement<ArrowRight className="h-4 w-4 ml-2" /></Link>
-            </Button>
+            <div className="flex justify-center">
+              <Link to={user ? "/dashboard" : "/auth"}>
+                <ShinyButton>Commencer gratuitement</ShinyButton>
+              </Link>
+            </div>
             <p className="text-[11px] text-muted-foreground mt-5">Pas de carte bancaire • Annulez à tout moment</p>
           </Card>
         </div>
       </section>
+
+      {/* Install Banner (mobile only, non-standalone) */}
+      {!isStandalone && (
+        <section className="px-4 pb-8 md:hidden">
+          <Link to="/install" className="flex items-center justify-center gap-2 py-3 px-5 rounded-2xl bg-primary/10 border border-primary/20 text-primary text-sm font-medium hover:bg-primary/15 transition-colors">
+            <Download className="h-4 w-4" />
+            Installer l'application Tribbue
+          </Link>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-border/50 py-8 px-4 bg-muted/20">
