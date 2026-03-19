@@ -28,7 +28,7 @@ export function InstallBanner() {
     }
 
     const ua = navigator.userAgent;
-    const ios = /iPad|iPhone|iPod/.test(ua);
+    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     setIsIOS(ios);
 
     if (ios) {
