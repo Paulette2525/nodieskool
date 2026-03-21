@@ -1,20 +1,22 @@
 import { Link, useLocation, useParams } from "react-router-dom";
-import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar, MessageCircle } from "lucide-react";
+import { Users, BookOpen, Settings, LogOut, X, ShieldCheck, LayoutDashboard, ChevronLeft, Calendar, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 
+interface CommunitySidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
 
-export function CommunitySidebar() {
+export function CommunitySidebar({ isOpen = false, onClose }: CommunitySidebarProps) {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
-  const { community, isAdmin, isOwner } = useCommunityContext();
+  const { community, isAdmin } = useCommunityContext();
 
   const navigation = [
     { name: "Communauté", href: `/c/${slug}/community`, icon: Users },
@@ -23,7 +25,7 @@ export function CommunitySidebar() {
     { name: "Messages", href: `/c/${slug}/messages`, icon: MessageCircle },
   ];
 
-  useEffect(() => { setIsOpen(false); }, [location.pathname]);
+  useEffect(() => { onClose?.(); }, [location.pathname]);
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -31,11 +33,7 @@ export function CommunitySidebar() {
 
   return (
     <>
-      <Button variant="outline" size="icon" className="fixed left-4 top-4 z-50 md:hidden bg-background shadow-sm rounded-xl" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-      </Button>
-
-      {isOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsOpen(false)} />}
+      {isOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm" onClick={onClose} />}
 
       <aside className={cn(
         "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-200 w-[220px] overflow-hidden",
@@ -44,7 +42,10 @@ export function CommunitySidebar() {
       )}>
         {/* Header */}
         <div className="flex h-14 items-center border-b border-sidebar-border px-3 gap-2">
-          <Button variant="ghost" size="icon" asChild className="flex-shrink-0 h-8 w-8 rounded-lg">
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg md:hidden" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" asChild className="flex-shrink-0 h-8 w-8 rounded-lg hidden md:flex">
             <Link to="/dashboard"><ChevronLeft className="h-4 w-4" /></Link>
           </Button>
           {community?.logo_url ? (
@@ -81,7 +82,6 @@ export function CommunitySidebar() {
               <span>Admin</span>
             </Link>
           )}
-
         </nav>
 
         {/* User footer */}
