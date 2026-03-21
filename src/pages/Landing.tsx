@@ -244,10 +244,7 @@ export default function Landing() {
                     {/* Content */}
                     <div className="p-4 pt-3">
                       <h3 className="font-semibold text-sm text-foreground mb-1 group-hover/community:text-primary transition-colors">{community.name}</h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-4 leading-relaxed">{community.description || "Une communauté dynamique"}</p>
-                      <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium group-hover/community:bg-primary group-hover/community:text-primary-foreground transition-colors duration-200">
-                        Rejoindre
-                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{community.description || "Une communauté dynamique"}</p>
                     </div>
                     {/* Hover glow */}
                     <div className="absolute inset-0 rounded-2xl opacity-0 group-hover/community:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
