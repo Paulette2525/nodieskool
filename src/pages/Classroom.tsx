@@ -35,7 +35,7 @@ export default function Classroom() {
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center gap-3 mb-6 flex-wrap">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           {[
             { icon: BookOpen, label: "Leçons", value: `${completedCount}/${totalLessons}`, color: "text-primary", bg: "bg-primary/10" },
             { icon: Award, label: "Cours terminés", value: `${completedCourses}`, color: "text-success", bg: "bg-success/10" },

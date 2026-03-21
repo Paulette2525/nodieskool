@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { Users, BookOpen, Settings, LogOut, Menu, X, ShieldCheck } from "lucide-react";
+import { Users, BookOpen, Settings, LogOut, X, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 const navigation = [
@@ -14,14 +14,15 @@ const navigation = [
 interface SidebarProps {
   communityName?: string;
   communityLogo?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export function Sidebar({ communityName = "Community Hub", communityLogo }: SidebarProps) {
+export function Sidebar({ communityName = "Community Hub", communityLogo, isOpen = false, onClose }: SidebarProps) {
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
   const { user, profile, isAdmin, signOut } = useAuth();
 
-  useEffect(() => { setIsOpen(false); }, [location.pathname]);
+  useEffect(() => { onClose?.(); }, [location.pathname]);
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -29,11 +30,7 @@ export function Sidebar({ communityName = "Community Hub", communityLogo }: Side
 
   return (
     <>
-      <Button variant="outline" size="icon" className="fixed left-4 top-4 z-50 md:hidden bg-background shadow-sm rounded-xl" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-      </Button>
-
-      {isOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsOpen(false)} />}
+      {isOpen && <div className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm" onClick={onClose} />}
 
       <aside className={cn(
         "fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-200 w-[220px] overflow-hidden",
@@ -41,6 +38,10 @@ export function Sidebar({ communityName = "Community Hub", communityLogo }: Side
         "md:relative md:translate-x-0"
       )}>
         <div className="flex h-14 items-center border-b border-sidebar-border px-3">
+          {/* Close button on mobile */}
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg md:hidden mr-1" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
           {communityLogo ? (
             <img src={communityLogo} alt={communityName} className="h-7 w-7 rounded-lg" />
           ) : (
