@@ -148,7 +148,7 @@ export function ProfileOnboarding() {
         <div className="mt-6 space-y-2">
           <Button
             onClick={handleSubmit}
-            disabled={saving}
+            disabled={saving || !username.trim() || !bio.trim()}
             className="w-full h-11 text-sm font-semibold rounded-xl"
             style={{ backgroundColor: primaryColor }}
           >

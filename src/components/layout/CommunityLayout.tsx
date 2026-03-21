@@ -16,7 +16,7 @@ interface CommunityLayoutProps {
 }
 
 function isProfileIncomplete(profile: any): boolean {
-  return !profile?.avatar_url || !profile?.bio;
+  return !profile?.avatar_url || !profile?.bio || !profile?.username;
 }
 
 export function CommunityLayout({ children }: CommunityLayoutProps) {
