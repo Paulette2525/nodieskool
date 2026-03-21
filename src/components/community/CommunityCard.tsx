@@ -101,32 +101,28 @@ import { useStorage } from "@/hooks/useStorage";
      toast.success("Lien copié dans le presse-papier !");
    };
 
-   const handleDelete = async () => {
-     setIsDeleting(true);
-     try {
-       // Delete community members first (due to foreign key)
-       await supabase
-         .from("community_members")
-         .delete()
-         .eq("community_id", id);
+    const handleDelete = async () => {
+      setIsDeleting(true);
+      try {
+        // CASCADE handles all dependent tables automatically
+        const { error } = await supabase
+          .from("communities")
+          .delete()
+          .eq("id", id);
 
-       // Delete the community
-       const { error } = await supabase
-         .from("communities")
-         .delete()
-         .eq("id", id);
+        if (error) throw error;
 
-       if (error) throw error;
-
-       toast.success("Communauté supprimée avec succès");
-       queryClient.invalidateQueries({ queryKey: ["my-communities"] });
-       setShowDeleteDialog(false);
-     } catch (error: any) {
-       toast.error("Erreur lors de la suppression: " + error.message);
-     } finally {
-       setIsDeleting(false);
-     }
-   };
+        toast.success("Communauté supprimée avec succès");
+        queryClient.invalidateQueries({ queryKey: ["my-communities"] });
+        queryClient.invalidateQueries({ queryKey: ["public-communities"] });
+        queryClient.invalidateQueries({ queryKey: ["community"] });
+        setShowDeleteDialog(false);
+      } catch (error: any) {
+        toast.error("Erreur lors de la suppression: " + error.message);
+      } finally {
+        setIsDeleting(false);
+      }
+    };
 
     const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
