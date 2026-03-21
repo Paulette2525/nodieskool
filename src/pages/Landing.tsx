@@ -209,19 +209,48 @@ export default function Landing() {
                 <TypingAnimation text="Rejoignez des communautés actives" delay={400} />
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {publicCommunities.slice(0, 3).map((community) => (
-                <Link key={community.id} to={`/c/${community.slug}/community`}>
-                  <div className="relative group/community p-6 rounded-2xl border border-border/50 bg-card hover:border-primary/20 transition-all duration-300 cursor-pointer">
-                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover/community:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-                    <div className="relative z-10">
-                      <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg mb-4 shadow-md shadow-primary/20 group-hover/community:scale-105 transition-transform duration-200">{community.name.charAt(0)}</div>
-                      <h3 className="font-semibold text-sm text-foreground mb-1.5 group-hover/community:text-primary transition-colors">{community.name}</h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{community.description || "Une communauté dynamique"}</p>
-                      <span className="text-xs text-primary font-medium opacity-0 group-hover/community:opacity-100 transition-opacity duration-200 flex items-center gap-1">
-                        Rejoindre <ArrowRight className="h-3 w-3" />
-                      </span>
+                <Link key={community.id} to={`/c/${community.slug}/community`} className="group/community block">
+                  <div className="relative rounded-2xl border border-border/50 bg-card hover:border-primary/30 transition-all duration-300 cursor-pointer overflow-hidden shadow-sm hover:shadow-lg hover:shadow-primary/5">
+                    {/* Cover image */}
+                    <div className="relative h-36 w-full overflow-hidden">
+                      {community.cover_url ? (
+                        <img
+                          src={community.cover_url}
+                          alt={community.name}
+                          className="w-full h-full object-cover group-hover/community:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full group-hover/community:scale-105 transition-transform duration-500"
+                          style={{
+                            background: `linear-gradient(135deg, ${community.primary_color || 'hsl(var(--primary))'}, ${community.primary_color || 'hsl(var(--primary))'}66)`,
+                          }}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      {/* Logo floating on cover */}
+                      {community.logo_url && (
+                        <div className="absolute bottom-3 left-3">
+                          <img
+                            src={community.logo_url}
+                            alt=""
+                            className="h-10 w-10 rounded-xl border-2 border-white/80 object-cover shadow-md"
+                          />
+                        </div>
+                      )}
                     </div>
+                    {/* Content */}
+                    <div className="p-4 pt-3">
+                      <h3 className="font-semibold text-sm text-foreground mb-1 group-hover/community:text-primary transition-colors">{community.name}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-4 leading-relaxed">{community.description || "Une communauté dynamique"}</p>
+                      <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium group-hover/community:bg-primary group-hover/community:text-primary-foreground transition-colors duration-200">
+                        Rejoindre
+                      </div>
+                    </div>
+                    {/* Hover glow */}
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover/community:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                   </div>
                 </Link>
               ))}
