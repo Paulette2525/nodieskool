@@ -71,7 +71,7 @@ export default function Landing() {
             <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
           </Link>
           <nav className="hidden md:flex items-center gap-5">
-            <Link to="#features" className="text-xs text-muted-foreground hover:text-primary transition-colors">Fonctionnalités</Link>
+            <a href="#features" className="text-xs text-muted-foreground hover:text-primary transition-colors">Fonctionnalités</a>
             <Link to="/pricing" className="text-xs text-muted-foreground hover:text-primary transition-colors">Tarifs</Link>
           </nav>
           <div className="flex items-center gap-2">
