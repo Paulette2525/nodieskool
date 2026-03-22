@@ -12,6 +12,7 @@ import { FeatureCard } from "@/components/ui/feature-card";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 
 const features = [
   { icon: <Users className="h-5 w-5" />, title: "Communauté engagée", description: "Créez un espace de discussion et d'entraide pour votre audience" },

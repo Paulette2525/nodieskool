@@ -74,7 +74,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <InstallBanner />
+          
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Landing />} />
