@@ -12,6 +12,7 @@ import { FeatureCard } from "@/components/ui/feature-card";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 
 const features = [
   { icon: <Users className="h-5 w-5" />, title: "Communauté engagée", description: "Créez un espace de discussion et d'entraide pour votre audience" },
@@ -64,6 +65,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
+      <InstallBanner />
       {/* Nav */}
       <header className="border-b border-border/50 bg-card/60 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
