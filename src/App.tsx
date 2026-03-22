@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
-import { InstallBanner } from "./components/pwa/InstallBanner";
+
 import { CommunityProvider } from "@/contexts/CommunityContext";
 import { CommunityLayout } from "@/components/layout/CommunityLayout";
 
