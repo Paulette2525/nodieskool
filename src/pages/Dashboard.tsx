@@ -10,6 +10,7 @@ import { CommunityCard } from "@/components/community/CommunityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
@@ -32,6 +33,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      <InstallBanner />
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
