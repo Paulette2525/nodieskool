@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useCommunityContext } from "@/contexts/CommunityContext";
+import { SmartRedirect } from "@/components/pwa/SmartRedirect";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ export function CommunityPreview() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SmartRedirect communityName={community.name} communityLogoUrl={community.logo_url} primaryColor={community.primary_color} />
       <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main */}

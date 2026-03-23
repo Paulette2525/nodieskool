@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { CommunityCard } from "@/components/community/CommunityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
+import { saveRedirectUrl, getPendingCommunityUrl, markPwaInstalled } from "@/hooks/useRedirectUrl";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -19,6 +20,24 @@ export default function Dashboard() {
   const { currentPlan, limits } = useSubscription();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Mark PWA as installed when running in standalone mode
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone;
+    if (isStandalone) {
+      markPwaInstalled();
+    }
+  }, []);
+
+  // Check for pending community URL (from iOS Safari → PWA handoff)
+  useEffect(() => {
+    const pending = getPendingCommunityUrl();
+    if (pending) {
+      navigate(pending, { replace: true });
+    }
+  }, [navigate]);
 
   if (authLoading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
