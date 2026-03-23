@@ -1,9 +1,8 @@
 import { ReactNode, lazy, Suspense, useState } from "react";
-import { Loader2, Settings, Menu } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Loader2, Menu } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { CommunitySidebar } from "./CommunitySidebar";
-import { useAuth } from "@/hooks/useAuth";
 import { CommunityPreview } from "@/pages/community/CommunityPreview";
 import { ProfileOnboarding } from "@/components/community/ProfileOnboarding";
 import { Button } from "@/components/ui/button";
@@ -20,9 +19,8 @@ function isProfileIncomplete(profile: any): boolean {
 }
 
 export function CommunityLayout({ children }: CommunityLayoutProps) {
-  const { community, loading, isMember, isAdmin } = useCommunityContext();
+  const { community, loading, isMember } = useCommunityContext();
   const { user, profile, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading || authLoading) {
@@ -54,7 +52,6 @@ export function CommunityLayout({ children }: CommunityLayoutProps) {
     <div className="flex h-screen w-full bg-background overflow-hidden">
       <CommunitySidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="flex-1 flex flex-col overflow-hidden w-full md:w-auto">
-        {/* Mobile top bar */}
         <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 px-4 py-2.5 flex md:hidden items-center justify-between gap-3 flex-shrink-0">
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-4 w-4" />
@@ -71,7 +68,7 @@ export function CommunityLayout({ children }: CommunityLayoutProps) {
             </Suspense>
           )}
         </div>
-        {/* Desktop top bar */}
+
         {user && (
           <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 px-4 py-2.5 hidden md:flex items-center justify-between gap-4 flex-shrink-0">
             <Suspense fallback={<div className="h-9" />}>
@@ -82,44 +79,7 @@ export function CommunityLayout({ children }: CommunityLayoutProps) {
             </Suspense>
           </div>
         )}
-        {/* Community Banner */}
-        <div className="relative w-full h-24 md:h-32 flex-shrink-0 overflow-hidden">
-          {community.cover_url ? (
-            <img
-              src={community.cover_url}
-              alt={community.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div
-              className="w-full h-full"
-              style={{
-                background: `linear-gradient(135deg, ${community.primary_color || 'hsl(var(--primary))'}, ${community.primary_color || 'hsl(var(--primary))'}88)`,
-              }}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-          <div className="absolute bottom-3 left-4 flex items-center gap-3">
-            {community.logo_url && (
-              <img
-                src={community.logo_url}
-                alt=""
-                className="h-10 w-10 rounded-full border-2 border-white/80 object-cover"
-              />
-            )}
-            <h2 className="text-white font-semibold text-lg drop-shadow-md">{community.name}</h2>
-          </div>
-          {isAdmin && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="absolute top-2 right-2 text-white/80 hover:text-white hover:bg-white/20"
-              onClick={() => navigate(`/c/${community.slug}/admin`)}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+
         <div className="flex-1 overflow-auto">
           {children}
         </div>
