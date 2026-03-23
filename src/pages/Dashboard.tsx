@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { saveRedirectUrl, getPendingCommunityUrl, markPwaInstalled } from "@/hooks/useRedirectUrl";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
   const { user, profile, loading: authLoading, signOut } = useAuth();
