@@ -47,6 +47,7 @@ export function CommunityPreview() {
   return (
     <div className="min-h-screen bg-background">
       <SmartRedirect communityName={community.name} communityLogoUrl={community.logo_url} primaryColor={community.primary_color} />
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main */}
           <div className="flex-1 min-w-0">
