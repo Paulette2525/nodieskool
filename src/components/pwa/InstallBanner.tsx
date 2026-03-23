@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { X, Download, Share, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,14 @@ const DISMISS_KEY = "pwa_banner_dismissed_at";
 const DISMISS_DAYS = 3;
 
 export function InstallBanner() {
+  const { pathname } = useLocation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [visible, setVisible] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
+    if (pathname !== "/dashboard") return;
     if (window.matchMedia("(display-mode: standalone)").matches) return;
     if ((window.navigator as any).standalone) return;
 
@@ -44,7 +47,7 @@ export function InstallBanner() {
 
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [pathname]);
 
   const handleInstall = async () => {
     if (deferredPrompt) {
@@ -62,7 +65,7 @@ export function InstallBanner() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible || pathname !== "/dashboard") return null;
 
   return (
     <div className="fixed bottom-0 md:bottom-auto md:top-0 left-0 right-0 z-50 safe-area-bottom md:safe-area-top animate-in slide-in-from-bottom md:slide-in-from-top duration-300">
