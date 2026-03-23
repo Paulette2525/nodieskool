@@ -10,6 +10,7 @@ import { CommunityCard } from "@/components/community/CommunityCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { saveRedirectUrl } from "@/hooks/useRedirectUrl";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
