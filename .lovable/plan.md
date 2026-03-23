@@ -1,13 +1,14 @@
 
 
-## Plan : Limiter la bannière d'installation à la Landing page
+## Plan : Déplacer la bannière d'installation vers le Dashboard
 
-### Problème
-La bannière d'installation PWA (`InstallBanner`) est placée dans `App.tsx` au niveau racine, donc elle s'affiche sur toutes les pages.
+### Constat
+La bannière est actuellement sur la **Landing page** (`/`), qui est la page publique. L'utilisateur veut qu'elle s'affiche uniquement sur le **Dashboard** (`/dashboard`) — la page connectée qui liste les communautés.
 
-### Solution
-1. **Retirer `<InstallBanner />` de `src/App.tsx`** (supprimer l'import et le composant)
-2. **Ajouter `<InstallBanner />` dans `src/pages/Landing.tsx`** uniquement
+### Modifications (2 fichiers)
 
-Changement minimal — 2 fichiers modifiés.
+1. **`src/pages/Landing.tsx`** — Retirer `<InstallBanner />` et son import
+2. **`src/pages/Dashboard.tsx`** — Ajouter `<InstallBanner />` avec son import
+
+La bannière ne s'affichera plus dans les pages communautés (`/c/:slug/*`) ni ailleurs.
 
