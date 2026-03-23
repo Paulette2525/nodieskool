@@ -13,10 +13,14 @@ const DISMISS_KEY = "pwa_banner_dismissed_at";
 const DISMISS_DAYS = 3;
 
 export function InstallBanner() {
+  const { pathname } = useLocation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [visible, setVisible] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+
+  // Only allow banner on /dashboard
+  if (pathname !== "/dashboard") return null;
 
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches) return;
