@@ -1,28 +1,34 @@
 
 
-## Plan : Ajouter l'upload de bannière sur la page de création de communauté
+## Diagnostic : La bannière d'installation ne s'affiche plus
 
-### Modification unique : `src/pages/CreateCommunity.tsx`
+### Cause racine
+L'événement `beforeinstallprompt` est déclenché par le navigateur **une seule fois** au chargement de la page. Or, le composant `InstallBanner` n'écoute cet événement que lorsque `pathname === "/dashboard"`. Si l'utilisateur arrive sur une autre page d'abord (ex: `/auth`, `/`), l'événement se déclenche, personne ne l'écoute, et il est perdu. Quand l'utilisateur navigue ensuite vers `/dashboard`, l'événement ne se redéclenche pas.
 
-1. **Ajouter les states pour la bannière** : `coverFile` et `coverPreview` (comme pour le logo)
-2. **Ajouter un ref** : `coverInputRef` pour l'input file caché
-3. **Ajouter un handler** : `handleCoverSelect` (identique au pattern de `handleLogoSelect`)
-4. **Ajouter la zone d'upload visuelle** : Un rectangle cliquable au-dessus du logo, avec une image de preview ou un placeholder avec icône `ImagePlus`. Dimensions approximatives : largeur 100%, hauteur ~150px, coins arrondis.
-5. **Modifier `onSubmit`** : Uploader le fichier cover via `uploadFile("community-assets", coverFile, "covers")` et passer `cover_url` au `createCommunity.mutate()`
+Sur iOS/Safari, le problème est différent : la vérification du `localStorage` (`pwa_banner_dismissed_at`) peut empêcher l'affichage si l'utilisateur a cliqué "X" dans les 3 derniers jours.
 
-### Rendu visuel
-```text
-┌──────────────────────────────────┐
-│   [Bannière : cliquez pour       │  ← zone cliquable, fond gris
-│    ajouter une image]            │     ou preview de l'image
-└──────────────────────────────────┘
-         ┌──────┐
-         │ Logo │  ← existant
-         └──────┘
-   Nom de la communauté
-   URL ...
-```
+### Solution
+Refactoriser `InstallBanner` pour :
+
+1. **Écouter `beforeinstallprompt` dès le montage**, indépendamment de la route
+2. **Conditionner uniquement l'affichage** (le `return null`) sur `pathname === "/dashboard"`
+3. Séparer la logique en deux `useEffect` : un pour capturer l'événement (permanent), un pour gérer la visibilité (dépend de la route)
 
 ### Fichier modifié
-- `src/pages/CreateCommunity.tsx`
+- `src/components/pwa/InstallBanner.tsx`
+
+### Détail technique
+```text
+useEffect 1 (sans dépendance de route) :
+  - Écouter beforeinstallprompt → stocker dans state
+  - Détecter iOS → stocker dans state
+
+useEffect 2 (dépend de pathname, deferredPrompt, isIOS) :
+  - Si pathname === "/dashboard" ET pas standalone ET pas dismissed :
+    → setVisible(true)
+  - Sinon : setVisible(false)
+
+Rendu :
+  - if (!visible) return null  (plus besoin du double check pathname)
+```
 
