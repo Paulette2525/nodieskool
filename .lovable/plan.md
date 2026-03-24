@@ -1,31 +1,28 @@
 
 
-## Diagnostic : Les mises à jour ne s'affichent pas sur iPhone
+## Plan : Ajouter l'upload de bannière sur la page de création de communauté
 
-### Problème
-Sur iOS, la PWA ne recharge pas automatiquement le nouveau contenu. Safari vérifie les mises à jour du Service Worker seulement quand l'app est rouverte depuis l'écran d'accueil, et même avec `skipWaiting: true`, iOS ne force pas toujours le rechargement de la page avec les nouveaux fichiers.
+### Modification unique : `src/pages/CreateCommunity.tsx`
 
-### Cause racine
-Dans `src/main.tsx`, le callback `onNeedRefresh()` se contente de loguer un message console. Il ne force jamais le rechargement. Sur Android c'est moins visible car Chrome est plus agressif, mais sur iOS le problème est flagrant.
+1. **Ajouter les states pour la bannière** : `coverFile` et `coverPreview` (comme pour le logo)
+2. **Ajouter un ref** : `coverInputRef` pour l'input file caché
+3. **Ajouter un handler** : `handleCoverSelect` (identique au pattern de `handleLogoSelect`)
+4. **Ajouter la zone d'upload visuelle** : Un rectangle cliquable au-dessus du logo, avec une image de preview ou un placeholder avec icône `ImagePlus`. Dimensions approximatives : largeur 100%, hauteur ~150px, coins arrondis.
+5. **Modifier `onSubmit`** : Uploader le fichier cover via `uploadFile("community-assets", coverFile, "covers")` et passer `cover_url` au `createCommunity.mutate()`
 
-### Solution
-Modifier `src/main.tsx` pour forcer un rechargement automatique quand une nouvelle version est détectée :
-
-```typescript
-registerSW({
-  onNeedRefresh() {
-    // Force reload when new version is available
-    window.location.reload();
-  },
-  onOfflineReady() {
-    console.log('App ready for offline use');
-  },
-});
+### Rendu visuel
+```text
+┌──────────────────────────────────┐
+│   [Bannière : cliquez pour       │  ← zone cliquable, fond gris
+│    ajouter une image]            │     ou preview de l'image
+└──────────────────────────────────┘
+         ┌──────┐
+         │ Logo │  ← existant
+         └──────┘
+   Nom de la communauté
+   URL ...
 ```
 
-### Fichier modifie
-- `src/main.tsx` -- Remplacer le `console.log` par `window.location.reload()` dans `onNeedRefresh`
-
-### Note importante
-Les utilisateurs iPhone devront quand même fermer et rouvrir l'app (swipe up dans le multitache puis relancer) pour que iOS detecte le nouveau Service Worker. C'est une limitation iOS, pas un bug du code. Mais une fois detecte, le reload forcera bien l'affichage de la nouvelle version.
+### Fichier modifié
+- `src/pages/CreateCommunity.tsx`
 
