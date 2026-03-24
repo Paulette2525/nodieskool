@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { X, Download, Share, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Download, Share, Plus } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Button } from "@/components/ui/button";
 
@@ -19,8 +19,28 @@ export function InstallBanner() {
   const [visible, setVisible] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
+  // Effect 1: Capture beforeinstallprompt globally + detect iOS (runs once)
   useEffect(() => {
-    if (pathname !== "/dashboard") return;
+    const ua = navigator.userAgent;
+    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIOS(ios);
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  // Effect 2: Control visibility based on route + state
+  useEffect(() => {
+    if (pathname !== "/dashboard") {
+      setVisible(false);
+      return;
+    }
+
     if (window.matchMedia("(display-mode: standalone)").matches) return;
     if ((window.navigator as any).standalone) return;
 
@@ -30,24 +50,10 @@ export function InstallBanner() {
       if (diff < DISMISS_DAYS * 24 * 60 * 60 * 1000) return;
     }
 
-    const ua = navigator.userAgent;
-    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    setIsIOS(ios);
-
-    if (ios) {
+    if (isIOS || deferredPrompt) {
       setVisible(true);
-      return;
     }
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setVisible(true);
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, [pathname]);
+  }, [pathname, deferredPrompt, isIOS]);
 
   const handleInstall = async () => {
     if (deferredPrompt) {
@@ -65,7 +71,7 @@ export function InstallBanner() {
     setVisible(false);
   };
 
-  if (!visible || pathname !== "/dashboard") return null;
+  if (!visible) return null;
 
   return (
     <div className="fixed bottom-0 md:bottom-auto md:top-0 left-0 right-0 z-50 safe-area-bottom md:safe-area-top animate-in slide-in-from-bottom md:slide-in-from-top duration-300">
@@ -96,7 +102,6 @@ export function InstallBanner() {
           </button>
         </div>
 
-        {/* Inline instructions for iOS / fallback */}
         {showInstructions && (
           <div className="mt-3 pt-3 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-200">
             {isIOS ? (
