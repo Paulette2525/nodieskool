@@ -101,6 +101,15 @@ export default function CreateCommunity() {
     reader.readAsDataURL(file);
   };
 
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setCoverPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = async (data: FormData) => {
     let logoUrl: string | null = null;
 
