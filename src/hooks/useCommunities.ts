@@ -77,6 +77,7 @@
       description?: string;
       is_public?: boolean;
       logo_url?: string | null;
+      cover_url?: string | null;
     }) => {
       if (!profile) throw new Error("Not authenticated");
 
