@@ -36,9 +36,7 @@ export default function Dashboard() {
 
   const canCreateMore = limits.maxCommunities === -1 || myCommunities.filter(c => c.role === "owner").length < limits.maxCommunities;
 
-  // Filter out communities the user already belongs to
-  const myIds = new Set(myCommunities.map(c => c.id));
-  const discoverCommunities = publicCommunities.filter(c => !myIds.has(c.id));
+  const handleJoinByCode
 
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;
