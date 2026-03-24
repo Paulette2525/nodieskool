@@ -280,6 +280,9 @@ export function CommunityAdminSettingsTab() {
         </CardContent>
       </Card>
 
+      {/* Invite Code */}
+      <InviteCodeSection communityId={communityId!} />
+
       {/* Save Button */}
       <div className="flex justify-end">
         <Button
@@ -296,5 +299,85 @@ export function CommunityAdminSettingsTab() {
         </Button>
       </div>
     </div>
+  );
+}
+
+function InviteCodeSection({ communityId }: { communityId: string }) {
+  const queryClient = useQueryClient();
+
+  const { data: inviteCode, isLoading } = useQuery({
+    queryKey: ["invite-code", communityId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("communities")
+        .select("invite_code")
+        .eq("id", communityId)
+        .single();
+      if (error) throw error;
+      return (data as any)?.invite_code as string | null;
+    },
+  });
+
+  const generateCode = useMutation({
+    mutationFn: async () => {
+      const { data: code } = await supabase.rpc("generate_invite_code");
+      const { error } = await supabase
+        .from("communities")
+        .update({ invite_code: code } as any)
+        .eq("id", communityId);
+      if (error) throw error;
+      return code;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invite-code", communityId] });
+      toast.success("Code d'invitation généré !");
+    },
+    onError: (e) => toast.error("Erreur: " + e.message),
+  });
+
+  const copyCode = () => {
+    if (inviteCode) {
+      navigator.clipboard.writeText(inviteCode);
+      toast.success("Code copié !");
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <KeyRound className="h-5 w-5" />
+          Code d'invitation
+        </CardTitle>
+        <CardDescription>
+          Partagez ce code pour permettre aux utilisateurs de rejoindre votre communauté directement depuis l'application
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        ) : inviteCode ? (
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-muted rounded-xl px-4 py-3 text-center font-mono text-xl tracking-[0.3em] font-bold text-foreground select-all">
+              {inviteCode}
+            </div>
+            <Button variant="outline" size="icon" className="rounded-xl h-11 w-11" onClick={copyCode}>
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" className="rounded-xl h-11 w-11" onClick={() => generateCode.mutate()} disabled={generateCode.isPending}>
+              {generateCode.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={() => generateCode.mutate()} disabled={generateCode.isPending} className="gap-2">
+            {generateCode.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+            Générer un code d'invitation
+          </Button>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Les utilisateurs pourront saisir ce code depuis leur tableau de bord pour rejoindre la communauté. Idéal pour les utilisateurs iPhone.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
