@@ -77,6 +77,7 @@
       description?: string;
       is_public?: boolean;
       logo_url?: string | null;
+      cover_url?: string | null;
     }) => {
       if (!profile) throw new Error("Not authenticated");
 
@@ -90,6 +91,7 @@
           is_public: data.is_public ?? true,
           owner_id: profile.id,
           logo_url: data.logo_url || null,
+          cover_url: data.cover_url || null,
         })
         .select()
         .single();

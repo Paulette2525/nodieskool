@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, ArrowLeft, Camera } from "lucide-react";
+import { Loader2, ArrowLeft, Camera, ImagePlus } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,7 +40,10 @@ export default function CreateCommunity() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -98,12 +101,27 @@ export default function CreateCommunity() {
     reader.readAsDataURL(file);
   };
 
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setCoverPreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = async (data: FormData) => {
     let logoUrl: string | null = null;
+    let coverUrl: string | null = null;
 
     if (logoFile) {
       logoUrl = await uploadFile("community-assets", logoFile, "logos");
-      if (!logoUrl) return; // upload failed
+      if (!logoUrl) return;
+    }
+
+    if (coverFile) {
+      coverUrl = await uploadFile("community-assets", coverFile, "covers");
+      if (!coverUrl) return;
     }
 
     createCommunity.mutate({
@@ -112,6 +130,7 @@ export default function CreateCommunity() {
       description: data.description,
       is_public: data.is_public,
       logo_url: logoUrl,
+      cover_url: coverUrl,
     }, {
       onSuccess: (community) => {
         navigate(`/c/${community.slug}/community`);
@@ -162,6 +181,36 @@ export default function CreateCommunity() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Banner upload */}
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    className="relative group w-full h-[150px] rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary transition-colors overflow-hidden bg-muted"
+                  >
+                    {coverPreview ? (
+                      <img src={coverPreview} alt="Bannière preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground">
+                        <ImagePlus className="h-8 w-8" />
+                        <span className="text-sm">Ajouter une bannière (optionnel)</span>
+                      </div>
+                    )}
+                    {coverPreview && (
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-white" />
+                      </div>
+                    )}
+                  </button>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverSelect}
+                  />
+                </div>
+
                 {/* Logo upload */}
                 <div className="flex flex-col items-center gap-3">
                   <button
