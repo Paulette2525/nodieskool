@@ -5,7 +5,7 @@ import "./index.css";
 
 registerSW({
   onNeedRefresh() {
-    console.log('[SW] New version available – reload to update.');
+    window.location.reload();
   },
   onOfflineReady() {
     console.log('App ready for offline use');
