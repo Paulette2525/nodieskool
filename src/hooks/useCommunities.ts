@@ -91,6 +91,7 @@
           is_public: data.is_public ?? true,
           owner_id: profile.id,
           logo_url: data.logo_url || null,
+          cover_url: data.cover_url || null,
         })
         .select()
         .single();
