@@ -1,26 +1,31 @@
 
 
-## Plan : Code d'invitation obligatoire + Quitter une communauté
+## Diagnostic : Les mises à jour ne s'affichent pas sur iPhone
 
-### 1. Supprimer la section "Découvrir des communautés" du Dashboard
+### Problème
+Sur iOS, la PWA ne recharge pas automatiquement le nouveau contenu. Safari vérifie les mises à jour du Service Worker seulement quand l'app est rouverte depuis l'écran d'accueil, et même avec `skipWaiting: true`, iOS ne force pas toujours le rechargement de la page avec les nouveaux fichiers.
 
-**Fichier : `src/pages/Dashboard.tsx`**
-- Retirer tout le bloc "Découvrir des communautés" (lignes 154-205) qui affiche les communautés publiques avec un bouton "Rejoindre" direct
-- Supprimer les imports/variables devenus inutiles (`Globe`, `discoverCommunities`, `joinCommunity`, `publicCommunities`, `isLoadingPublic`)
-- Conserver uniquement le bouton "Code d'invitation" pour rejoindre une communauté
+### Cause racine
+Dans `src/main.tsx`, le callback `onNeedRefresh()` se contente de loguer un message console. Il ne force jamais le rechargement. Sur Android c'est moins visible car Chrome est plus agressif, mais sur iOS le problème est flagrant.
 
-### 2. Ajouter le bouton "Quitter" pour les membres (non-propriétaires)
+### Solution
+Modifier `src/main.tsx` pour forcer un rechargement automatique quand une nouvelle version est détectée :
 
-**Fichier : `src/components/community/CommunityCard.tsx`**
-- Pour les rôles `member`, `moderator`, `admin` (pas `owner`), ajouter une option "Quitter la communauté" dans un menu contextuel ou un bouton visible
-- Utiliser `leaveCommunity` de `useCommunities` (déjà implémenté dans le hook)
-- Ajouter un `AlertDialog` de confirmation avant de quitter
+```typescript
+registerSW({
+  onNeedRefresh() {
+    // Force reload when new version is available
+    window.location.reload();
+  },
+  onOfflineReady() {
+    console.log('App ready for offline use');
+  },
+});
+```
 
-### 3. Code d'invitation depuis la page Admin communauté
+### Fichier modifie
+- `src/main.tsx` -- Remplacer le `console.log` par `window.location.reload()` dans `onNeedRefresh`
 
-La section `InviteCodeSection` existe déjà dans `CommunityAdminSettingsTab.tsx` — elle permet de générer, copier et régénérer le code. Aucun changement nécessaire ici.
-
-### Résumé des fichiers modifiés
-- `src/pages/Dashboard.tsx` — Retrait de la section Découvrir
-- `src/components/community/CommunityCard.tsx` — Ajout du bouton Quitter pour non-propriétaires
+### Note importante
+Les utilisateurs iPhone devront quand même fermer et rouvrir l'app (swipe up dans le multitache puis relancer) pour que iOS detecte le nouveau Service Worker. C'est une limitation iOS, pas un bug du code. Mais une fois detecte, le reload forcera bien l'affichage de la nouvelle version.
 
