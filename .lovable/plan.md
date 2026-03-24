@@ -1,50 +1,26 @@
 
 
-## Analyse du problème
+## Plan : Code d'invitation obligatoire + Quitter une communauté
 
-Le problème sur iPhone est lié au système "Smart Redirect" iOS : quand un utilisateur reçoit un lien `/c/slug`, la PWA installée ne peut pas intercepter ce lien (pas de Universal Links pour les PWA). Et dans le navigateur Safari, l'utilisateur doit être connecté pour voir/rejoindre la communauté, ce qui crée des frictions.
+### 1. Supprimer la section "Découvrir des communautés" du Dashboard
 
-## Proposition : Section "Découvrir" intégrée au Dashboard
+**Fichier : `src/pages/Dashboard.tsx`**
+- Retirer tout le bloc "Découvrir des communautés" (lignes 154-205) qui affiche les communautés publiques avec un bouton "Rejoindre" direct
+- Supprimer les imports/variables devenus inutiles (`Globe`, `discoverCommunities`, `joinCommunity`, `publicCommunities`, `isLoadingPublic`)
+- Conserver uniquement le bouton "Code d'invitation" pour rejoindre une communauté
 
-Au lieu de compter sur les liens partagés, on rend les communautés accessibles directement depuis l'application.
+### 2. Ajouter le bouton "Quitter" pour les membres (non-propriétaires)
 
-### Modifications
+**Fichier : `src/components/community/CommunityCard.tsx`**
+- Pour les rôles `member`, `moderator`, `admin` (pas `owner`), ajouter une option "Quitter la communauté" dans un menu contextuel ou un bouton visible
+- Utiliser `leaveCommunity` de `useCommunities` (déjà implémenté dans le hook)
+- Ajouter un `AlertDialog` de confirmation avant de quitter
 
-**1. Ajouter une section "Communautés disponibles" sur le Dashboard (`src/pages/Dashboard.tsx`)**
-- Sous la liste "Mes communautés", ajouter une section "Découvrir des communautés"
-- Afficher les communautés publiques auxquelles l'utilisateur n'a pas encore adhéré
-- Chaque carte a un bouton "Rejoindre" qui déclenche l'adhésion directement
-- L'utilisateur n'a plus besoin de quitter l'app ni de suivre un lien externe
+### 3. Code d'invitation depuis la page Admin communauté
 
-**2. Améliorer la page CommunityPreview pour le web (`src/pages/community/CommunityPreview.tsx`)**
-- La page `/c/slug` fonctionne déjà dans le navigateur web classique (hors PWA)
-- Ajouter un meilleur guidage : si l'utilisateur n'est pas connecté, afficher clairement "Créez un compte pour rejoindre cette communauté" avec un bouton vers `/auth`
-- S'assurer que la redirection post-connexion ramène bien vers `/c/slug`
+La section `InviteCodeSection` existe déjà dans `CommunityAdminSettingsTab.tsx` — elle permet de générer, copier et régénérer le code. Aucun changement nécessaire ici.
 
-**3. Système de code d'invitation pour les communautés privées**
-- Ajouter un champ `invite_code` (texte, 6-8 caractères) dans la table `communities`
-- Le propriétaire peut générer/régénérer un code depuis les paramètres admin
-- Sur le Dashboard, ajouter un bouton "Rejoindre avec un code" qui ouvre un petit dialog
-- L'utilisateur saisit le code, le système trouve la communauté correspondante et l'ajoute comme membre (en attente d'approbation pour les privées)
-- Cela contourne complètement le problème des liens sur iOS
-
-### Flux utilisateur simplifié
-
-```text
-Utilisateur iPhone reçoit une invitation :
-  Option A (commu publique) : "Ouvre l'app → tu la verras dans Découvrir"
-  Option B (commu privée) : "Ouvre l'app → clique Rejoindre avec un code → entre le code XXXX"
-```
-
-### Fichiers modifiés
-- **Migration SQL** : Ajouter colonne `invite_code` à `communities` + politique RLS pour lecture
-- **`src/pages/Dashboard.tsx`** : Section "Découvrir" + bouton "Rejoindre avec un code" + dialog de saisie de code
-- **`src/hooks/useCommunities.ts`** : Fonction pour rejoindre via code d'invitation
-- **`src/components/community-admin/CommunityAdminSettingsTab.tsx`** : Interface pour générer/afficher le code d'invitation
-- **`src/pages/community/CommunityPreview.tsx`** : Améliorer le message pour les utilisateurs non connectés
-
-### Sécurité
-- Les communautés privées ne sont visibles dans "Découvrir" que si l'utilisateur a le code
-- Le code d'invitation est régénérable par le propriétaire à tout moment
-- L'adhésion aux communautés privées reste soumise à approbation (`is_approved = false`)
+### Résumé des fichiers modifiés
+- `src/pages/Dashboard.tsx` — Retrait de la section Découvrir
+- `src/components/community/CommunityCard.tsx` — Ajout du bouton Quitter pour non-propriétaires
 
