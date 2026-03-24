@@ -191,6 +191,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          invite_code: string | null
           is_active: boolean
           is_public: boolean
           logo_url: string | null
@@ -205,6 +206,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          invite_code?: string | null
           is_active?: boolean
           is_public?: boolean
           logo_url?: string | null
@@ -219,6 +221,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          invite_code?: string | null
           is_active?: boolean
           is_public?: boolean
           logo_url?: string | null
@@ -1450,6 +1453,7 @@ export type Database = {
         Returns: string
       }
       generate_certificate_number: { Args: never; Returns: string }
+      generate_invite_code: { Args: never; Returns: string }
       get_community_member_count: {
         Args: { _community_id: string }
         Returns: number
@@ -1489,6 +1493,7 @@ export type Database = {
         Args: { _module_id: string }
         Returns: boolean
       }
+      join_community_by_code: { Args: { _code: string }; Returns: Json }
       update_user_points: {
         Args: {
           _awarded_by?: string
