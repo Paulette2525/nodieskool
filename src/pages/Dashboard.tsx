@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Loader2, Plus, Users, User, Settings, LogOut, KeyRound, Globe } from "lucide-react";
+import { Loader2, Plus, Users, User, Settings, LogOut, KeyRound } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
@@ -18,7 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 
 export default function Dashboard() {
   const { user, profile, loading: authLoading, signOut } = useAuth();
-  const { myCommunities, publicCommunities, isLoading, isLoadingPublic, joinCommunity, joinByCode } = useCommunities();
+  const { myCommunities, isLoading, joinByCode } = useCommunities();
   const { currentPlan, limits } = useSubscription();
   const location = useLocation();
   const navigate = useNavigate();
@@ -151,58 +151,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Discover Communities */}
-        {discoverCommunities.length > 0 && (
-          <div className="mt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <Globe className="h-4 w-4 text-primary" />
-              <h2 className="text-base font-semibold">Découvrir des communautés</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {discoverCommunities.map((community) => (
-                <Card key={community.id} className="rounded-2xl border-border/50 overflow-hidden hover:shadow-md transition-shadow">
-                  {/* Cover */}
-                  <div className="h-20 bg-muted relative">
-                    {community.cover_url ? (
-                      <img src={community.cover_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${community.primary_color || 'hsl(var(--primary))'} 0%, ${community.primary_color || 'hsl(var(--primary))'}55 100%)` }} />
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-10 w-10 -mt-7 ring-2 ring-background shadow-sm flex-shrink-0">
-                        {community.logo_url ? (
-                          <AvatarImage src={community.logo_url} alt={community.name} />
-                        ) : (
-                          <AvatarFallback className="text-sm font-bold text-white" style={{ backgroundColor: community.primary_color || 'hsl(var(--primary))' }}>
-                            {community.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-foreground truncate">{community.name}</h3>
-                        {community.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{community.description}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-end">
-                      <Button 
-                        size="sm" 
-                        className="rounded-xl text-xs h-8"
-                        onClick={() => joinCommunity.mutate(community.id)}
-                        disabled={joinCommunity.isPending}
-                      >
-                        {joinCommunity.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Rejoindre"}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Invite Code Dialog */}

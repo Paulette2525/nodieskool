@@ -2,7 +2,7 @@
  import { Card } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
  import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
- import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight, Camera } from "lucide-react";
+ import { Users, Crown, Shield, User, MoreVertical, Pencil, Trash2, Link2, ExternalLink, ArrowRight, Camera, LogOut } from "lucide-react";
  import { cn } from "@/lib/utils";
  import {
    DropdownMenu,
@@ -37,8 +37,9 @@
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useStorage } from "@/hooks/useStorage";
- import { supabase } from "@/integrations/supabase/client";
- import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+  import { useQueryClient } from "@tanstack/react-query";
+  import { useCommunities } from "@/hooks/useCommunities";
  
  interface CommunityCardProps {
    id: string;
@@ -79,8 +80,10 @@ import { useStorage } from "@/hooks/useStorage";
     const queryClient = useQueryClient();
     const { uploadFile } = useStorage();
     const coverInputRef = useRef<HTMLInputElement>(null);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [showEditDialog, setShowEditDialog] = useState(false);
+   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+   const [showEditDialog, setShowEditDialog] = useState(false);
+   const { leaveCommunity } = useCommunities();
     const [isDeleting, setIsDeleting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -186,8 +189,8 @@ import { useStorage } from "@/hooks/useStorage";
                {roleInfo.label}
              </Badge>
            )}
-           {/* Actions menu for owners */}
-           {isOwner && showActions && (
+            {/* Actions menu */}
+            {showActions && role && (role === "owner" ? (
              <DropdownMenu>
                <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
                  <Button
@@ -230,9 +233,19 @@ import { useStorage } from "@/hooks/useStorage";
                    Supprimer
                  </DropdownMenuItem>
                </DropdownMenuContent>
-             </DropdownMenu>
-           )}
-         </div>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute top-2 left-2 h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-destructive/10 hover:text-destructive"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowLeaveDialog(true); }}
+                title="Quitter la communauté"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            ))}
+          </div>
  
          {/* Content */}
          <Link to={`/c/${slug}/community`} className="block p-4 pt-0 relative">
@@ -275,8 +288,29 @@ import { useStorage } from "@/hooks/useStorage";
          </Link>
        </Card>
 
-       {/* Delete confirmation dialog */}
-       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        {/* Leave confirmation dialog */}
+        <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Quitter la communauté</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir quitter "{name}" ? Vous perdrez l'accès aux contenus de cette communauté.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => { leaveCommunity.mutate(id); setShowLeaveDialog(false); }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Quitter
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete confirmation dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
          <AlertDialogContent>
            <AlertDialogHeader>
              <AlertDialogTitle>Supprimer la communauté</AlertDialogTitle>
