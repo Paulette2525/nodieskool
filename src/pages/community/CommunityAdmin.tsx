@@ -8,7 +8,7 @@ import { CommunityAdminStats } from "@/components/community-admin/CommunityAdmin
 import { CommunityAdminMembersTab } from "@/components/community-admin/CommunityAdminMembersTab";
 import { CommunityAdminCoursesTab } from "@/components/community-admin/CommunityAdminCoursesTab";
 import { CommunityAdminPostsTab } from "@/components/community-admin/CommunityAdminPostsTab";
-import { CommunityAdminSettingsTab } from "@/components/community-admin/CommunityAdminSettingsTab";
+import { CommunityAdminSettingsTab, InviteCodeSection } from "@/components/community-admin/CommunityAdminSettingsTab";
 import { CommunityAdminEventsTab } from "@/components/community-admin/CommunityAdminEventsTab";
 
 export default function CommunityAdmin() {
@@ -55,6 +55,7 @@ export default function CommunityAdmin() {
         <TabsContent value="courses"><CommunityAdminCoursesTab courses={courses} /></TabsContent>
         <TabsContent value="posts"><CommunityAdminPostsTab posts={posts} deletePost={deletePost} /></TabsContent>
         <TabsContent value="events"><CommunityAdminEventsTab /></TabsContent>
+        <TabsContent value="invite">{community?.id && <InviteCodeSection communityId={community.id} />}</TabsContent>
         <TabsContent value="settings"><CommunityAdminSettingsTab /></TabsContent>
       </Tabs>
     </div>
