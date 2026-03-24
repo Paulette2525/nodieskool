@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 
 import { CommunityProvider } from "@/contexts/CommunityContext";
 import { CommunityLayout } from "@/components/layout/CommunityLayout";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 
 // Critical routes — eager loaded for Safari/iOS reliability
 import Landing from "./pages/Landing";
@@ -74,7 +75,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          
+          <InstallBanner />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Landing />} />
