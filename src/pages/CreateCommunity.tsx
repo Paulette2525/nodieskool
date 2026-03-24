@@ -181,6 +181,36 @@ export default function CreateCommunity() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Banner upload */}
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    className="relative group w-full h-[150px] rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary transition-colors overflow-hidden bg-muted"
+                  >
+                    {coverPreview ? (
+                      <img src={coverPreview} alt="Bannière preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground">
+                        <ImagePlus className="h-8 w-8" />
+                        <span className="text-sm">Ajouter une bannière (optionnel)</span>
+                      </div>
+                    )}
+                    {coverPreview && (
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-white" />
+                      </div>
+                    )}
+                  </button>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverSelect}
+                  />
+                </div>
+
                 {/* Logo upload */}
                 <div className="flex flex-col items-center gap-3">
                   <button
