@@ -1,48 +1,39 @@
 
+Objectif : faire en sorte que la bannière d’installation ne puisse s’afficher que sur la page `/dashboard`, et jamais sur les pages Communauté, Formations, Événements, Messages ou Admin.
 
-## Diagnostic
+Plan :
+1. Vérifier le point de montage actuel de `InstallBanner`
+   - Le code montre aujourd’hui que la bannière est montée dans `src/pages/Dashboard.tsx`.
+   - Je vais conserver ce montage uniquement pour le dashboard principal.
 
-La capture d'écran montre la **page de connexion de lovable.dev** (pas de Tribbue) qui s'ouvre dans Chrome sur iPhone. Cela signifie que le lien partagé pointe vers une URL Lovable (preview ou lovable.app) qui nécessite une authentification Lovable, et non vers le domaine personnalisé **tribbue.com**.
+2. Ajouter un verrou de route dans `src/components/pwa/InstallBanner.tsx`
+   - Faire une condition explicite sur la route courante pour n’autoriser l’affichage que sur `/dashboard`.
+   - Si la route est :
+     - `/c/:slug/community`
+     - `/c/:slug/classroom`
+     - `/c/:slug/events`
+     - `/c/:slug/messages`
+     - `/c/:slug/admin`
+     - ou toute autre page différente de `/dashboard`
+     alors la bannière retournera `null`.
 
-Il y a **deux problèmes distincts** :
+3. Laisser les pages communauté intactes
+   - `CommunityLayout` et les pages internes continueront de fonctionner normalement.
+   - La barre du haut de la communauté restera visible, mais la bannière d’installation ne pourra plus s’y afficher.
 
-### Problème 1 : Mauvaise URL partagée
-Les liens envoyés aux utilisateurs pointent probablement vers `nodieskool.lovable.app/c/...` ou une URL preview, au lieu de `tribbue.com/c/...`. Les URLs lovable.app peuvent demander une authentification Lovable — d'où l'écran lovable.dev.
+4. Vérification ciblée
+   - Contrôler le comportement sur :
+     - `/dashboard` → bannière visible
+     - pages communauté / formations / événements / messages / admin → bannière absente
 
-**Solution** : Toujours partager les liens via `https://tribbue.com/c/nom-communaute/community`. Ce n'est pas un changement de code mais d'usage.
+Détail technique :
+- Fichiers concernés :
+  - `src/components/pwa/InstallBanner.tsx`
+  - éventuellement `src/pages/Dashboard.tsx` si un petit ajustement de placement est nécessaire
+- Approche recommandée :
+  - utiliser la route courante (`useLocation`) dans `InstallBanner`
+  - autoriser uniquement `pathname === "/dashboard"`
 
-### Problème 2 : Chrome sur iOS ≠ Safari → localStorage non partagé
-Quand un utilisateur a Chrome comme navigateur par défaut sur iPhone, les liens WhatsApp s'ouvrent dans Chrome. Mais la PWA installée depuis Safari a son propre localStorage séparé. Le système SmartRedirect actuel ne fonctionne donc pas avec Chrome.
-
-**Solution technique** : Améliorer SmartRedirect pour détecter **tous les navigateurs iOS** (pas seulement Safari) et adapter le message :
-- **Safari** → message actuel "Ouvrez depuis l'écran d'accueil" (localStorage partagé, redirection automatique possible)
-- **Chrome/Firefox/autre** → message différent expliquant d'**ouvrir Safari** d'abord, puis l'app depuis l'écran d'accueil, car Chrome ne peut pas communiquer avec la PWA
-
-### Fichier à modifier
-
-**`src/components/pwa/SmartRedirect.tsx`** :
-- Renommer `isIOSBrowser()` en une détection plus fine qui distingue Safari des autres navigateurs
-- Ajouter une fonction `isIOSChrome()` / `isIOSNonSafari()`
-- Si l'utilisateur est sur Chrome iOS : afficher un message spécifique "Ouvrez ce lien dans Safari pour accéder à l'application Tribbue" avec un bouton pour copier l'URL
-- Si l'utilisateur est sur Safari iOS : garder le comportement actuel (sauvegarder l'URL + afficher "Ouvrez depuis l'écran d'accueil")
-- Retirer la condition `wasPwaInstalled()` pour les utilisateurs Chrome (on ne peut pas savoir si la PWA est installée depuis Chrome), et montrer le message à **tous les utilisateurs iOS non-standalone** qui arrivent sur une page communauté
-
-### Flux résultant
-
-```text
-Utilisateur iPhone + Chrome :
-1. Clique lien WhatsApp → Chrome s'ouvre
-2. Écran : "Pour une meilleure expérience, ouvrez ce lien dans Safari"
-   + Bouton "Copier le lien" 
-   + Bouton "Continuer sur le navigateur"
-
-Utilisateur iPhone + Safari :
-1. Clique lien WhatsApp → Safari s'ouvre
-2. Écran : "Ouvrez Tribbue depuis votre écran d'accueil"
-   + URL sauvegardée automatiquement
-3. Ouvre la PWA → redirection automatique
-```
-
-### Action immédiate (pas de code)
-Vérifier que les liens communauté partagés utilisent bien `https://tribbue.com/c/...` et non `nodieskool.lovable.app/c/...`.
-
+Résultat attendu :
+- La bannière ne s’affiche plus du tout dans l’espace communauté.
+- Elle reste visible uniquement sur le dashboard principal avec la liste des communautés.
