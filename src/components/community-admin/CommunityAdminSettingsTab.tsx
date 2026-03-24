@@ -302,7 +302,7 @@ export function CommunityAdminSettingsTab() {
   );
 }
 
-function InviteCodeSection({ communityId }: { communityId: string }) {
+export function InviteCodeSection({ communityId }: { communityId: string }) {
   const queryClient = useQueryClient();
 
   const { data: inviteCode, isLoading } = useQuery({

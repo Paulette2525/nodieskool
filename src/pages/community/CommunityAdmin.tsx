@@ -2,13 +2,13 @@ import { Navigate } from "react-router-dom";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { useCommunityAdmin } from "@/hooks/useCommunityAdmin";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users, BookOpen, FileText, Settings, Calendar } from "lucide-react";
+import { Loader2, Users, BookOpen, FileText, Settings, Calendar, KeyRound } from "lucide-react";
 
 import { CommunityAdminStats } from "@/components/community-admin/CommunityAdminStats";
 import { CommunityAdminMembersTab } from "@/components/community-admin/CommunityAdminMembersTab";
 import { CommunityAdminCoursesTab } from "@/components/community-admin/CommunityAdminCoursesTab";
 import { CommunityAdminPostsTab } from "@/components/community-admin/CommunityAdminPostsTab";
-import { CommunityAdminSettingsTab } from "@/components/community-admin/CommunityAdminSettingsTab";
+import { CommunityAdminSettingsTab, InviteCodeSection } from "@/components/community-admin/CommunityAdminSettingsTab";
 import { CommunityAdminEventsTab } from "@/components/community-admin/CommunityAdminEventsTab";
 
 export default function CommunityAdmin() {
@@ -48,12 +48,14 @@ export default function CommunityAdmin() {
           <TabsTrigger value="courses" className="gap-2"><BookOpen className="h-4 w-4" />Formations</TabsTrigger>
           <TabsTrigger value="posts" className="gap-2"><FileText className="h-4 w-4" />Posts</TabsTrigger>
           <TabsTrigger value="events" className="gap-2"><Calendar className="h-4 w-4" />Événements</TabsTrigger>
+          <TabsTrigger value="invite" className="gap-2"><KeyRound className="h-4 w-4" />Code d'invitation</TabsTrigger>
           <TabsTrigger value="settings" className="gap-2"><Settings className="h-4 w-4" />Paramètres</TabsTrigger>
         </TabsList>
         <TabsContent value="members"><CommunityAdminMembersTab members={members} updateMemberRole={updateMemberRole} removeMember={removeMember} /></TabsContent>
         <TabsContent value="courses"><CommunityAdminCoursesTab courses={courses} /></TabsContent>
         <TabsContent value="posts"><CommunityAdminPostsTab posts={posts} deletePost={deletePost} /></TabsContent>
         <TabsContent value="events"><CommunityAdminEventsTab /></TabsContent>
+        <TabsContent value="invite">{community?.id && <InviteCodeSection communityId={community.id} />}</TabsContent>
         <TabsContent value="settings"><CommunityAdminSettingsTab /></TabsContent>
       </Tabs>
     </div>
