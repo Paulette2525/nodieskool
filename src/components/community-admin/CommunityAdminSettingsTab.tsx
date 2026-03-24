@@ -280,8 +280,6 @@ export function CommunityAdminSettingsTab() {
         </CardContent>
       </Card>
 
-      {/* Invite Code */}
-      <InviteCodeSection communityId={communityId!} />
 
       {/* Save Button */}
       <div className="flex justify-end">
