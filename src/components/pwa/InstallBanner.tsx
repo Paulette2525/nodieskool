@@ -1,77 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { X, Download, Share, Plus } from "lucide-react";
+import { X, Download, Share, Plus, MoreVertical, ExternalLink } from "lucide-react";
 import tribbueLogoImg from "@/assets/tribbue-logo.png";
 import { Button } from "@/components/ui/button";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-
-const DISMISS_KEY = "pwa_banner_dismissed_at";
-const DISMISS_DAYS = 3;
+const ALLOWED_PATHS = ["/", "/dashboard"];
 
 export function InstallBanner() {
   const { pathname } = useLocation();
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isIOS, setIsIOS] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const { platform, canShowBanner, triggerInstall, dismiss } = usePwaInstall();
   const [showInstructions, setShowInstructions] = useState(false);
+  const [localDismissed, setLocalDismissed] = useState(false);
 
-  // Effect 1: Capture beforeinstallprompt globally + detect iOS (runs once)
-  useEffect(() => {
-    const ua = navigator.userAgent;
-    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    setIsIOS(ios);
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
-
-  // Effect 2: Control visibility based on route + state
-  useEffect(() => {
-    if (pathname !== "/dashboard") {
-      setVisible(false);
-      return;
-    }
-
-    if (window.matchMedia("(display-mode: standalone)").matches) return;
-    if ((window.navigator as any).standalone) return;
-
-    const dismissed = localStorage.getItem(DISMISS_KEY);
-    if (dismissed) {
-      const diff = Date.now() - Number(dismissed);
-      if (diff < DISMISS_DAYS * 24 * 60 * 60 * 1000) return;
-    }
-
-    if (isIOS || deferredPrompt) {
-      setVisible(true);
-    }
-  }, [pathname, deferredPrompt, isIOS]);
+  // Only show on allowed paths
+  if (!ALLOWED_PATHS.includes(pathname)) return null;
+  if (!canShowBanner || localDismissed) return null;
 
   const handleInstall = async () => {
-    if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") setVisible(false);
-      setDeferredPrompt(null);
+    if (platform === "android-native") {
+      const accepted = await triggerInstall();
+      if (accepted) setLocalDismissed(true);
     } else {
       setShowInstructions((prev) => !prev);
     }
   };
 
   const handleDismiss = () => {
-    localStorage.setItem(DISMISS_KEY, String(Date.now()));
-    setVisible(false);
+    dismiss();
+    setLocalDismissed(true);
   };
-
-  if (!visible) return null;
 
   return (
     <div className="fixed bottom-0 md:bottom-auto md:top-0 left-0 right-0 z-50 safe-area-bottom md:safe-area-top animate-in slide-in-from-bottom md:slide-in-from-top duration-300">
@@ -82,17 +40,14 @@ export function InstallBanner() {
             alt="Tribbue"
             className="w-10 h-10 rounded-xl shrink-0 object-contain"
           />
-
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">Tribbue</p>
             <p className="text-xs text-muted-foreground">Installez l'app sur votre appareil</p>
           </div>
-
           <Button size="sm" onClick={handleInstall} className="rounded-xl gap-1.5 shrink-0">
             <Download className="w-4 h-4" />
             Installer
           </Button>
-
           <button
             onClick={handleDismiss}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0"
@@ -104,7 +59,7 @@ export function InstallBanner() {
 
         {showInstructions && (
           <div className="mt-3 pt-3 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-200">
-            {isIOS ? (
+            {platform === "ios-safari" && (
               <div className="space-y-2.5">
                 <p className="text-xs font-medium text-foreground">3 étapes pour installer :</p>
                 <div className="flex items-start gap-2.5">
@@ -120,10 +75,35 @@ export function InstallBanner() {
                   <p className="text-xs text-muted-foreground">Confirmez en appuyant sur <span className="font-medium text-foreground">Ajouter</span></p>
                 </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-foreground">Pour installer l'application :</p>
-                <p className="text-xs text-muted-foreground">Ouvrez cette page dans <span className="font-medium text-foreground">Google Chrome</span>, puis le bouton "Installer" apparaîtra automatiquement.</p>
+            )}
+
+            {platform === "ios-other" && (
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/10">
+                  <ExternalLink className="w-4 h-4 text-primary shrink-0" />
+                  <p className="text-xs text-foreground">
+                    Ouvrez cette page dans <span className="font-semibold">Safari</span> pour pouvoir installer l'application
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">Puis suivez : <Share className="w-3 h-3 inline text-primary" /> Partager → <Plus className="w-3 h-3 inline text-primary" /> Sur l'écran d'accueil → Ajouter</p>
+              </div>
+            )}
+
+            {platform === "android-manual" && (
+              <div className="space-y-2.5">
+                <p className="text-xs font-medium text-foreground">3 étapes pour installer :</p>
+                <div className="flex items-start gap-2.5">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">1</span>
+                  <p className="text-xs text-muted-foreground">Appuyez sur <MoreVertical className="w-3.5 h-3.5 inline text-primary" /> <span className="font-medium text-foreground">le menu</span> (⋮) en haut à droite</p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">2</span>
+                  <p className="text-xs text-muted-foreground">Appuyez sur <span className="font-medium text-foreground">Ajouter à l'écran d'accueil</span></p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold shrink-0">3</span>
+                  <p className="text-xs text-muted-foreground">Confirmez en appuyant sur <span className="font-medium text-foreground">Ajouter</span></p>
+                </div>
               </div>
             )}
           </div>
