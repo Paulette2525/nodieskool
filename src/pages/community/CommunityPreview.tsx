@@ -141,8 +141,13 @@ function CTAButton({ community, user, joining, onJoin, onLogin }: { community: a
       {community.is_public ? "Rejoindre" : "Demander à rejoindre"}
     </Button>
   ) : (
-    <Button onClick={onLogin} className="w-full h-11 text-sm font-semibold rounded-xl shadow-sm transition-all" size="lg">
-      Se connecter pour rejoindre
-    </Button>
+    <div className="space-y-3">
+      <Button onClick={onLogin} className="w-full h-11 text-sm font-semibold rounded-xl shadow-sm transition-all" size="lg">
+        Se connecter pour rejoindre
+      </Button>
+      <p className="text-xs text-muted-foreground text-center">
+        Vous n'avez pas de compte ? Créez-en un gratuitement pour rejoindre cette communauté.
+      </p>
+    </div>
   );
 }

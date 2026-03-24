@@ -15,9 +15,12 @@ import {
   Lock,
   Camera,
   ImagePlus,
+  KeyRound,
+  Copy,
+  RefreshCw,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { useStorage } from "@/hooks/useStorage";

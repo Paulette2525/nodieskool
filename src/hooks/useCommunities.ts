@@ -133,37 +133,62 @@
      onError: (error) => {
        toast.error("Erreur: " + error.message);
      },
-   });
- 
-   // Leave a community
-   const leaveCommunity = useMutation({
-     mutationFn: async (communityId: string) => {
-       if (!profile) throw new Error("Not authenticated");
- 
-       const { error } = await supabase
-         .from("community_members")
-         .delete()
-         .eq("community_id", communityId)
-         .eq("user_id", profile.id);
- 
-       if (error) throw error;
-     },
-     onSuccess: () => {
-       queryClient.invalidateQueries({ queryKey: ["my-communities"] });
-       toast.success("Vous avez quitté la communauté");
-     },
-   });
- 
-   return {
-     myCommunities: myCommunitiesQuery.data ?? [],
-     publicCommunities: publicCommunitiesQuery.data ?? [],
-     isLoading: myCommunitiesQuery.isLoading,
-     isLoadingPublic: publicCommunitiesQuery.isLoading,
-     createCommunity,
-     joinCommunity,
-     leaveCommunity,
-   };
- }
+    });
+  
+    // Leave a community
+    const leaveCommunity = useMutation({
+      mutationFn: async (communityId: string) => {
+        if (!profile) throw new Error("Not authenticated");
+
+        const { error } = await supabase
+          .from("community_members")
+          .delete()
+          .eq("community_id", communityId)
+          .eq("user_id", profile.id);
+
+        if (error) throw error;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["my-communities"] });
+        toast.success("Vous avez quitté la communauté");
+      },
+    });
+
+    // Join by invite code
+    const joinByCode = useMutation({
+      mutationFn: async (code: string) => {
+        const { data, error } = await supabase.rpc("join_community_by_code", { _code: code });
+        if (error) throw error;
+        return data as { success: boolean; error?: string; community_name?: string; is_approved?: boolean };
+      },
+      onSuccess: (data) => {
+        if (data?.success) {
+          queryClient.invalidateQueries({ queryKey: ["my-communities"] });
+          queryClient.invalidateQueries({ queryKey: ["public-communities"] });
+          toast.success(data.is_approved 
+            ? `Bienvenue dans ${data.community_name} !` 
+            : `Demande envoyée pour ${data.community_name}`
+          );
+        } else {
+          toast.error(data?.error || "Code invalide");
+        }
+      },
+      onError: (error) => {
+        toast.error("Erreur: " + error.message);
+      },
+    });
+
+    return {
+      myCommunities: myCommunitiesQuery.data ?? [],
+      publicCommunities: publicCommunitiesQuery.data ?? [],
+      isLoading: myCommunitiesQuery.isLoading,
+      isLoadingPublic: publicCommunitiesQuery.isLoading,
+      createCommunity,
+      joinCommunity,
+      leaveCommunity,
+      joinByCode,
+    };
+  }
  
  export function useCommunity(slug: string) {
    return useQuery({
