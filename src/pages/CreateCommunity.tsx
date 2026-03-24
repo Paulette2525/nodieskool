@@ -112,10 +112,16 @@ export default function CreateCommunity() {
 
   const onSubmit = async (data: FormData) => {
     let logoUrl: string | null = null;
+    let coverUrl: string | null = null;
 
     if (logoFile) {
       logoUrl = await uploadFile("community-assets", logoFile, "logos");
-      if (!logoUrl) return; // upload failed
+      if (!logoUrl) return;
+    }
+
+    if (coverFile) {
+      coverUrl = await uploadFile("community-assets", coverFile, "covers");
+      if (!coverUrl) return;
     }
 
     createCommunity.mutate({
@@ -124,6 +130,7 @@ export default function CreateCommunity() {
       description: data.description,
       is_public: data.is_public,
       logo_url: logoUrl,
+      cover_url: coverUrl,
     }, {
       onSuccess: (community) => {
         navigate(`/c/${community.slug}/community`);
