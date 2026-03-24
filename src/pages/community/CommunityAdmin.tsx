@@ -2,7 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useCommunityContext } from "@/contexts/CommunityContext";
 import { useCommunityAdmin } from "@/hooks/useCommunityAdmin";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users, BookOpen, FileText, Settings, Calendar } from "lucide-react";
+import { Loader2, Users, BookOpen, FileText, Settings, Calendar, KeyRound } from "lucide-react";
 
 import { CommunityAdminStats } from "@/components/community-admin/CommunityAdminStats";
 import { CommunityAdminMembersTab } from "@/components/community-admin/CommunityAdminMembersTab";
@@ -48,6 +48,7 @@ export default function CommunityAdmin() {
           <TabsTrigger value="courses" className="gap-2"><BookOpen className="h-4 w-4" />Formations</TabsTrigger>
           <TabsTrigger value="posts" className="gap-2"><FileText className="h-4 w-4" />Posts</TabsTrigger>
           <TabsTrigger value="events" className="gap-2"><Calendar className="h-4 w-4" />Événements</TabsTrigger>
+          <TabsTrigger value="invite" className="gap-2"><KeyRound className="h-4 w-4" />Code d'invitation</TabsTrigger>
           <TabsTrigger value="settings" className="gap-2"><Settings className="h-4 w-4" />Paramètres</TabsTrigger>
         </TabsList>
         <TabsContent value="members"><CommunityAdminMembersTab members={members} updateMemberRole={updateMemberRole} removeMember={removeMember} /></TabsContent>
