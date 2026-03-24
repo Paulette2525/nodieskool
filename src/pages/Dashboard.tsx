@@ -36,8 +36,6 @@ export default function Dashboard() {
 
   const canCreateMore = limits.maxCommunities === -1 || myCommunities.filter(c => c.role === "owner").length < limits.maxCommunities;
 
-  const handleJoinByCode
-
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;
     joinByCode.mutate(inviteCode.trim(), {
