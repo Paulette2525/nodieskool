@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Send, Mail, MessageSquare } from "lucide-react";
-import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import collonieLogoImg from "@/assets/collonie-logo.png";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -41,7 +41,7 @@ export default function Contact() {
             </Link>
           </Button>
           <Link to="/" className="flex items-center gap-2">
-            <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-8 object-contain" />
             <span className="font-bold">Contact</span>
           </Link>
         </div>
