@@ -24,7 +24,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-sm text-foreground truncate flex-1">Community Hub</span>
+          <img src={collonieLogoImg} alt="Collonie" className="h-7 object-contain flex-1" />
           {user && (
             <Suspense fallback={<div className="h-9 w-9" />}>
               <NotificationBell />
