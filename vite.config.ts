@@ -33,8 +33,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "Tribbue",
-        short_name: "Tribbue",
+        name: "Collonie",
+        short_name: "Collonie",
         description: "Plateforme communautaire d'apprentissage",
         theme_color: "#0f172a",
         background_color: "#ffffff",

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import collonieLogoImg from "@/assets/collonie-logo.png";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -139,7 +139,7 @@ export default function ResetPassword() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-10 object-contain" />
           </div>
           <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
           <CardDescription>

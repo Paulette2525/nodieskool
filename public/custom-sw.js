@@ -1,7 +1,7 @@
 // Custom Service Worker for Push Notifications
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'Tribbue', body: 'Nouvelle notification', icon: '/tribbue-logo.png' };
+  let data = { title: 'Collonie', body: 'Nouvelle notification', icon: '/collonie-logo.png' };
 
   if (event.data) {
     try {
@@ -14,11 +14,11 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: data.icon || '/tribbue-logo.png',
-      badge: data.badge || '/tribbue-logo.png',
+      icon: data.icon || '/collonie-logo.png',
+      badge: data.badge || '/collonie-logo.png',
       data: data.data || {},
       vibrate: [200, 100, 200],
-      tag: 'tribbue-notification',
+      tag: 'collonie-notification',
       renotify: true,
     })
   );

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Loader2, Plus, Users, User, Settings, LogOut, KeyRound } from "lucide-react";
-import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import collonieLogoImg from "@/assets/collonie-logo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -54,7 +54,7 @@ export default function Dashboard() {
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-8 object-contain" />
           </Link>
           <div className="flex items-center gap-3">
             <Badge variant="outline" className="capitalize text-xs rounded-full border-border/50">{currentPlan}</Badge>

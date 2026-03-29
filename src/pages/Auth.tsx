@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Loader2, LogOut, LayoutDashboard, RefreshCw, Eye, EyeOff } from "lucide-react";
-import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import collonieLogoImg from "@/assets/collonie-logo.png";
 import { getAndClearRedirectUrl, hasRedirectUrl } from "@/hooks/useRedirectUrl";
 
 export default function Auth() {
@@ -77,7 +77,7 @@ export default function Auth() {
         <Card className="w-full max-w-sm rounded-2xl border-border/50 shadow-lg relative">
           <CardHeader className="text-center pb-4">
             <div className="flex items-center justify-center mb-3">
-              <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
+              <img src={collonieLogoImg} alt="Collonie" className="h-10 object-contain" />
             </div>
             <CardTitle className="text-lg">Vous êtes déjà connecté</CardTitle>
             <CardDescription className="text-xs">
@@ -138,7 +138,7 @@ export default function Auth() {
       <Card className="w-full max-w-sm rounded-2xl border-border/50 shadow-lg relative">
         <CardHeader className="text-center pb-4">
           <div className="flex items-center justify-center mb-3">
-            <img src={tribbueLogoImg} alt="Tribbue" className="h-10 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-10 object-contain" />
           </div>
           
           <CardDescription className="text-xs">Rejoignez notre communauté d'apprentissage</CardDescription>

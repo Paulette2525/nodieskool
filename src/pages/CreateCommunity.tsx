@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, ArrowLeft, Camera, ImagePlus } from "lucide-react";
-import tribbueLogoImg from "@/assets/tribbue-logo.png";
+import collonieLogoImg from "@/assets/collonie-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommunities } from "@/hooks/useCommunities";
@@ -163,7 +163,7 @@ export default function CreateCommunity() {
             </Link>
           </Button>
           <div className="flex items-center gap-2">
-            <img src={tribbueLogoImg} alt="Tribbue" className="h-8 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-8 object-contain" />
             <span className="font-bold">Créer une communauté</span>
           </div>
         </div>
