@@ -72,7 +72,7 @@ const Install = () => {
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <img src={collonieLogoImg} alt="Collonie" <img src={collonieLogoImg} alt="Collonie" className="w-24 h-24 rounded-2xl mx-auto shadow-lg" /> />
+          <img src={collonieLogoImg} alt="Collonie" className="w-24 h-24 rounded-2xl mx-auto shadow-lg" />
           <h1 className="text-2xl font-bold text-foreground">Installer Collonie</h1>
           <p className="text-muted-foreground text-sm">
             Accédez à Collonie directement depuis votre écran d'accueil, comme une application native.

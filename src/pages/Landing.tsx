@@ -70,7 +70,7 @@ export default function Landing() {
       <header className="border-b border-border/50 bg-card/60 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={collonieLogoImg} alt="Collonie" <img src={collonieLogoImg} alt="Collonie" className="h-12 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-12 object-contain" />
           </Link>
           <nav className="hidden md:flex items-center gap-5">
             <a href="#features" className="text-xs text-muted-foreground hover:text-primary transition-colors">Fonctionnalités</a>
@@ -293,7 +293,7 @@ export default function Landing() {
       <footer className="border-t border-border/50 py-8 px-4 bg-muted/20">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src={collonieLogoImg} alt="Collonie" <img src={collonieLogoImg} alt="Collonie" className="h-10 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-10 object-contain" />
           </div>
           <div className="flex items-center gap-5 text-xs text-muted-foreground">
             <Link to="/pricing" className="hover:text-primary transition-colors">Tarifs</Link>
