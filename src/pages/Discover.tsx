@@ -55,7 +55,7 @@ export default function Discover() {
           <div className="flex items-center gap-3">
             {user && <Button variant="ghost" size="icon" asChild className="h-8 w-8 rounded-lg"><Link to="/dashboard"><ArrowLeft className="h-4 w-4" /></Link></Button>}
             <Link to="/" className="flex items-center gap-2">
-              <img src={collonieLogoImg} alt="Collonie" className="h-8 object-contain" loading="lazy" />
+              <img src={collonieLogoImg} alt="Collonie" className="h-12 object-contain" loading="lazy" />
             </Link>
           </div>
           {!user && <Button asChild size="sm" className="rounded-xl text-xs h-9"><Link to="/auth">Se connecter</Link></Button>}
