@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import collonieLogoImg from "@/assets/collonie-logo.png";
 
 const GlobalSearch = lazy(() => import("@/components/search/GlobalSearch").then(m => ({ default: m.GlobalSearch })));
 const NotificationBell = lazy(() => import("@/components/notifications/NotificationBell").then(m => ({ default: m.NotificationBell })));
@@ -24,7 +25,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-4 w-4" />
           </Button>
-          <span className="font-semibold text-sm text-foreground truncate flex-1">Community Hub</span>
+          <img src={collonieLogoImg} alt="Collonie" className="h-7 object-contain flex-1" />
           {user && (
             <Suspense fallback={<div className="h-9 w-9" />}>
               <NotificationBell />
