@@ -139,7 +139,7 @@ export default function ResetPassword() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <img src={collonieLogoImg} alt="Collonie" className="h-10 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-14 object-contain" />
           </div>
           <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
           <CardDescription>

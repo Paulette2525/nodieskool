@@ -75,7 +75,7 @@ import collonieLogoImg from "@/assets/collonie-logo.png";
              </Link>
            </Button>
             <Link to="/" className="flex items-center gap-2">
-              <img src={collonieLogoImg} alt="Collonie" className="h-8 object-contain" />
+              <img src={collonieLogoImg} alt="Collonie" className="h-12 object-contain" />
               <span className="font-bold">Tarifs</span>
             </Link>
          </div>

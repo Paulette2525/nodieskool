@@ -163,7 +163,7 @@ export default function CreateCommunity() {
             </Link>
           </Button>
           <div className="flex items-center gap-2">
-            <img src={collonieLogoImg} alt="Collonie" className="h-8 object-contain" />
+            <img src={collonieLogoImg} alt="Collonie" className="h-12 object-contain" />
             <span className="font-bold">Créer une communauté</span>
           </div>
         </div>
