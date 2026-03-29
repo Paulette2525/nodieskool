@@ -56,7 +56,7 @@ const Install = () => {
             </div>
             <h1 className="text-2xl font-bold text-foreground">Déjà installée !</h1>
             <p className="text-muted-foreground">
-              Tribbue est déjà installée sur votre appareil.
+              Collonie est déjà installée sur votre appareil.
             </p>
             <Button onClick={() => navigate("/dashboard")} className="w-full rounded-xl">
               Aller au dashboard
@@ -73,9 +73,9 @@ const Install = () => {
         {/* Header */}
         <div className="text-center space-y-3">
           <img src={collonieLogoImg} alt="Collonie" className="w-20 h-20 rounded-2xl mx-auto shadow-lg" />
-          <h1 className="text-2xl font-bold text-foreground">Installer Tribbue</h1>
+          <h1 className="text-2xl font-bold text-foreground">Installer Collonie</h1>
           <p className="text-muted-foreground text-sm">
-            Accédez à Tribbue directement depuis votre écran d'accueil, comme une application native.
+            Accédez à Collonie directement depuis votre écran d'accueil, comme une application native.
           </p>
         </div>
 

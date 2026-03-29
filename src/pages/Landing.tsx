@@ -299,7 +299,7 @@ export default function Landing() {
             <Link to="/pricing" className="hover:text-primary transition-colors">Tarifs</Link>
             <Link to="/auth" className="hover:text-primary transition-colors">Connexion</Link>
           </div>
-          <p className="text-[11px] text-muted-foreground">© 2026 Tribbue. Tous droits réservés.</p>
+          <p className="text-[11px] text-muted-foreground">© 2026 Collonie. Tous droits réservés.</p>
         </div>
       </footer>
     </div>

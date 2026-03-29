@@ -28,9 +28,9 @@ const IconPreview = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-xl">Icône Tribbue — Symbole Infini</CardTitle>
+          <CardTitle className="text-xl">Icône Collonie — Symbole Infini</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Générez une icône carrée avec le symbole d'infini bleu Tribbue sur fond blanc.
+            Générez une icône carrée avec le symbole d'infini bleu Collonie sur fond blanc.
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -51,20 +51,20 @@ const IconPreview = () => {
               <div className="flex flex-col items-center gap-4">
                 {/* Large preview */}
                 <div className="border rounded-2xl overflow-hidden shadow-lg" style={{ width: 192, height: 192 }}>
-                  <img src={iconUrl} alt="Tribbue icon" className="w-full h-full object-cover" />
+                  <img src={iconUrl} alt="Collonie icon" className="w-full h-full object-cover" />
                 </div>
                 {/* Small preview */}
                 <div className="flex gap-3 items-end">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1 text-center">64px</p>
                     <div className="border rounded-xl overflow-hidden shadow" style={{ width: 64, height: 64 }}>
-                      <img src={iconUrl} alt="Tribbue icon small" className="w-full h-full object-cover" />
+                      <img src={iconUrl} alt="Collonie icon small" className="w-full h-full object-cover" />
                     </div>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground mb-1 text-center">48px</p>
                     <div className="border rounded-lg overflow-hidden shadow" style={{ width: 48, height: 48 }}>
-                      <img src={iconUrl} alt="Tribbue icon xs" className="w-full h-full object-cover" />
+                      <img src={iconUrl} alt="Collonie icon xs" className="w-full h-full object-cover" />
                     </div>
                   </div>
                 </div>

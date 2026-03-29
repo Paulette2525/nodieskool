@@ -53,7 +53,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const fileName = `tribbue-icon-${Date.now()}.png`;
+    const fileName = `collonie-icon-${Date.now()}.png`;
     const { error: uploadError } = await supabase.storage
       .from("community-assets")
       .upload(fileName, imageBytes, {
