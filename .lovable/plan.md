@@ -1,37 +1,29 @@
 
 
-## Plan : Renommer la plateforme de "Tribbue" en "Collonie" + nouveau logo
+## Plan : Agrandir le logo Collonie sur toute la plateforme
 
-### 1. Remplacer le logo
+Le logo utilise actuellement `h-8` (32px) dans les navbars et `h-10` (40px) sur les pages auth. C'est effectivement petit. Je vais augmenter les tailles de manière cohérente.
 
-- Copier `user-uploads://COLLONIE.png` vers `src/assets/collonie-logo.png` et `public/collonie-logo.png`
-- Mettre a jour les fichiers PWA (`public/pwa-192x192.png`, `public/pwa-512x512.png`, `public/favicon.ico`) avec le nouveau logo Collonie
+### Nouvelles tailles
 
-### 2. Fichiers a modifier (renommage texte + import logo)
+| Contexte | Avant | Après |
+|----------|-------|-------|
+| Navbar (Landing, Dashboard, Pricing, Contact, Discover, CreateCommunity) | `h-8` | `h-12` |
+| Footer (Landing) | `h-7` | `h-10` |
+| Pages Auth (Auth, ForgotPassword, ResetPassword) | `h-10` | `h-14` |
+| Page Install | `w-20 h-20` | `w-24 h-24` |
 
-**11 fichiers avec import du logo** -- changer `tribbue-logo` en `collonie-logo` et la variable `tribbueLogoImg` en `collonieLogoImg` :
-- `src/pages/Landing.tsx`
-- `src/pages/Discover.tsx`
-- `src/pages/Install.tsx`
-- `src/pages/ResetPassword.tsx`
-- `src/pages/Dashboard.tsx`
-- `src/pages/ForgotPassword.tsx`
-- `src/pages/Auth.tsx`
-- `src/pages/Pricing.tsx`
-- `src/pages/CreateCommunity.tsx`
-- `src/pages/Contact.tsx`
-- `src/components/pwa/InstallBanner.tsx`
+### Fichiers modifiés (10 fichiers)
+- `src/pages/Landing.tsx` — navbar `h-12`, footer `h-10`
+- `src/pages/Dashboard.tsx` — `h-12`
+- `src/pages/Pricing.tsx` — `h-12`
+- `src/pages/Contact.tsx` — `h-12`
+- `src/pages/Discover.tsx` — `h-12`
+- `src/pages/CreateCommunity.tsx` — `h-12`
+- `src/pages/Auth.tsx` — `h-14`
+- `src/pages/ForgotPassword.tsx` — `h-14`
+- `src/pages/ResetPassword.tsx` — `h-14`
+- `src/pages/Install.tsx` — `w-24 h-24`
 
-**Autres fichiers avec texte "Tribbue"** :
-- `index.html` -- title, meta tags, OG tags (remplacer `Tribbue` par `Collonie`, `tribbue.com` par le domaine actuel)
-- `vite.config.ts` -- manifest PWA name/short_name
-- `public/custom-sw.js` -- titre notifications, references `tribbue-logo.png` et tag
-- `supabase/functions/send-push-notification/index.ts` -- email contact
-
-### 3. Nettoyage
-- Supprimer `src/assets/tribbue-logo.png` et `public/tribbue-logo.png` apres migration
-
-### Resume des changements
-- ~17 fichiers modifies
-- Aucun changement de logique, uniquement du renommage textuel et remplacement d'assets
+Aucun changement de logique, uniquement les classes CSS de taille.
 
