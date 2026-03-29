@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import collonieLogoImg from "@/assets/collonie-logo.png";
-import { Button } from "@/components/ui/button";
 
 const GlobalSearch = lazy(() => import("@/components/search/GlobalSearch").then(m => ({ default: m.GlobalSearch })));
 const NotificationBell = lazy(() => import("@/components/notifications/NotificationBell").then(m => ({ default: m.NotificationBell })));
